@@ -76,9 +76,20 @@ export const screens = {
                             { name: "prayer-list" }
                         ],
 
+                        
+
                         "wifi": [
-                            { name: "wifi" }
+                            {
+                                name: "wifi",
+                                config: {
+                                    image: "https://cdn11.bigcommerce.com/s-wld7mb6jpw/images/stencil/1280x1280/products/755/904/61ktCJKmTGL._AC_SL1500___54216.1723046252.jpg?c=1",
+                                    ssid: "YOUR_GUEST_SSID",
+                                    password: "YOUR_GUEST_PASSWORD",
+                                    security: "WPA"
+                                }
+                            }
                         ]
+
 
                     },
 

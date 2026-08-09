@@ -2,6 +2,10 @@ import {
     getSheetRows
 } from "../../services/google-sheets/sheets.js";
 
+import {
+    getDailyVerse
+} from "../../services/ourmanna/ourmanna-data.js";
+
 
 const SHEET_NAME =
     "PrayerList";
@@ -27,11 +31,114 @@ const prayerList = {
         );
 
 
-        const rows =
-            await getSheetRows(
-                SHEET_NAME
-            );
+        /*
+         * Load both data sources.
+         */
 
+        const [
+            rows,
+            verse
+        ] =
+            await Promise.all([
+                getSheetRows(
+                    SHEET_NAME
+                ),
+                getDailyVerse()
+            ]);
+
+
+        /*
+         * Today's Prayer
+         */
+
+        const prayerTitle =
+            document.createElement("div");
+
+
+        prayerTitle.className =
+            "prayer-list-widget__section-title";
+
+
+        prayerTitle.textContent =
+            "Today's Prayer:";
+
+
+        wrapper.appendChild(
+            prayerTitle
+        );
+
+
+        const verseText =
+            document.createElement("div");
+
+
+        verseText.className =
+            "prayer-list-widget__verse";
+
+
+        verseText.textContent =
+            `"${verse.text}"`;
+
+
+        wrapper.appendChild(
+            verseText
+        );
+
+
+        const verseReference =
+            document.createElement("div");
+
+
+        verseReference.className =
+            "prayer-list-widget__reference";
+
+
+        verseReference.textContent =
+            `${verse.reference} — ${verse.version}`;
+
+
+        wrapper.appendChild(
+            verseReference
+        );
+
+
+        /*
+         * Prayer List
+         */
+
+        const title =
+            document.createElement("div");
+
+
+        title.className =
+            "prayer-list-widget__section-title prayer-list-widget__prayer-title";
+
+
+        title.textContent =
+            "Prayer List:";
+
+
+        wrapper.appendChild(
+            title
+        );
+
+
+        const list =
+            document.createElement("div");
+
+
+        list.className =
+            "prayer-list-widget__list";
+
+
+        wrapper.appendChild(
+            list
+        );
+
+
+        /*
+         * Extract names from Google Sheet.
+         */
 
         const names = [];
 
@@ -57,87 +164,59 @@ const prayerList = {
         }
 
 
-        const title =
-            document.createElement("div");
-
-
-        title.className =
-            "prayer-list-widget__title";
-
-
-        title.textContent =
-            "Prayer List";
-
-
-        wrapper.appendChild(
-            title
-        );
-
-
-        const list =
-            document.createElement("div");
-
-
-        list.className =
-            "prayer-list-widget__list";
-
-
-        wrapper.appendChild(
-            list
-        );
+        /*
+         * Render prayer list.
+         */
 
         names.forEach(
-    name => {
+            name => {
 
-        const item =
-            document.createElement(
-                "div"
-            );
-
-
-        item.className =
-            "prayer-list-widget__item";
+                const item =
+                    document.createElement(
+                        "div"
+                    );
 
 
-        const icon =
-            document.createElement(
-                "i"
-            );
+                item.className =
+                    "prayer-list-widget__item";
 
 
-        icon.className =
-            "fa-fw fa-solid fa-praying-hands";
+                const icon =
+                    document.createElement(
+                        "i"
+                    );
 
 
-        item.appendChild(
-            icon
+                icon.className =
+                    "fa-fw fa-solid fa-praying-hands";
+
+
+                item.appendChild(
+                    icon
+                );
+
+
+                const text =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                text.textContent =
+                    name;
+
+
+                item.appendChild(
+                    text
+                );
+
+
+                list.appendChild(
+                    item
+                );
+
+            }
         );
-
-
-        const text =
-            document.createElement(
-                "span"
-            );
-
-
-        text.textContent =
-            name;
-
-
-        item.appendChild(
-            text
-        );
-
-
-        list.appendChild(
-            item
-        );
-
-    }
-);
-
-
-        
 
     }
 

@@ -26,4 +26,10 @@ export async function registerWidgets() {
         "prayer-list",
         "../widgets/prayer-list/prayer-list.js"
     );
+
+    await registerWidget(
+        "wifi",
+        "../widgets/wifi/wifi.js"
+    );
+
 }
