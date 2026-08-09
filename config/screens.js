@@ -1,8 +1,17 @@
+export const screenOrder = [
+    "information"
+];
+
+
 export const screens = {
 
     information: {
 
         layout: "information-layout",
+
+        theme: "dark",
+
+        duration: { minutes: 2 },
 
         regions: {
 

@@ -1,17 +1,53 @@
 body {
-    margin: 20px;
+
+    margin: 0;
     padding: 0;
+
+    width: 100vw;
+    height: 100vh;
+
     background: black;
+
     font-family: Roboto, Arial, sans-serif;
+
     overflow: hidden;
 }
 
+
 :root {
 
-    --panel-bg: rgba(255,255,255,.15); 
+    --panel-bg: rgba(255,255,255,.15);
 
     --panel-radius: 16px;
 
     --panel-padding: 16px;
+
+}
+
+
+#dashboard-scale {
+
+    width: 100vw;
+    height: 100vh;
+
+    box-sizing: border-box;
+
+    padding: 20px;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    overflow: hidden;
+}
+
+
+#dashboard {
+
+    width: 3840px;
+    height: 2160px;
+
+    transform-origin: center center;
 
 }

@@ -1,6 +1,14 @@
-import { screens } from "../config/screens.js";
-import { loadWidget } from "./widget-loader.js";
+import {
+    screens,
+    screenOrder
+} from "../config/screens.js";
 
+import {
+    loadWidget,
+    destroyWidget
+} from "./widget-loader.js";
+
+let activeWidgets = [];
 
 async function buildRegion(
     regionName,
@@ -43,6 +51,11 @@ async function buildRegion(
                 widget.config
             );
 
+            activeWidgets.push({
+                name: widget.name,
+                container: container
+            });
+
         }
 
     }
@@ -75,12 +88,27 @@ async function buildRegion(
 
 }
 
+async function destroyCurrentScreen() {
 
+    for (
+        const widget of activeWidgets
+    ) {
+
+        await destroyWidget(
+            widget.name,
+            widget.container
+        );
+
+    }
+
+
+    activeWidgets = [];
+
+}
 
 export async function loadScreen(
     screenName
 ) {
-
 
     const screen =
         screens[screenName];
@@ -97,6 +125,8 @@ export async function loadScreen(
 
     }
 
+    await destroyCurrentScreen();
+
 
     const dashboard =
         document.getElementById(
@@ -108,13 +138,20 @@ export async function loadScreen(
         screen.layout;
 
 
+    dashboard.dataset.theme =
+        screen.theme || "dark";
+
+
     dashboard.innerHTML =
         "";
 
 
-    for (const [regionName, contents]
-        of Object.entries(screen.regions)) {
-
+    for (
+        const [regionName, contents]
+        of Object.entries(
+            screen.regions
+        )
+    ) {
 
         const region =
             await buildRegion(
@@ -128,5 +165,140 @@ export async function loadScreen(
         );
 
     }
+
+}
+
+let currentScreenIndex = 0;
+
+let rotationTimer = null;
+
+
+export async function startScreenRotation() {
+
+    if (
+        !screenOrder ||
+        screenOrder.length === 0
+    ) {
+
+        console.error(
+            "No screens configured."
+        );
+
+        return;
+
+    }
+
+
+    async function showCurrentScreen() {
+
+        const screenName =
+            screenOrder[
+                currentScreenIndex
+            ];
+
+
+        const screen =
+            screens[screenName];
+
+
+        if (!screen) {
+
+            console.error(
+                "Screen not found:",
+                screenName
+            );
+
+            return;
+
+        }
+
+
+        await loadScreen(
+            screenName
+        );
+
+
+        const durationConfig =
+            screen.duration || { seconds: 15 };
+
+
+        let duration;
+
+
+        if (
+            typeof durationConfig ===
+            "number"
+        ) {
+
+            duration =
+                durationConfig;
+
+        }
+
+
+        else if (
+            durationConfig.minutes
+        ) {
+
+            duration =
+                durationConfig.minutes *
+                60 *
+                1000;
+
+        }
+
+
+        else if (
+            durationConfig.seconds
+        ) {
+
+            duration =
+                durationConfig.seconds *
+                1000;
+
+        }
+
+
+        else {
+
+            duration =
+                15000;
+
+        }
+
+        rotationTimer =
+            setTimeout(
+                async () => {
+
+                    currentScreenIndex =
+                        (
+                            currentScreenIndex + 1
+                        )
+                        %
+                        screenOrder.length;
+
+
+                    await showCurrentScreen();
+
+                },
+                duration
+            );
+
+    }
+
+
+    if (rotationTimer) {
+
+        clearTimeout(
+            rotationTimer
+        );
+
+    }
+
+
+    currentScreenIndex = 0;
+
+
+    await showCurrentScreen();
 
 }

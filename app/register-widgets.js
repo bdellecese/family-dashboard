@@ -22,4 +22,8 @@ export async function registerWidgets() {
         "../widgets/family-menu/family-menu.js"
     );
 
+    await registerWidget(
+        "prayer-list",
+        "../widgets/prayer-list/prayer-list.js"
+    );
 }

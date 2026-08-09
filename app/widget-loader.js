@@ -1,6 +1,5 @@
 const widgets = {};
 
-
 export async function registerWidget(
     name,
     path
@@ -15,7 +14,6 @@ export async function registerWidget(
 
 }
 
-
 export async function loadWidget(
     name,
     container,
@@ -25,7 +23,6 @@ export async function loadWidget(
     const widget =
         widgets[name];
 
-
     if (!widget) {
 
         console.warn(
@@ -34,6 +31,7 @@ export async function loadWidget(
         );
 
         return;
+
     }
 
 
@@ -41,5 +39,34 @@ export async function loadWidget(
         container,
         config
     );
+
+}
+
+export async function destroyWidget(
+    name,
+    container
+) {
+
+    const widget =
+        widgets[name];
+
+
+    if (!widget) {
+
+        return;
+
+    }
+
+
+    if (
+        typeof widget.destroy ===
+        "function"
+    ) {
+
+        await widget.destroy(
+            container
+        );
+
+    }
 
 }

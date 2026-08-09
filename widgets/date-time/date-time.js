@@ -1,3 +1,6 @@
+const intervals = new WeakMap();
+
+
 const dateTime = {
 
     render(container, options = {}) {
@@ -68,12 +71,15 @@ const dateTime = {
 
         container.style.textAlign =
             config.alignment;
-        
-        container.style.color = config.color;
+
+
+        container.style.color =
+            config.color;
 
 
         timeElement.style.fontSize =
             `${config.time.size}px`;
+
 
         timeElement.style.fontWeight =
             config.time.weight;
@@ -81,6 +87,7 @@ const dateTime = {
 
         dateElement.style.fontSize =
             `${config.date.size}px`;
+
 
         dateElement.style.fontWeight =
             config.date.weight;
@@ -274,10 +281,40 @@ const dateTime = {
         update();
 
 
-        setInterval(
-            update,
-            1000
+        const interval =
+            setInterval(
+                update,
+                1000
+            );
+
+
+        intervals.set(
+            container,
+            interval
         );
+
+    },
+
+
+    destroy(container) {
+
+        const interval =
+            intervals.get(
+                container
+            );
+
+
+        if (interval) {
+
+            clearInterval(
+                interval
+            );
+
+            intervals.delete(
+                container
+            );
+
+        }
 
     }
 

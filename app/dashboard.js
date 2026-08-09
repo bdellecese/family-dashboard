@@ -1,28 +1,26 @@
 import {
-    registerWidgets
-}
-from "./register-widgets.js";
-
+    initializeDashboardScaling
+} from "../services/dashboard/dashboard-scale.js";
 
 import {
-    loadScreen
-}
-from "./screen-manager.js";
+    registerWidgets
+} from "./register-widgets.js";
 
+import {
+    startScreenRotation
+} from "./screen-manager.js";
+
+
+initializeDashboardScaling();
 
 
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
 
-
         await registerWidgets();
 
-
-        await loadScreen(
-            "information"
-        );
-
+        await startScreenRotation();
 
     }
 );

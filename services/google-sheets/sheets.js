@@ -1,8 +1,44 @@
+import {
+    getCached,
+    setCached
+} from "../cache/cache.js";
+
+
 const GOOGLE_SHEET_ID =
     "1LxStcCNQLawP81a4fiNdVTtxW7XA0ejR9ENyJ7dzG0I";
 
 
-export async function getSheetRows(sheetName) {
+const DEFAULT_CACHE_DURATION =
+    30 * 60 * 1000;
+
+
+export async function getSheetRows(
+    sheetName,
+    options = {}
+) {
+
+    const cacheDuration =
+        options.cacheDuration ??
+        DEFAULT_CACHE_DURATION;
+
+
+    const cacheKey =
+        `google-sheet:${sheetName}`;
+
+
+    const cached =
+        getCached(
+            cacheKey,
+            cacheDuration
+        );
+
+
+    if (cached) {
+
+        return cached;
+
+    }
+
 
     try {
 
@@ -32,15 +68,28 @@ export async function getSheetRows(sheetName) {
             );
 
 
-        return json.table.rows;
+        const rows =
+            json.table.rows;
 
 
-    } catch(error) {
+        setCached(
+            cacheKey,
+            rows
+        );
+
+
+        return rows;
+
+    }
+
+
+    catch(error) {
 
         console.error(
             "Unable to load Google Sheet:",
             error
         );
+
 
         return [];
 
