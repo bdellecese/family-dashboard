@@ -1,9 +1,90 @@
 import { screens } from "../config/screens.js";
+import { loadWidget } from "./widget-loader.js";
 
 
-export function loadScreen(screenName) {
+async function buildRegion(
+    regionName,
+    contents
+) {
 
-    const screen = screens[screenName];
+    const region =
+        document.createElement("div");
+
+
+    region.className =
+        regionName;
+
+
+    // Array = widgets
+    if (Array.isArray(contents)) {
+
+        for (const widget of contents) {
+
+            const container =
+                document.createElement("div");
+
+
+            container.className =
+                `widget ${widget.name}`;
+
+
+            container.dataset.widget =
+                widget.name;
+
+
+            region.appendChild(
+                container
+            );
+
+
+            await loadWidget(
+                widget.name,
+                container,
+                widget.config
+            );
+
+        }
+
+    }
+
+
+    // Object = nested regions
+    else {
+
+        for (const [childName, childContents]
+            of Object.entries(contents)) {
+
+
+            const child =
+                await buildRegion(
+                    childName,
+                    childContents
+                );
+
+
+            region.appendChild(
+                child
+            );
+
+        }
+
+    }
+
+
+    return region;
+
+}
+
+
+
+export async function loadScreen(
+    screenName
+) {
+
+
+    const screen =
+        screens[screenName];
+
 
     if (!screen) {
 
@@ -17,42 +98,35 @@ export function loadScreen(screenName) {
     }
 
 
-    const container =
-        document.getElementById("dashboard");
+    const dashboard =
+        document.getElementById(
+            "dashboard"
+        );
 
 
-    container.className =
+    dashboard.className =
         screen.layout;
 
 
-    container.innerHTML = "";
+    dashboard.innerHTML =
+        "";
 
 
-    screen.widgets.forEach(widget => {
+    for (const [regionName, contents]
+        of Object.entries(screen.regions)) {
 
 
-        const div =
-            document.createElement("div");
+        const region =
+            await buildRegion(
+                regionName,
+                contents
+            );
 
 
-        div.className =
-            widget.className;
+        dashboard.appendChild(
+            region
+        );
 
-
-        div.dataset.widget =
-            widget.name;
-
-
-        div.innerHTML =
-            `
-            <div class="placeholder">
-                ${widget.name}
-            </div>
-            `;
-
-
-        container.appendChild(div);
-
-    });
+    }
 
 }

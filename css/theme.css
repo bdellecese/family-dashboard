@@ -1,0 +1,17 @@
+body {
+    margin: 20px;
+    padding: 0;
+    background: black;
+    font-family: Roboto, Arial, sans-serif;
+    overflow: hidden;
+}
+
+:root {
+
+    --panel-bg: rgba(255,255,255,.15); 
+
+    --panel-radius: 16px;
+
+    --panel-padding: 16px;
+
+}

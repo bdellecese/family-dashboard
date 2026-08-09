@@ -2,31 +2,100 @@ export const screens = {
 
     information: {
 
-        layout: "kitchen-landscape",
+        layout: "information-layout",
 
-        widgets: [
+        regions: {
 
-            {
-                name: "photo",
-                className: "photo-main"
-            },
+            "left-panel": [
+                {
+                    name: "date-time",
+                    config: {
+                        timezone: "America/New_York",
 
-            {
-                name: "weather",
-                className: "weather-small"
-            },
+                        color: "rgba(255, 255, 255, 0.85)",
 
-            {
-                name: "prayer",
-                className: "prayer-main"
-            },
+                        time: {
+                            format: "12h",
+                            size: 72,
+                            weight: "normal"
+                        },
 
-            {
-                name: "menu",
-                className: "menu-bottom"
+                        date: {
+                            format: "weekday-month-day",
+                            size: 48,
+                            weight: "normal"
+                        },
+
+                        alignment: "left"
+                    }
+                },
+
+                { name: "photos" },
+                { name: "message" }
+            ],
+
+
+            "right-panel": {
+
+                "right-top": {
+
+                    "calendar-dates": [
+                        { name: "calendar-dates" }
+                    ],
+
+                    "right-top-content": {
+
+                        "top-summary": [
+                            { name: "calendar" },
+                            { name: "news" }
+                        ],
+
+                        "countdown": [
+                            { name: "countdown" }
+                        ]
+
+                    }
+
+                },
+
+
+                "right-bottom": {
+
+                    "prayer-column": {
+
+                        "prayer": [
+                            { name: "prayer-list" }
+                        ],
+
+                        "wifi": [
+                            { name: "wifi" }
+                        ]
+
+                    },
+
+
+                    "weather-column": {
+
+                        "weather": [
+                            { name: "weather" }
+                        ],
+
+                        "weather-secondary": [
+                            { name: "tbd" }
+                        ]
+
+                    },
+
+
+                    "menu-column": [
+                        { name: "family-menu" }
+                    ]
+
+                }
+
             }
 
-        ]
+        }
 
     }
 

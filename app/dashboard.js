@@ -1,13 +1,28 @@
-import { loadScreen } from "./screen-manager.js";
+import {
+    registerWidgets
+}
+from "./register-widgets.js";
+
+
+import {
+    loadScreen
+}
+from "./screen-manager.js";
+
 
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    async () => {
 
-        loadScreen(
+
+        await registerWidgets();
+
+
+        await loadScreen(
             "information"
         );
+
 
     }
 );

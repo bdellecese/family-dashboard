@@ -297,3 +297,7 @@ function getRelativeDate(event, year) {
     return referenceDate;
 
 }
+
+export {
+    getNextOccurrence
+};

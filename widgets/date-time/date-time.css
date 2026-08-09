@@ -1,0 +1,19 @@
+.date-time-widget {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.date-time-widget__time,
+.date-time-widget__date {
+    margin: 0;
+    padding: 0;
+}
+
+.date-time-widget__time {
+    white-space: nowrap;
+}
+
+.date-time-widget__date {
+    white-space: nowrap;
+}

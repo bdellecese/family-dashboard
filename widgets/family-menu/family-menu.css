@@ -1,0 +1,75 @@
+.family-menu-widget {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.family-menu-widget__title {
+    font-size: 1vw;
+    margin-bottom: 16px;
+}
+
+.family-menu-widget__chef {
+    font-size: .75vw;
+    margin-bottom: 16px;
+}
+
+
+.family-menu-widget__list {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.family-menu-widget__day-name {
+    font-size: .75vw;
+
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+
+.family-menu-widget__meal {
+    display: grid;
+    grid-template-columns: 32px 32px minmax(0, 1fr);
+    column-gap: 6px;
+
+    align-items: baseline;
+
+    font-size: 1vw;
+    line-height: 1.3;
+
+    margin-bottom: 4px;
+}
+
+.family-menu-widget__meal i {
+    width: 28px;
+    text-align: center;
+}
+
+.family-menu-widget__meal-prefix {
+    font-size: 28px;
+}
+
+
+.family-menu-widget__meal a {
+    color: inherit;
+    text-decoration: none;
+}
+
+
+.family-menu-widget__meal a:hover {
+    text-decoration: underline;
+}
+
+.family-menu-widget__meal-icon {
+    color: rgb(135, 206, 235);
+    font-size: 28px;
+    line-height: 20px;
+    width: 24px;
+
+    text-align: center;
+    text-shadow:
+        rgba(0, 0, 0, 0.3)
+        1px 1px 0px;
+}
