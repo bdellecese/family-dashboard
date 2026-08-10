@@ -236,18 +236,22 @@ export const screens = {
                         "weather": [
 
                             {
-                                name: "weather"
+                                name: "weather",
+
+                                config: {
+
+                                    location: "Holden, MA"
+
+                                }
+
                             }
 
                         ],
 
-
-                        "weather-secondary": [
-
+                        "placeholder": [
                             {
-                                name: "tbd"
+                                name: "placeholder"
                             }
-
                         ]
 
                     },

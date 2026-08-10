@@ -48,4 +48,9 @@ export async function registerWidgets() {
 
     );
 
+    await registerWidget(
+        "weather",
+        "../widgets/weather/weather.js"
+    )
+
 }
