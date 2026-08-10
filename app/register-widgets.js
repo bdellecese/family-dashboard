@@ -35,6 +35,17 @@ export async function registerWidgets() {
     await registerWidget(
         "calendar-list",
         "../widgets/calendar-list/calendar-list.js"
-);
+    );
+
+    await registerWidget(
+        "calendar",
+        "../widgets/calendar/calendar.js"
+    );
+
+    await registerWidget(
+        "news",
+        "../widgets/news/news.js"
+
+    );
 
 }

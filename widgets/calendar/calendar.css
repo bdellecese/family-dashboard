@@ -1,0 +1,171 @@
+.calendar-widget {
+
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    box-sizing: border-box;
+
+    padding: 14px;
+
+    color: white;
+
+    background-color: transparent;
+
+    overflow: hidden;
+}
+
+
+/*
+ * CALENDAR GRID
+ */
+
+.calendar-widget__grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(7, minmax(0, 1fr));
+
+    width: 100%;
+
+    min-width: 0;
+
+    box-sizing: border-box;
+
+    row-gap: 8px;
+}
+
+
+/*
+ * DAY HEADERS
+ */
+
+.calendar-widget__day-name {
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    height: 20px;
+
+    font-size: .4vw;
+
+    font-weight: 400;
+
+    line-height: 20px;
+
+    opacity: .7;
+}
+
+
+/*
+ * DAY CELL
+ */
+
+.calendar-widget__day {
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    height: 30px;
+
+    min-width: 0;
+
+    box-sizing: border-box;
+}
+
+
+/*
+ * DAY NUMBER
+ */
+
+.calendar-widget__day-number {
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    width: 22px;
+    height: 22px;
+
+    border-radius: 50%;
+
+    font-size: .6vw;
+
+    font-weight: 400;
+
+    line-height: 1;
+}
+
+
+/*
+ * TODAY
+ */
+
+.calendar-widget__day--today
+.calendar-widget__day-number {
+
+    width: 1vw;
+    height: 1vw;
+
+    border-radius: 50%;
+
+    background-color: rgb(220, 60, 60);
+
+    color: white;
+
+    font-weight: 500;
+}
+
+
+/*
+ * ADJACENT MONTH
+ */
+
+.calendar-widget__day--adjacent {
+
+    color: rgba(
+        255,
+        255,
+        255,
+        0.7
+    );
+}
+
+
+.calendar-widget__day--adjacent
+.calendar-widget__day-number {
+
+    color: rgba(
+        255,
+        255,
+        255,
+        0.7
+    );
+
+    font-weight: 400;
+}
+
+
+/*
+ * ADJACENT MONTH LABEL
+ *
+ * The first day of the previous/next
+ * month is rendered as "Jul", "Sep", etc.
+ */
+
+.calendar-widget__day-number--month {
+
+    font-size: .55vw;
+
+    font-weight: 400;
+
+    white-space: nowrap;
+}

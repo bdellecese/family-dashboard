@@ -12,7 +12,7 @@ export const screens = {
         theme: "dark",
 
         duration: {
-            minutes: 2
+            minutes: 20
         },
 
 
@@ -147,7 +147,11 @@ export const screens = {
 
 
                             {
-                                name: "news"
+                                name: "news",
+                                config: {
+                                    feed: "http://feeds.bbci.co.uk/news/world/rss.xml",
+                                    rotationSeconds: 30
+                                }
                             }
 
                         ],
