@@ -1,0 +1,262 @@
+.weather-alerts-widget {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+
+    box-sizing: border-box;
+
+    padding: 14px;
+
+    color: white;
+
+    overflow: hidden;
+
+    font-family: Roboto, sans-serif;
+}
+
+
+/*
+ * HEADER
+ */
+
+.weather-alerts-widget__header {
+    width: 100%;
+
+    font-size: .65vw;
+    font-weight: 600;
+
+    letter-spacing: .08em;
+
+    margin-bottom: 10px;
+
+    color: rgba(255, 255, 255, .75);
+}
+
+
+/*
+ * ALERT
+ */
+
+.weather-alerts-widget__alert {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 10px 12px;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    background: rgba(255, 255, 255, .08);
+
+    border: 1px solid rgba(255, 255, 255, .15);
+
+    border-left: 6px solid #ffcc00;
+}
+
+
+/*
+ * WHAT
+ */
+
+.weather-alerts-widget__event {
+    font-size: .9vw;
+
+    font-weight: 600;
+
+    line-height: 1.2;
+
+    margin-bottom: 10px;
+
+    color: #ffcc00;
+}
+
+
+/*
+ * WHAT / WHERE / WHEN / IMPACTS
+ */
+
+.weather-alerts-widget__row,
+.weather-alerts-widget__impacts {
+
+    display: grid;
+
+    grid-template-columns:
+        100px
+        minmax(0, 1fr);
+
+    align-items: start;
+
+    column-gap: 16px;
+
+    width: 100%;
+
+    margin-bottom: 7px;
+}
+
+
+/*
+ * LABEL
+ */
+
+.weather-alerts-widget__label {
+
+    font-size: .5vw;
+
+    font-weight: 600;
+
+    letter-spacing: .06em;
+
+    line-height: 1.4;
+
+    color: rgba(255, 255, 255, .55);
+}
+
+
+/*
+ * VALUE
+ */
+
+.weather-alerts-widget__value {
+
+    min-width: 0;
+
+    font-size: .55vw;
+
+    font-weight: 400;
+
+    line-height: 1.4;
+
+    color: rgba(255, 255, 255, .95);
+
+    overflow-wrap: break-word;
+}
+
+
+/*
+ * IMPACTS
+ */
+
+.weather-alerts-widget__impacts {
+
+    margin-top: 9px;
+
+    margin-bottom: 0;
+}
+
+
+/*
+ * WARNING
+ *
+ * Red
+ */
+
+.weather-alerts-widget__alert[data-severity="warning"] {
+
+    border-left-color: #ff3b30;
+
+    border-color:
+        rgba(255, 59, 48, .35);
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255, 59, 48, .18),
+            rgba(255, 59, 48, .06)
+        );
+
+    box-shadow:
+        0 0 12px rgba(255, 59, 48, .16);
+}
+
+
+.weather-alerts-widget__alert[data-severity="warning"]
+.weather-alerts-widget__event {
+
+    color: #ff5c5c;
+}
+
+
+/*
+ * WATCH
+ *
+ * Orange
+ */
+
+.weather-alerts-widget__alert[data-severity="watch"] {
+
+    border-left-color: #ff9500;
+
+    border-color:
+        rgba(255, 149, 0, .35);
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255, 149, 0, .16),
+            rgba(255, 149, 0, .05)
+        );
+}
+
+
+.weather-alerts-widget__alert[data-severity="watch"]
+.weather-alerts-widget__event {
+
+    color: #ffb340;
+}
+
+
+/*
+ * ADVISORY
+ *
+ * Yellow
+ */
+
+.weather-alerts-widget__alert[data-severity="advisory"] {
+
+    border-left-color: #ffcc00;
+
+    border-color:
+        rgba(255, 204, 0, .30);
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255, 204, 0, .13),
+            rgba(255, 204, 0, .04)
+        );
+}
+
+
+.weather-alerts-widget__alert[data-severity="advisory"]
+.weather-alerts-widget__event {
+
+    color: #ffcc00;
+}
+
+
+/*
+ * NO ALERTS / ERROR
+ */
+
+.weather-alerts-widget__message {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 100%;
+    height: 100%;
+
+    box-sizing: border-box;
+
+    text-align: center;
+
+    font-size: .6vw;
+
+    color: rgba(255, 255, 255, .65);
+}

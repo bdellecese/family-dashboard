@@ -51,6 +51,19 @@ export async function registerWidgets() {
     await registerWidget(
         "weather",
         "../widgets/weather/weather.js"
+    );
+
+    await registerWidget(
+        "weather-alerts",
+        "../widgets/weather-alerts/weather-alerts.js"
     )
+
+    /*
+    await registerWidget(
+        "photo",
+        "../widgets/photo/photo.js"
+    )
+    */
+
 
 }

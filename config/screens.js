@@ -67,12 +67,16 @@ export const screens = {
 
 
                 {
-                    name: "photos"
+                    name: "photo"
                 },
 
 
                 {
-                    name: "message"
+                    name: "weather-alerts",
+
+                    config: {
+                        location: "Holden, MA"
+                    }
                 }
 
             ],

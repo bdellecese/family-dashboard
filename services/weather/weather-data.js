@@ -291,5 +291,4 @@ function normalizeDaily(
 
 }
 
-
 export default weatherData;
