@@ -32,4 +32,9 @@ export async function registerWidgets() {
         "../widgets/wifi/wifi.js"
     );
 
+    await registerWidget(
+        "calendar-list",
+        "../widgets/calendar-list/calendar-list.js"
+);
+
 }
