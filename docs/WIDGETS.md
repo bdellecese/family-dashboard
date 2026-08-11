@@ -7,23 +7,24 @@ functionality.
 
 Widgets should follow the common widget contract:
 
-    const widget = {
+```text
+const widget = {
 
-        name: "widget-name",
+    name: "widget-name",
 
-        async render(
-            container,
-            config = {}
-        ) {
+    async render(
+        container,
+        config = {}
+    ) {
 
-            // Render widget
+        // Render widget
 
-        }
+    }
 
-    };
+};
 
-    export default widget;
-
+export default widget;
+```
 
 ---
 
@@ -31,51 +32,51 @@ Widgets should follow the common widget contract:
 
 Every widget should:
 
-- Export a default object.
-- Provide a `name`.
-- Provide a `render()` function.
-- Accept a target `container`.
-- Accept an optional `config` object.
-- Render only inside the supplied container.
-- Avoid manipulating unrelated parts of the dashboard.
-- Use data services for external API access when practical.
-
+* Export a default object.
+* Provide a `name`.
+* Provide a `render()` function.
+* Accept a target `container`.
+* Accept an optional `config` object.
+* Render only inside the supplied container.
+* Avoid manipulating unrelated parts of the dashboard.
+* Use data services for external API access when practical.
 
 The normal rendering flow is:
 
-    screen configuration
-          |
-          v
-    widget-loader
-          |
-          v
-       widget
-          |
-          v
-    data service
-          |
-          v
-    external API
-
+```text
+screen configuration
+      |
+      v
+widget-loader
+      |
+      v
+   widget
+      |
+      v
+data service
+      |
+      v
+external API
+```
 
 ---
 
 # Widget Inventory
 
-| Widget | Purpose | Configurable | Data Source | Status |
-|---|---|---:|---|---|
-| date-time | Current date and time | Yes | Browser | Complete |
-| weather | Current weather and forecast | Yes | Open-Meteo | Complete |
-| weather-alerts | Active weather alerts | Yes | NWS / Open-Meteo | Complete |
-| calendar | Calendar display | Yes | Google Calendar | Complete |
-| calendar-list | Multi-calendar event list | Yes | Google Calendar | Complete |
-| countdown | Event countdowns | Yes | Configuration / data | Complete |
-| news | Rotating news headlines | Yes | RSS | Complete |
-| prayer-list | Prayer list | TBD | Configuration / data | Complete |
-| family-menu | Family menu | TBD | Configuration / data | Complete |
-| wifi | Wi-Fi information / QR | Yes | Configuration | Complete |
-| photo | Rotating photos | Yes | iCloud shared album | In development |
-
+| Widget         | Purpose                      | Configurable | Data Source                  | Status         |
+| -------------- | ---------------------------- | -----------: | ---------------------------- | -------------- |
+| date-time      | Current date and time        |          Yes | Browser                      | Complete       |
+| weather        | Current weather and forecast |          Yes | Open-Meteo                   | Complete       |
+| weather-alerts | Active weather alerts        |          Yes | NWS / Open-Meteo             | Complete       |
+| calendar       | Calendar display             |          Yes | Google Calendar              | Complete       |
+| large-calendar | Four-week calendar + weather |          Yes | Google Calendar / Open-Meteo | Complete       |
+| calendar-list  | Multi-calendar event list    |          Yes | Google Calendar              | Complete       |
+| countdown      | Event countdowns             |          Yes | Configuration / data         | Complete       |
+| news           | Rotating news headlines      |          Yes | RSS                          | Complete       |
+| prayer-list    | Prayer list                  |          TBD | Configuration / data         | Complete       |
+| family-menu    | Family menu                  |          TBD | Configuration / data         | Complete       |
+| wifi           | Wi-Fi information / QR       |          Yes | Configuration                | Complete       |
+| photo          | Rotating photos              |          Yes | iCloud shared album          | In development |
 
 ---
 
@@ -83,7 +84,9 @@ The normal rendering flow is:
 
 ## Widget
 
-    date-time
+```text
+date-time
+```
 
 ## Purpose
 
@@ -95,44 +98,46 @@ The widget supports timezone-aware rendering and configurable formatting.
 
 Example:
 
-    {
-        name: "date-time",
+```text
+{
+    name: "date-time",
 
-        config: {
+    config: {
 
-            timezone:
-                "America/New_York",
+        timezone:
+            "America/New_York",
 
-            color:
-                "rgba(255, 255, 255, 0.85)",
+        color:
+            "rgba(255, 255, 255, 0.85)",
 
-            time: {
+        time: {
 
-                format: "12h",
+            format: "12h",
 
-                size: 72,
+            size: 72,
 
-                weight: "normal"
+            weight: "normal"
 
-            },
+        },
 
-            date: {
+        date: {
 
-                format:
-                    "weekday-month-day",
+            format:
+                "weekday-month-day",
 
-                size: 48,
+            size: 48,
 
-                weight: "normal"
+            weight: "normal"
 
-            },
+        },
 
-            alignment:
-                "left"
-
-        }
+        alignment:
+            "left"
 
     }
+
+}
+```
 
 ## Data Source
 
@@ -142,14 +147,15 @@ Browser date/time APIs.
 
 Complete.
 
-
 ---
 
 # Weather
 
 ## Widget
 
-    weather
+```text
+weather
+```
 
 ## Purpose
 
@@ -161,17 +167,19 @@ The widget is location configurable.
 
 Example:
 
-    {
-        name: "weather",
+```text
+{
+    name: "weather",
 
-        config: {
+    config: {
 
-            location:
-                "Holden, MA"
-
-        }
+        location:
+            "Holden, MA"
 
     }
+
+}
+```
 
 ## Data Source
 
@@ -184,18 +192,17 @@ a local proxy.
 
 Weather presentation includes:
 
-- Current conditions
-- Forecast
-- Sunrise
-- Sunset
-- Wind
-- Weather condition indicators
-- Precipitation information
+* Current conditions
+* Forecast
+* Sunrise
+* Sunset
+* Wind
+* Weather condition indicators
+* Precipitation information
 
 ## Status
 
 Complete.
-
 
 ---
 
@@ -203,7 +210,9 @@ Complete.
 
 ## Widget
 
-    weather-alerts
+```text
+weather-alerts
+```
 
 ## Purpose
 
@@ -212,25 +221,27 @@ location.
 
 The widget highlights alert severity using:
 
-- Red = Warning
-- Orange = Watch
-- Yellow = Advisory
+* Red = Warning
+* Orange = Watch
+* Yellow = Advisory
 
 ## Configuration
 
 Example:
 
-    {
-        name: "weather-alerts",
+```text
+{
+    name: "weather-alerts",
 
-        config: {
+    config: {
 
-            location:
-                "Holden, MA"
-
-        }
+        location:
+            "Holden, MA"
 
     }
+
+}
+```
 
 The configurable location is also useful for testing.
 
@@ -241,37 +252,39 @@ validate the red severity styling.
 
 The alert service performs:
 
-    configured location
-            |
-            v
-    Open-Meteo geocoding
-            |
-            v
-    latitude / longitude
-            |
-            v
-    NWS points API
-            |
-            v
-    forecast zone
-            |
-            v
-    NWS active alerts API
-            |
-            v
-    normalized alert data
-            |
-            v
-    weather-alerts widget
+```text
+configured location
+        |
+        v
+Open-Meteo geocoding
+        |
+        v
+latitude / longitude
+        |
+        v
+NWS points API
+        |
+        v
+forecast zone
+        |
+        v
+NWS active alerts API
+        |
+        v
+normalized alert data
+        |
+        v
+weather-alerts widget
+```
 
 ## Alert Parsing
 
 The widget separates the alert into:
 
-- WHAT
-- WHERE
-- WHEN
-- IMPACTS
+* WHAT
+* WHERE
+* WHEN
+* IMPACTS
 
 ### WHAT
 
@@ -279,9 +292,9 @@ Uses the NWS `event` field.
 
 Examples:
 
-- Heat Advisory
-- Tornado Warning
-- Flood Watch
+* Heat Advisory
+* Tornado Warning
+* Flood Watch
 
 ### WHERE
 
@@ -306,42 +319,55 @@ Severity is determined primarily from the NWS event name.
 
 Events containing:
 
-    warning
+```text
+warning
+```
 
 are classified as:
 
-    warning
+```text
+warning
+```
 
 ### Orange
 
 Events containing:
 
-    watch
+```text
+watch
+```
 
 are classified as:
 
-    watch
+```text
+watch
+```
 
 ### Yellow
 
 Events containing:
 
-    advisory
+```text
+advisory
+```
 
 are classified as:
 
-    advisory
+```text
+advisory
+```
 
 The NWS severity field is used as a fallback.
 
 ## Data Service
 
-    services/weather/weather-alert-data.js
+```text
+services/weather/weather-alert-data.js
+```
 
 ## Status
 
 Complete.
-
 
 ---
 
@@ -349,7 +375,9 @@ Complete.
 
 ## Widget
 
-    calendar
+```text
+calendar
+```
 
 ## Purpose
 
@@ -372,6 +400,222 @@ Google Calendar.
 
 Complete.
 
+---
+
+# Large Calendar
+
+## Widget
+
+```text
+large-calendar
+```
+
+## Purpose
+
+Displays a four-week calendar view with seven columns representing
+Sunday through Saturday.
+
+The widget combines calendar events with a compact five-day weather
+forecast displayed directly beneath each date.
+
+The large calendar is intended for the primary calendar/dashboard screen
+and is optimized for a large touchscreen display.
+
+## Configuration
+
+Example:
+
+```text
+{
+    name: "large-calendar",
+
+    config: {
+
+        calendars: [
+
+            "barry.dellecese@gmail.com",
+            "family01156229611257150686",
+            "natalie.dellecese@gmail.com",
+            "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com"
+
+        ]
+
+    }
+
+}
+```
+
+Calendar IDs are supplied through configuration rather than being
+hard-coded in the widget.
+
+The weather location is currently hard-coded to:
+
+```text
+Holden
+```
+
+This should eventually be moved into configuration.
+
+## Calendar Layout
+
+The widget displays:
+
+* Four weeks / 28 days
+* Seven columns
+* Sunday through Saturday
+* Calendar legend
+* Date number for each day
+* Weather forecast beneath the date
+* All-day events
+* Timed events
+* Event locations when available
+
+The widget supports vertical scrolling when the calendar content exceeds
+the available screen height.
+
+## Date Formatting
+
+The current day is highlighted using a red circle around the date number.
+
+Past dates are visually muted.
+
+The date-number area has a fixed height so the current-day circle does not
+change the vertical alignment of the calendar rows.
+
+## Weather
+
+The weather forecast is displayed directly beneath the date number.
+
+The weather layout is:
+
+```text
+weather icon → high → low → precipitation
+```
+
+Example:
+
+```text
+☀️ 82° 61° 💧20%
+```
+
+Weather information is displayed only when forecast data is available.
+
+The weather area maintains its reserved vertical space even when there is
+no forecast available. This prevents the event lists from shifting vertically
+between days.
+
+Forecasts are currently available for five days.
+
+Therefore:
+
+* Past days have no weather forecast displayed.
+* Days beyond the five-day forecast have no weather forecast displayed.
+* The reserved weather space remains present for alignment.
+
+## Calendar Events
+
+### All-Day Events
+
+All-day events are displayed as colored event tiles.
+
+The layout is:
+
+```text
+icon → event title
+```
+
+The calendar's configured color is used for the event background and border.
+
+All-day events do not display event locations.
+
+### Timed Events
+
+Timed events use the following layout:
+
+```text
+icon → time → title
+```
+
+The time is displayed on two lines:
+
+```text
+10:00 AM
+→ 11:30 AM
+```
+
+The end time is smaller and muted.
+
+The event title appears to the right of the time.
+
+If a location exists, it is displayed beneath the title:
+
+```text
+Event Title
+at Location
+```
+
+The location is smaller and muted relative to the event title.
+
+## Past Events
+
+Past dates are muted.
+
+Timed events and all-day events belonging to past dates are also visually
+muted.
+
+## Legend
+
+The legend displays the configured calendars using their configured:
+
+* Icon
+* Name
+* Color
+
+## Data Sources
+
+Calendar events:
+
+```text
+services/google-calendar/calendar-data.js
+```
+
+Weather:
+
+```text
+services/weather/weather-data.js
+```
+
+The large calendar should reuse the existing Google Calendar data service
+rather than implementing an independent Google Calendar API integration.
+
+The weather forecast should reuse the existing weather data service rather
+than making Open-Meteo requests directly from the widget.
+
+## Data Flow
+
+```text
+screen configuration
+        |
+        v
+large-calendar widget
+        |
+        +--------------------------+
+        |                          |
+        v                          v
+calendar-data.js             weather-data.js
+        |                          |
+        v                          v
+Google Calendar              Open-Meteo
+        |                          |
+        +------------+-------------+
+                     |
+                     v
+              large-calendar
+```
+
+## Status
+
+Complete.
 
 ---
 
@@ -379,7 +623,9 @@ Complete.
 
 ## Widget
 
-    calendar-list
+```text
+calendar-list
+```
 
 ## Purpose
 
@@ -391,27 +637,29 @@ This widget is currently used in the Information screen.
 
 Example:
 
-    {
-        name: "calendar-list",
+```text
+{
+    name: "calendar-list",
 
-        config: {
+    config: {
 
-            calendars: [
+        calendars: [
 
-                "barry.dellecese@gmail.com",
-                "family01156229611257150686",
-                "natalie.dellecese@gmail.com",
-                "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com"
+            "barry.dellecese@gmail.com",
+            "family01156229611257150686",
+            "natalie.dellecese@gmail.com",
+            "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com"
 
-            ],
+        ],
 
-            days: 7,
+        days: 7,
 
-            showCalendarName: false
-
-        }
+        showCalendarName: false
 
     }
+
+}
+```
 
 ## Data Source
 
@@ -421,14 +669,15 @@ Google Calendar.
 
 Complete.
 
-
 ---
 
 # Countdown
 
 ## Widget
 
-    countdown
+```text
+countdown
+```
 
 ## Purpose
 
@@ -445,14 +694,15 @@ Configuration and/or dashboard event data.
 
 Complete.
 
-
 ---
 
 # News
 
 ## Widget
 
-    news
+```text
+news
+```
 
 ## Purpose
 
@@ -462,20 +712,22 @@ Displays rotating news headlines.
 
 Example:
 
-    {
-        name: "news",
+```text
+{
+    name: "news",
 
-        config: {
+    config: {
 
-            feed:
-                "http://feeds.bbci.co.uk/news/world/rss.xml",
+        feed:
+            "http://feeds.bbci.co.uk/news/world/rss.xml",
 
-            rotationSeconds:
-                30
-
-        }
+        rotationSeconds:
+            30
 
     }
+
+}
+```
 
 ## Data Source
 
@@ -489,14 +741,15 @@ The feed URL and rotation interval are configurable.
 
 Complete.
 
-
 ---
 
 # Prayer List
 
 ## Widget
 
-    prayer-list
+```text
+prayer-list
+```
 
 ## Purpose
 
@@ -510,14 +763,15 @@ Configuration / dashboard data.
 
 Complete.
 
-
 ---
 
 # Family Menu
 
 ## Widget
 
-    family-menu
+```text
+family-menu
+```
 
 ## Purpose
 
@@ -531,14 +785,15 @@ Configuration / dashboard data.
 
 Complete.
 
-
 ---
 
 # Wi-Fi
 
 ## Widget
 
-    wifi
+```text
+wifi
+```
 
 ## Purpose
 
@@ -549,26 +804,27 @@ information for guests.
 
 Example:
 
-    {
-        name: "wifi",
+```text
+{
+    name: "wifi",
 
-        config: {
+    config: {
 
-            image:
-                "...",
+        image:
+            "...",
 
-            ssid:
-                "YOUR_GUEST_SSID",
+        ssid:
+            "YOUR_GUEST_SSID",
 
-            password:
-                "YOUR_GUEST_PASSWORD",
+        password:
+            "YOUR_GUEST_PASSWORD",
 
-            security:
-                "WPA"
-
-        }
+        security:
+            "WPA"
 
     }
+}
+```
 
 ## Data Source
 
@@ -578,14 +834,15 @@ Configuration.
 
 Complete.
 
-
 ---
 
 # Photo
 
 ## Widget
 
-    photo
+```text
+photo
+```
 
 ## Purpose
 
@@ -613,7 +870,6 @@ dependency if possible.
 
 In development.
 
-
 ---
 
 # Widget Development Guidelines
@@ -630,42 +886,46 @@ When creating a new widget:
 8. Test independently before integrating into a screen.
 9. Document the widget in this file.
 
-
 ---
 
 # Configuration Guidelines
 
 Prefer:
 
-    screen configuration
-          |
-          v
-       widget
-          |
-          v
-      data service
-
+```text
+screen configuration
+      |
+      v
+   widget
+      |
+      v
+  data service
+```
 
 over:
 
-    widget
-       |
-       +-- hard-coded user settings
-       |
-       +-- API access
-       |
-       +-- application logic
-
+```text
+widget
+   |
+   +-- hard-coded user settings
+   |
+   +-- API access
+   |
+   +-- application logic
+```
 
 Configuration should be used for values such as:
 
-- Locations
-- Calendar IDs
-- RSS feeds
-- Rotation intervals
-- Screen durations
-- Display preferences
+* Locations
+* Calendar IDs
+* RSS feeds
+* Rotation intervals
+* Screen durations
+* Display preferences
 
+When a value is temporarily hard-coded during development, it should
+eventually be moved into configuration when the widget architecture is
+stable.
 
 ---
 
@@ -682,29 +942,30 @@ Recommended process:
 5. Verify the widget visually.
 6. Only then move to the next change.
 
-
 Common errors to watch for include:
 
-    Widget not registered
+```text
+Widget not registered
 
-    Failed to load dynamically imported module
+Failed to load dynamically imported module
 
-    Module does not expose expected function
+Module does not expose expected function
 
-    Failed to fetch
+Failed to fetch
 
-    CORS errors
+CORS errors
 
-    404 Not Found
-
+404 Not Found
+```
 
 ---
 
 # Future Widgets / Screens
 
-The next major widget/screen work is the large Calendar screen.
+The dashboard now has two completed screens built from the shared widget
+architecture.
 
-The large Calendar screen should reuse the existing Google Calendar data
-service rather than creating an independent calendar API implementation.
+Completed screens should continue to reuse existing widgets and data services
+where practical rather than creating screen-specific implementations.
 
-Additional widgets can be added as dashboard requirements evolve.
+Additional widgets and screens can be added as dashboard requirements evolve.

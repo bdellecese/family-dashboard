@@ -1,0 +1,835 @@
+/*
+ * LARGE CALENDAR WIDGET
+ */
+
+.large-calendar-widget {
+
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+
+    color: #222222;
+
+}
+
+
+/*
+ * LEGEND
+ */
+
+.large-calendar-widget__legend {
+
+    width: 100%;
+
+    display: flex;
+
+    flex-direction: row;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-wrap: nowrap;
+
+    gap: 28px;
+
+    padding:
+        14px
+        0;
+
+    margin-bottom: 8px;
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    background:
+        rgba(100, 100, 100, 0.3);
+
+}
+
+
+/*
+ * LEGEND ITEM
+ */
+
+.large-calendar-widget__legend-item {
+
+    display: flex;
+
+    flex-direction: row;
+
+    align-items: center;
+
+    gap: 6px;
+
+    white-space: nowrap;
+
+}
+
+
+/*
+ * LEGEND ICON
+ */
+
+.large-calendar-widget__legend-icon {
+
+    display: inline-block;
+
+    font-size: .9vw;
+
+    padding-right: 2px;
+
+    flex-shrink: 0;
+
+}
+
+
+/*
+ * LEGEND NAME
+ */
+
+.large-calendar-widget__legend-name {
+
+    white-space: nowrap;
+
+    font-size: .9vw;
+
+    font-weight: 500;
+
+    line-height: 1;
+
+}
+
+
+/*
+ * CALENDAR GRID
+ *
+ * The grid can extend vertically.
+ * The widget itself provides vertical scrolling.
+ */
+
+.large-calendar-widget__grid {
+
+    width: 100%;
+
+    min-width: 0;
+
+    min-height: 0;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(7, minmax(0, 1fr));
+
+    grid-template-rows:
+        auto
+        repeat(4, minmax(260px, auto));
+
+    gap: 8px;
+
+    padding:
+        0
+        4px
+        12px
+        4px;
+
+    box-sizing: border-box;
+
+    overflow: visible;
+
+    background: #ffffff;
+
+}
+
+
+/*
+ * DAY HEADER
+ */
+
+.large-calendar-widget__day-name {
+
+    min-width: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding:
+        8px
+        2px;
+
+    margin-bottom: 4px;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    font-size: .7vw;
+
+    font-weight: 300;
+
+    color: #555555;
+
+    background: #ffffff;
+
+}
+
+
+/*
+ * DAY
+ */
+
+.large-calendar-widget__day {
+
+    min-width: 0;
+
+    min-height: 260px;
+
+    padding: 8px;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+
+    color: #222222;
+
+}
+
+
+/*
+ * PAST DAY
+ *
+ * Mute date number and events.
+ */
+
+.large-calendar-widget__day--past
+.large-calendar-widget__day-number {
+
+    color: #aaaaaa;
+
+}
+
+
+.large-calendar-widget__day--past
+.large-calendar-widget__timed-events {
+
+    opacity: 0.45;
+
+}
+
+
+.large-calendar-widget__day--past
+.large-calendar-widget__all-day-events {
+
+    opacity: 0.45;
+
+}
+
+
+/*
+ * TODAY
+ */
+
+.large-calendar-widget__day--today {
+
+    background: #ffffff;
+
+}
+
+
+/*
+ * DAY NUMBER
+ *
+ * Fixed-height container keeps every row aligned.
+ * The current-day circle sits inside this same
+ * reserved space and cannot change the row height.
+ */
+
+.large-calendar-widget__day-number {
+
+    width: 100%;
+
+    height: 2em;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    box-sizing: border-box;
+
+    margin:
+        0
+        0
+        8px
+        0;
+
+    text-align: center;
+
+    font-size: 1.7vw;
+
+    font-weight: 300;
+
+    line-height: 1;
+
+    color: #222222;
+
+}
+
+
+/*
+ * TODAY DATE CIRCLE
+ *
+ * Keep the circle behind the date text.
+ */
+
+.large-calendar-widget__day--today
+.large-calendar-widget__day-number {
+
+    position: relative;
+
+    z-index: 0;
+
+    color: #ffffff;
+
+    isolation: isolate;
+
+}
+
+
+/*
+ * TODAY DATE CIRCLE
+ *
+ * Use a pseudo-element so the circle does not
+ * alter the layout or alignment of the date row.
+ */
+
+.large-calendar-widget__day--today
+.large-calendar-widget__day-number::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    width: 2em;
+    height: 2em;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    border-radius: 50%;
+
+    background: #e53935;
+
+    z-index: -1;
+
+}
+
+
+/*
+ * WEATHER
+ *
+ * Reserved-height weather row.
+ *
+ * ICON → HIGH → LOW → PRECIPITATION
+ *
+ * The fixed height keeps all event lists aligned,
+ * even when a day has no forecast available.
+ */
+
+.large-calendar-widget__weather {
+
+    width: 100%;
+
+    min-width: 0;
+
+    height: 1.6em;
+
+    display: flex;
+
+    flex-direction: row;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    margin:
+        0
+        0
+        9px
+        0;
+
+    box-sizing: border-box;
+
+    font-size: .55vw;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+
+/*
+ * WEATHER ICON
+ */
+
+.large-calendar-widget__weather-icon {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    width: 1.4em;
+
+    min-width: 1.4em;
+
+    font-size: .7vw;
+
+    line-height: 1;
+
+}
+
+
+/*
+ * WEATHER HIGH
+ */
+
+.large-calendar-widget__weather-high {
+
+    font-size: .55vw;
+
+    font-weight: 500;
+
+    color: #555555;
+
+}
+
+
+/*
+ * WEATHER LOW
+ */
+
+.large-calendar-widget__weather-low {
+
+    font-size: .55vw;
+
+    font-weight: 400;
+
+    color: #999999;
+
+}
+
+
+/*
+ * WEATHER PRECIPITATION
+ */
+
+.large-calendar-widget__weather-precip {
+
+    font-size: .5vw;
+
+    font-weight: 400;
+
+    color: #999999;
+
+}
+
+
+/*
+ * ALL-DAY EVENTS CONTAINER
+ */
+
+.large-calendar-widget__all-day-events {
+
+    width: 100%;
+
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+    margin-bottom: 8px;
+
+}
+
+
+/*
+ * ALL-DAY EVENT
+ *
+ * ICON → TITLE
+ */
+
+.large-calendar-widget__all-day-event {
+
+    width: 100%;
+
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: row;
+
+    align-items: center;
+
+    gap: 9px;
+
+    box-sizing: border-box;
+
+    padding:
+        5px
+        7px;
+
+    border:
+        1px solid;
+
+    border-radius: 4px;
+
+    font-size: .65vw;
+
+    line-height: 1.3;
+
+    overflow-wrap: break-word;
+
+    word-break: normal;
+
+    color: #ffffff;
+
+}
+
+
+/*
+ * ALL-DAY EVENT ICON
+ */
+
+.large-calendar-widget__all-day-event
+.large-calendar-widget__event-icon {
+
+    flex-shrink: 0;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 28px;
+
+    min-width: 28px;
+
+    font-size: .7vw;
+
+    line-height: 1.3;
+
+    margin: 0;
+
+    color: #ffffff;
+
+}
+
+
+/*
+ * ALL-DAY EVENT TITLE
+ */
+
+.large-calendar-widget__all-day-event
+.large-calendar-widget__event-title {
+
+    flex: 1;
+
+    min-width: 0;
+
+    display: block;
+
+    text-align: left;
+
+    white-space: normal;
+
+    overflow-wrap: break-word;
+
+    word-break: normal;
+
+    font-size: .65vw;
+
+    line-height: 1.3;
+
+    margin: 0;
+
+    color: #ffffff;
+
+}
+
+
+/*
+ * TIMED EVENTS CONTAINER
+ */
+
+.large-calendar-widget__timed-events {
+
+    width: 100%;
+
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+}
+
+
+/*
+ * EVENT ROW
+ *
+ * ICON → TIME → TITLE
+ */
+
+.large-calendar-widget__event {
+
+    display: grid;
+
+    grid-template-columns:
+        26px
+        125px
+        minmax(0, 1fr);
+
+    column-gap: 12px;
+
+    align-items: start;
+
+    width: 100%;
+
+    min-width: 0;
+
+    box-sizing: border-box;
+
+    font-size: .7vw;
+
+    line-height: 1.35;
+
+    margin-bottom: 6px;
+
+}
+
+
+/*
+ * EVENT ICON
+ */
+
+.large-calendar-widget__event-icon {
+
+    grid-column: 1;
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: center;
+
+    width: 26px;
+
+    min-width: 26px;
+
+    height: 1.35em;
+
+    box-sizing: border-box;
+
+    text-align: center;
+
+    font-size: .7vw;
+
+    line-height: 1.35;
+
+    margin: 0;
+
+}
+
+
+/*
+ * EVENT TIME
+ *
+ * START ON FIRST LINE
+ * → END ON SECOND LINE
+ */
+
+.large-calendar-widget__event-time {
+
+    grid-column: 2;
+
+    display: flex;
+
+    flex-direction: column;
+
+    width: 125px;
+
+    min-width: 125px;
+
+    max-width: 125px;
+
+    box-sizing: border-box;
+
+    font-size: .65vw;
+
+    line-height: 1.35;
+
+    white-space: nowrap;
+
+    margin: 0;
+
+    color: #555555;
+
+}
+
+
+/*
+ * EVENT START TIME
+ */
+
+.large-calendar-widget__event-start {
+
+    display: block;
+
+    white-space: nowrap;
+
+    margin: 0;
+
+}
+
+
+/*
+ * EVENT END TIME
+ */
+
+.large-calendar-widget__event-end {
+
+    display: block;
+
+    white-space: nowrap;
+
+    font-size: .5vw;
+
+    line-height: 1.35;
+
+    color: #999999;
+
+    margin: 0;
+
+}
+
+
+/*
+ * EVENT CONTENT
+ *
+ * TITLE + LOCATION
+ */
+
+.large-calendar-widget__event-content {
+
+    grid-column: 3;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    min-width: 0;
+
+    width: 100%;
+
+    gap: 2px;
+
+}
+
+
+/*
+ * EVENT TITLE
+ */
+
+.large-calendar-widget__event-title {
+
+    min-width: 0;
+
+    max-width: 100%;
+
+    box-sizing: border-box;
+
+    font-size: .7vw;
+
+    line-height: 1.35;
+
+    white-space: normal;
+
+    overflow-wrap: break-word;
+
+    word-break: normal;
+
+    text-align: left;
+
+    margin: 0;
+
+    color: #222222;
+
+}
+
+
+/*
+ * EVENT LOCATION
+ */
+
+.large-calendar-widget__event-location {
+
+    min-width: 0;
+
+    max-width: 100%;
+
+    box-sizing: border-box;
+
+    font-size: .5vw;
+
+    line-height: 1.3;
+
+    white-space: normal;
+
+    overflow-wrap: break-word;
+
+    word-break: normal;
+
+    text-align: left;
+
+    margin: 0;
+
+    color: #999999;
+
+}

@@ -56,14 +56,18 @@ export async function registerWidgets() {
     await registerWidget(
         "weather-alerts",
         "../widgets/weather-alerts/weather-alerts.js"
-    )
+    );
+
+    await registerWidget(
+        "large-calendar",
+        "../widgets/large-calendar/large-calendar.js"
+    );
 
     /*
     await registerWidget(
         "photo",
         "../widgets/photo/photo.js"
-    )
+    );
     */
-
 
 }

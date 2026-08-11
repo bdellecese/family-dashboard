@@ -1,5 +1,13 @@
 export const CALENDARS = {
 
+    "family01156229611257150686@group.calendar.google.com": {
+
+        name: "Family",
+        icon: "fa-fw fas fa-home",
+        color: "#039be5"
+
+    },
+
     "barry.dellecese@gmail.com": {
 
         name: "Barry",
@@ -7,16 +15,6 @@ export const CALENDARS = {
         color: "#0b8043"
 
     },
-
-
-    "family01156229611257150686": {
-
-        name: "Family",
-        icon: "fa-fw fas fa-home-heart",
-        color: "#039be5"
-
-    },
-
 
     "natalie.dellecese@gmail.com": {
 
@@ -26,13 +24,72 @@ export const CALENDARS = {
 
     },
 
+    "james.dellecese@gmail.com": {
+
+        name: "James",
+        icon:"fa-fw fas fa-user-secret",
+        color: "rgb(63, 81, 181)"
+
+    },
+
+    "isabella.c.dellecese@gmail.com": {
+
+        name: "Isabella",
+        icon:"fa-fw fas fa-dog",
+        color: "rgb(228, 196, 65)"
+
+    },
+
+    "alexander.dellecese@gmail.com": {
+
+        name: "Zander",
+        icon:"fa-fw fas fa-hamburger",
+        color: "rgb(213, 0, 0)"
+
+    },
+
+    "theodore.dellecese@gmail.com": {
+
+        name: "Teddy",
+        icon:"fa-fw fas fa-paw",
+        color: "rgb(124, 179, 66)"
+
+    },
+
+    "m1tj3sivp5mmipt3f5a0d164cifunqm4@import.calendar.google.com": {
+        name: "Barry TripIt",
+        icon: "fa-fw fas fa-map-marked-alt",
+        color: "#0b8043"
+    },
 
     "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com": {
-
         name: "Natalie TSC",
-        icon:"fa-fw fas fa-user-shield",
+        icon: "fa-fw fas fa-user-shield",
         color: "#9e69af"
 
-    }  
+    },
+    
+    "878vjmvnrhp8soe4g89lmditinvg9tpm@import.calendar.google.com": {
+        name: "WU FC U10",
+        icon:"fa-fw fas fa-futbol",
+        color: "rgb(213, 0, 0)"
+    },
 
+    "kkpcjqa95gv87cn0ojj5oi7s6o3h6195@import.calendar.google.com": {
+        name: "WU FC U16",
+        icon:"fa-fw fas fa-futbol",
+        color: "rgb(63, 81, 181)"
+    },
+
+    "gvco5trj7a8eip611tr883v8jsbftad6@import.calendar.google.com": {
+        name: "WU Softball",
+        icon: "fa-fw fas fa-baseball",
+        color: "rgb(228, 196, 65)"
+    },
+
+    "en.usa#holiday@group.v.calendar.google.com": {
+        name: "US Holidays",
+        icon: "fa-fw fas fa-calendar-days", 
+        color: "rgb(167, 155, 142)"
+    }
 };

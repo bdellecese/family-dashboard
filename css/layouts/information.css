@@ -1,15 +1,3 @@
-#dashboard {
-    width:100vw;
-    height:100vh;
-
-    display:grid;
-
-    grid-template-columns: 1fr 2fr;
-
-    gap:10px;
-
-}
-
 .information-layout {
     display: grid;
     grid-template-columns: 1fr 2fr;

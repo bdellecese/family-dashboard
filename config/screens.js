@@ -1,19 +1,14 @@
 export const screenOrder = [
-    "information"
+    "calendar"
 ];
-
 
 export const screens = {
 
     information: {
 
         layout: "information-layout",
-
         theme: "dark",
-
-        duration: {
-            minutes: 20
-        },
+        duration: { minutes: 2 },
 
 
         regions: {
@@ -29,54 +24,34 @@ export const screens = {
 
                     config: {
 
-                        timezone:
-                            "America/New_York",
-
-                        color:
-                            "rgba(255, 255, 255, 0.85)",
-
+                        timezone: "America/New_York",
+                        color: "rgba(255, 255, 255, 0.85)",
 
                         time: {
 
                             format: "12h",
-
                             size: 72,
-
                             weight: "normal"
 
                         },
-
 
                         date: {
-
                             format:
                                 "weekday-month-day",
-
-                            size: 48,
-
-                            weight: "normal"
+                                size: 48,
+                                weight: "normal"
 
                         },
-
-
                         alignment: "left"
-
                     }
 
                 },
 
-
-                {
-                    name: "photo"
-                },
-
+                { name: "photo" },
 
                 {
                     name: "weather-alerts",
-
-                    config: {
-                        location: "Holden, MA"
-                    }
+                    config: { location: "Holden, MA"}
                 }
 
             ],
@@ -113,7 +88,7 @@ export const screens = {
                                 calendars: [
 
                                     "barry.dellecese@gmail.com",
-                                    "family01156229611257150686",
+                                    "family01156229611257150686@group.calendar.google.com",
                                     "natalie.dellecese@gmail.com",
                                     "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com"
 
@@ -279,6 +254,48 @@ export const screens = {
 
         }
 
+    },
+
+    calendar: {
+
+        layout: "large-calendar-layout",
+
+        theme: "dark",
+
+        duration: {
+            minutes: 5
+        },
+
+        regions: {
+
+            "calendar-main": [
+
+                {
+                    name: "large-calendar",
+
+                    config: {
+
+                        calendars: [
+                            "family01156229611257150686@group.calendar.google.com", /* Family */
+                            "barry.dellecese@gmail.com",
+                            "m1tj3sivp5mmipt3f5a0d164cifunqm4@import.calendar.google.com", /* Barry TripIt */
+                            "natalie.dellecese@gmail.com",
+                            "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com", /* Nat TSC */
+                            "james.dellecese@gmail.com",
+                            "kkpcjqa95gv87cn0ojj5oi7s6o3h6195@import.calendar.google.com", /* WU FC U16 */
+                            "isabella.c.dellecese@gmail.com",
+                            "gvco5trj7a8eip611tr883v8jsbftad6@import.calendar.google.com", /* WU Softball */
+                            "alexander.dellecese@gmail.com",
+                            "878vjmvnrhp8soe4g89lmditinvg9tpm@import.calendar.google.com", /* WU FC U10 */
+                            "theodore.dellecese@gmail.com",
+                            "en.usa#holiday@group.v.calendar.google.com" /* US Holidays */
+                        ],
+
+                        showCalendarName: false
+                    }
+                }
+            ]
+        }
     }
 
 };

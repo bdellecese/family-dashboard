@@ -39,18 +39,9 @@ export async function getCalendars() {
 
     if (cached) {
 
-        console.log(
-            "[CACHE HIT] google-calendar:calendars"
-        );
-
         return cached;
 
     }
-
-
-    console.log(
-        "[CACHE MISS] google-calendar:calendars"
-    );
 
 
     const accessToken =
@@ -144,18 +135,9 @@ export async function getEventsForRange(
 
     if (cached) {
 
-        console.log(
-            `[CACHE HIT] ${cacheKey}`
-        );
-
         return cached;
 
     }
-
-
-    console.log(
-        `[CACHE MISS] ${cacheKey}`
-    );
 
 
     const accessToken =

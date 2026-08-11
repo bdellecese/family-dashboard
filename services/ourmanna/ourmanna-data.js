@@ -27,18 +27,9 @@ export async function getDailyVerse() {
 
     if (cached) {
 
-        console.log(
-            `[CACHE HIT] ${CACHE_KEY}`
-        );
-
         return cached;
 
     }
-
-
-    console.log(
-        `[CACHE MISS] ${CACHE_KEY}`
-    );
 
 
     const response =
@@ -76,11 +67,6 @@ export async function getDailyVerse() {
     setCached(
         CACHE_KEY,
         verse
-    );
-
-
-    console.log(
-        `[CACHE SET] ${CACHE_KEY}`
     );
 
 
