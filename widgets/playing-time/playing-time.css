@@ -1,0 +1,185 @@
+/*
+ * ============================================================
+ * PLAYING TIME WIDGET
+ * ============================================================
+ */
+
+.playing-time-widget {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    position:
+        relative;
+
+    box-sizing:
+        border-box;
+
+    overflow:
+        hidden;
+
+    border-radius:
+        16px;
+
+    font-family:
+        "Roboto",
+        sans-serif;
+
+}
+
+
+/*
+ * ============================================================
+ * BACKGROUND
+ * ============================================================
+ */
+
+.playing-time-widget__background {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    background-size:
+        contain;
+
+    background-position:
+        center;
+
+    background-repeat:
+        no-repeat;
+
+    transform:
+        scale(1.02);
+
+}
+
+
+/*
+ * ============================================================
+ * OVERLAY
+ *
+ * Darkens the image so the saying remains readable.
+ * ============================================================
+ */
+
+.playing-time-widget__overlay {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    background:
+        rgba(0, 0, 0, 0.48);
+
+}
+
+
+/*
+ * ============================================================
+ * CONTENT
+ * ============================================================
+ */
+
+.playing-time-widget__content {
+
+    position:
+        relative;
+
+    z-index:
+        1;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    box-sizing:
+        border-box;
+
+    padding:
+        28px;
+
+}
+
+
+/*
+ * ============================================================
+ * SAYING
+ * ============================================================
+ */
+
+.playing-time-widget__saying {
+
+    width:
+        100%;
+
+    color:
+        #FFFFFF;
+
+    font-size:
+        1.35vw;
+
+    font-weight:
+        500;
+
+    line-height:
+        1.4;
+
+    text-align:
+        left;
+
+    text-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.75);
+
+}
+
+
+/*
+ * ============================================================
+ * RESPONSIVE TEXT
+ *
+ * Prevents the saying from becoming excessively large
+ * on very large displays.
+ * ============================================================
+ */
+
+@media (min-width: 1800px) {
+
+    .playing-time-widget__saying {
+
+        font-size:
+            1.25vw;
+
+    }
+
+}

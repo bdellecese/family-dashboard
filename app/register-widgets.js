@@ -98,6 +98,11 @@ export async function registerWidgets() {
         "../widgets/dad-wisdom/dad-wisdom.js"
     );
 
+        await registerWidget(
+        "playing-time",
+        "../widgets/playing-time/playing-time.js"
+    );
+
     /*
     await registerWidget(
         "photo",

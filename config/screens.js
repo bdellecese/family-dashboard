@@ -520,9 +520,24 @@ export const screens = {
             {
 
                 name:
-                    "placeholder"
+                    "playing-time"
 
-            }
+            },
+
+            {
+
+                name:
+                    "on-this-day"
+
+            },
+
+            {
+
+                name:
+                    "did-you-know"
+
+            },
+
 
         ],
 
