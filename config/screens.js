@@ -538,10 +538,23 @@ export const screens = {
             {
 
                 name:
-                    "placeholder"
+                    "word-of-day"
+
+            },
+
+            {
+
+                name:
+                    "quote-of-day"
+
+            },
+
+            {
+
+                name:
+                    "dad-wisdom"
 
             }
-
         ]
 
     }

@@ -83,6 +83,21 @@ export async function registerWidgets() {
         "../widgets/school-lunch/school-lunch.js"
     );
 
+    await registerWidget(
+        "word-of-day",
+        "../widgets/word-of-day/word-of-day.js"
+    );
+
+    await registerWidget(
+        "quote-of-day",
+        "../widgets/quote-of-day/quote-of-day.js"
+    );
+
+    await registerWidget(
+        "dad-wisdom",
+        "../widgets/dad-wisdom/dad-wisdom.js"
+    );
+
     /*
     await registerWidget(
         "photo",

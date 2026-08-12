@@ -1,0 +1,293 @@
+/*
+ * ============================================================
+ * WORD OF THE DAY WIDGET
+ * ============================================================
+ */
+
+.word-of-day-widget {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    box-sizing:
+        border-box;
+
+    padding:
+        14px 18px;
+
+    overflow:
+        hidden;
+
+    color:
+        #F0F4F8;
+
+    font-family:
+        "Roboto",
+        sans-serif;
+
+}
+
+
+/*
+ * ============================================================
+ * HEADER
+ * ============================================================
+ */
+
+.word-of-day-widget__header {
+
+    margin-bottom:
+        12px;
+
+}
+
+
+.word-of-day-widget__title {
+
+    font-size:
+        1vw;
+
+    font-weight:
+        300;
+
+    color:
+        #F0F4F8;
+
+}
+
+
+/*
+ * ============================================================
+ * CONTENT
+ * ============================================================
+ */
+
+.word-of-day-widget__content {
+
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    box-sizing:
+        border-box;
+
+}
+
+
+/*
+ * ============================================================
+ * WORD
+ * ============================================================
+ */
+
+.word-of-day-widget__word {
+
+    margin-bottom:
+        5px;
+
+    font-size:
+        2vw;
+
+    font-weight:
+        400;
+
+    line-height:
+        1.1;
+
+    color:
+        #FFFFFF;
+
+    word-break:
+        break-word;
+
+}
+
+
+/*
+ * ============================================================
+ * META
+ * ============================================================
+ */
+
+.word-of-day-widget__meta {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    margin-bottom:
+        10px;
+
+}
+
+
+/*
+ * ============================================================
+ * PRONUNCIATION
+ * ============================================================
+ */
+
+.word-of-day-widget__pronunciation {
+
+    font-size:
+        1vw;
+
+    font-weight:
+        300;
+
+    color:
+        #A3C1D9;
+
+}
+
+
+/*
+ * ============================================================
+ * PART OF SPEECH
+ * ============================================================
+ */
+
+.word-of-day-widget__part-of-speech {
+
+    font-size:
+        1vw;
+
+    font-style:
+        italic;
+
+    font-weight:
+        300;
+
+    color:
+        #7A8793;
+
+}
+
+
+/*
+ * ============================================================
+ * DEFINITION
+ * ============================================================
+ */
+
+.word-of-day-widget__definition {
+
+    font-size:
+        1vw;
+
+    font-weight:
+        300;
+
+    line-height:
+        1.4;
+
+    color:
+        #F0F4F8;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * SOURCE
+ * ============================================================
+ */
+
+.word-of-day-widget__source {
+
+    margin-top:
+        14px;
+
+    font-size:
+        .5vw;
+
+    font-weight:
+        300;
+
+    color:
+        #7A8793;
+
+}
+
+
+/*
+ * ============================================================
+ * MESSAGE
+ * ============================================================
+ */
+
+.word-of-day-widget__message {
+
+    font-size:
+        1vw;
+
+    font-weight:
+        300;
+
+    color:
+        #A3C1D9;
+
+}
+
+.word-of-day-widget__details {
+
+    display:
+        flex;
+
+    align-items:
+        baseline;
+
+    gap:
+        10px;
+
+    margin-bottom:
+        8px;
+
+}
+
+
+.word-of-day-widget__pronunciation {
+
+    font-size:
+        1vw;
+
+    font-weight:
+        400;
+
+    color:
+        #A3C1D9;
+
+}
+
+
+.word-of-day-widget__part-of-speech {
+
+    font-size:
+        1vw;
+
+    font-style:
+        italic;
+
+    color:
+        #A3C1D9;
+
+}
