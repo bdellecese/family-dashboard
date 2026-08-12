@@ -5,8 +5,8 @@
  */
 
 export const screenOrder = [
-    /*    "information",
-    "calendar",*/
+    "information",
+    "calendar",
     "chores-fun"
 ];
 
@@ -338,8 +338,8 @@ export const screens = {
 
         duration: {
 
-            minutes:
-                5
+            seconds:
+                90
 
         },
 
@@ -416,8 +416,8 @@ export const screens = {
 
     duration: {
 
-        minutes:
-            5
+        seconds:
+            90
 
     },
 
