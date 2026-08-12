@@ -1,15 +1,26 @@
 export const screenOrder = [
-    "calendar"
+/*    "information",
+    "calendar",*/
+    "chores-fun"
 ];
 
 export const screens = {
 
+    /*
+     * ============================================================
+     * INFORMATION
+     * ============================================================
+     */
+
     information: {
 
         layout: "information-layout",
-        theme: "dark",
-        duration: { minutes: 2 },
 
+        theme: "dark",
+
+        duration: {
+            minutes: 2
+        },
 
         regions: {
 
@@ -24,34 +35,53 @@ export const screens = {
 
                     config: {
 
-                        timezone: "America/New_York",
-                        color: "rgba(255, 255, 255, 0.85)",
+                        timezone:
+                            "America/New_York",
+
+                        color:
+                            "rgba(255, 255, 255, 0.85)",
 
                         time: {
 
                             format: "12h",
+
                             size: 72,
+
                             weight: "normal"
 
                         },
 
                         date: {
+
                             format:
                                 "weekday-month-day",
-                                size: 48,
-                                weight: "normal"
+
+                            size: 48,
+
+                            weight: "normal"
 
                         },
+
                         alignment: "left"
+
                     }
 
                 },
 
-                { name: "photo" },
+                {
+                    name: "photo"
+                },
 
                 {
                     name: "weather-alerts",
-                    config: { location: "Holden, MA"}
+
+                    config: {
+
+                        location:
+                            "Holden, MA"
+
+                    }
+
                 }
 
             ],
@@ -63,40 +93,37 @@ export const screens = {
 
             "right-panel": {
 
-
                 /*
                  * TOP RIGHT
                  */
 
                 "right-top": {
 
-
-                    /*
-                     * LEFT 1/3
-                     *
-                     * New calendar-list widget
-                     */
-
                     "calendar-list": [
 
                         {
 
-                            name: "calendar-list",
+                            name:
+                                "calendar-list",
 
                             config: {
 
                                 calendars: [
 
                                     "barry.dellecese@gmail.com",
+
                                     "family01156229611257150686@group.calendar.google.com",
+
                                     "natalie.dellecese@gmail.com",
+
                                     "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com"
 
                                 ],
 
                                 days: 7,
 
-                                showCalendarName: false
+                                showCalendarName:
+                                    false
 
                             }
 
@@ -105,47 +132,42 @@ export const screens = {
                     ],
 
 
-                    /*
-                     * RIGHT 2/3
-                     */
-
                     "right-top-content": {
-
-
-                        /*
-                         * TOP HALF
-                         *
-                         * Calendar + News
-                         */
 
                         "top-summary": [
 
                             {
-                                name: "calendar"
+                                name:
+                                    "calendar"
                             },
 
-
                             {
-                                name: "news",
+
+                                name:
+                                    "news",
+
                                 config: {
-                                    feed: "http://feeds.bbci.co.uk/news/world/rss.xml",
-                                    rotationSeconds: 30
+
+                                    feed:
+                                        "http://feeds.bbci.co.uk/news/world/rss.xml",
+
+                                    rotationSeconds:
+                                        30
+
                                 }
+
                             }
 
                         ],
 
 
-                        /*
-                         * BOTTOM HALF
-                         *
-                         * Countdown
-                         */
-
                         "countdown": [
 
                             {
-                                name: "countdown"
+
+                                name:
+                                    "countdown"
+
                             }
 
                         ]
@@ -161,17 +183,15 @@ export const screens = {
 
                 "right-bottom": {
 
-
-                    /*
-                     * PRAYER COLUMN
-                     */
-
                     "prayer-column": {
 
                         "prayer": [
 
                             {
-                                name: "prayer-list"
+
+                                name:
+                                    "prayer-list"
+
                             }
 
                         ],
@@ -181,7 +201,8 @@ export const screens = {
 
                             {
 
-                                name: "wifi",
+                                name:
+                                    "wifi",
 
                                 config: {
 
@@ -206,20 +227,19 @@ export const screens = {
                     },
 
 
-                    /*
-                     * WEATHER COLUMN
-                     */
-
                     "weather-column": {
 
                         "weather": [
 
                             {
-                                name: "weather",
+
+                                name:
+                                    "weather",
 
                                 config: {
 
-                                    location: "Holden, MA"
+                                    location:
+                                        "Holden, MA"
 
                                 }
 
@@ -227,23 +247,28 @@ export const screens = {
 
                         ],
 
+
                         "placeholder": [
+
                             {
-                                name: "placeholder"
+
+                                name:
+                                    "placeholder"
+
                             }
+
                         ]
 
                     },
 
 
-                    /*
-                     * MENU COLUMN
-                     */
-
                     "menu-column": [
 
                         {
-                            name: "family-menu"
+
+                            name:
+                                "family-menu"
+
                         }
 
                     ]
@@ -256,14 +281,25 @@ export const screens = {
 
     },
 
+
+    /*
+     * ============================================================
+     * LARGE CALENDAR
+     * ============================================================
+     */
+
     calendar: {
 
-        layout: "large-calendar-layout",
+        layout:
+            "large-calendar-layout",
 
-        theme: "dark",
+        theme:
+            "dark",
 
         duration: {
+
             minutes: 5
+
         },
 
         regions: {
@@ -271,31 +307,176 @@ export const screens = {
             "calendar-main": [
 
                 {
-                    name: "large-calendar",
+
+                    name:
+                        "large-calendar",
 
                     config: {
 
                         calendars: [
-                            "family01156229611257150686@group.calendar.google.com", /* Family */
+
+                            "family01156229611257150686@group.calendar.google.com",
+
                             "barry.dellecese@gmail.com",
-                            "m1tj3sivp5mmipt3f5a0d164cifunqm4@import.calendar.google.com", /* Barry TripIt */
+
+                            "m1tj3sivp5mmipt3f5a0d164cifunqm4@import.calendar.google.com",
+
                             "natalie.dellecese@gmail.com",
-                            "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com", /* Nat TSC */
+
+                            "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com",
+
                             "james.dellecese@gmail.com",
-                            "kkpcjqa95gv87cn0ojj5oi7s6o3h6195@import.calendar.google.com", /* WU FC U16 */
+
+                            "kkpcjqa95gv87cn0ojj5oi7s6o3h6195@import.calendar.google.com",
+
                             "isabella.c.dellecese@gmail.com",
-                            "gvco5trj7a8eip611tr883v8jsbftad6@import.calendar.google.com", /* WU Softball */
+
+                            "gvco5trj7a8eip611tr883v8jsbftad6@import.calendar.google.com",
+
                             "alexander.dellecese@gmail.com",
-                            "878vjmvnrhp8soe4g89lmditinvg9tpm@import.calendar.google.com", /* WU FC U10 */
+
+                            "878vjmvnrhp8soe4g89lmditinvg9tpm@import.calendar.google.com",
+
                             "theodore.dellecese@gmail.com",
-                            "en.usa#holiday@group.v.calendar.google.com" /* US Holidays */
+
+                            "en.usa#holiday@group.v.calendar.google.com"
+
                         ],
 
-                        showCalendarName: false
+                        showCalendarName:
+                            false
+
+                    }
+
+                }
+
+            ]
+
+        }
+
+    },
+
+
+    /*
+     * ============================================================
+     * CHORES + FUN
+     * ============================================================
+     */
+
+    "chores-fun": {
+
+        layout:
+            "chores-fun-layout",
+
+        theme:
+            "light",
+
+        duration: {
+
+            minutes: 5
+
+        },
+
+        regions: {
+
+            /*
+             * FULL-WIDTH BANNER
+             */
+
+            "screen-banner": [
+
+                {
+                    name: "text",
+                    config: {
+                        text: "Hard work before play at 28 Patriot Way"
                     }
                 }
+
+            ],
+
+
+            /*
+             * COLUMN 1
+             *
+             * Kids daily / weekly chores
+             */
+
+            "column-1": [
+                {
+                    name:
+                        "kids-chores"
+                }
+
+            ],
+
+
+            /*
+             * COLUMN 2
+             *
+             * Household chores + future content
+             */
+
+            "column-2": {
+
+                "household-chores": [
+
+                    {
+
+                        name:
+                            "household-chores"
+
+                    }
+
+                ],
+
+
+                "column-2-bottom": [
+
+                    {
+
+                        name:
+                            "placeholder"
+
+                    }
+
+                ]
+
+            },
+
+
+            /*
+             * COLUMN 3
+             */
+
+            "column-3": [
+
+                {
+
+                    name:
+                        "placeholder"
+
+                }
+
+            ],
+
+
+            /*
+             * COLUMN 4
+             */
+
+            "column-4": [
+
+                {
+
+                    name:
+                        "placeholder"
+
+                }
+
             ]
+
         }
+
     }
 
 };

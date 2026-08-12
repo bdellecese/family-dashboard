@@ -1,0 +1,243 @@
+/*
+ * ============================================================
+ * CHORES + FUN LAYOUT
+ * ============================================================
+ */
+
+.chores-fun-layout {
+
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    display: grid;
+
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: 100px minmax(0, 1fr);
+
+    gap: 12px;
+    padding: 12px;
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    background: #000000;
+}
+
+
+/*
+ * ============================================================
+ * BANNER
+ *
+ * Spans all four columns.
+ * ============================================================
+ */
+
+.chores-fun-layout
+.screen-banner {
+
+    grid-column:
+        1 / -1;
+
+    grid-row: 1;
+
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    box-sizing: border-box;
+
+    padding:
+        8px
+        20px;
+
+    color:#ffffff;
+
+    font-family: "Roboto",sans-serif;
+
+    font-size: 1.5vw;
+
+    font-weight: 300;
+
+    line-height: 1;
+
+    text-align: center;
+
+    border-radius: 10px;
+}
+
+
+/*
+ * ============================================================
+ * COLUMNS
+ * ============================================================
+ */
+
+.chores-fun-layout
+.column-1,
+
+.chores-fun-layout
+.column-2,
+
+.chores-fun-layout
+.column-3,
+
+.chores-fun-layout
+.column-4 {
+
+    grid-row:
+        2;
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+}
+
+
+/*
+ * ============================================================
+ * COLUMN 1
+ *
+ * Kids daily / weekly chores.
+ * ============================================================
+ */
+
+.chores-fun-layout
+.column-1 {
+
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    border-radius:
+        16px;
+
+    background-color:
+        rgb(19, 41, 75);
+
+    overflow: hidden;
+}
+
+
+/*
+ * ============================================================
+ * KIDS CHORES WIDGET
+ * ============================================================
+ */
+
+.chores-fun-layout
+.column-1
+.widget {
+
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    background:
+        transparent;
+}
+
+
+/*
+ * ============================================================
+ * COLUMN 2
+ *
+ * Household chores on top,
+ * placeholder below.
+ * ============================================================
+ */
+
+.chores-fun-layout
+.column-2 {
+
+    display: grid;
+
+    grid-template-rows:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+
+    gap:
+        12px;
+}
+
+
+/*
+ * ============================================================
+ * HOUSEHOLD CHORES
+ * ============================================================
+ */
+
+.chores-fun-layout
+.household-chores {
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+
+    background:
+        rgb(0, 0, 0);
+}
+
+
+/*
+ * ============================================================
+ * COLUMN 2 BOTTOM
+ * ============================================================
+ */
+
+.chores-fun-layout
+.column-2-bottom {
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+}
+
+
+/*
+ * ============================================================
+ * COLUMN 3
+ * ============================================================
+ */
+
+.chores-fun-layout
+.column-3 {
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+}
+
+
+/*
+ * ============================================================
+ * COLUMN 4
+ * ============================================================
+ */
+
+.chores-fun-layout
+.column-4 {
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+}

@@ -63,6 +63,22 @@ export async function registerWidgets() {
         "../widgets/large-calendar/large-calendar.js"
     );
 
+    await registerWidget(
+        "kids-chores",
+        "../widgets/kids-chores/kids-chores.js"
+    );
+
+        await registerWidget(
+        "text",
+        "../widgets/text/text.js"
+    );
+
+
+    await registerWidget(
+        "household-chores",
+        "../widgets/household-chores/household-chores.js"
+    );
+
     /*
     await registerWidget(
         "photo",
