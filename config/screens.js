@@ -1,10 +1,18 @@
+/*
+ * ============================================================
+ * SCREEN CONFIGURATION
+ * ============================================================
+ */
+
 export const screenOrder = [
-/*    "information",
+    /*    "information",
     "calendar",*/
     "chores-fun"
 ];
 
+
 export const screens = {
+
 
     /*
      * ============================================================
@@ -14,15 +22,22 @@ export const screens = {
 
     information: {
 
-        layout: "information-layout",
+        layout:
+            "information-layout",
 
-        theme: "dark",
+        theme:
+            "dark",
 
         duration: {
-            minutes: 2
+
+            minutes:
+                2
+
         },
 
+
         regions: {
+
 
             /*
              * LEFT PANEL
@@ -31,7 +46,9 @@ export const screens = {
             "left-panel": [
 
                 {
-                    name: "date-time",
+
+                    name:
+                        "date-time",
 
                     config: {
 
@@ -43,11 +60,14 @@ export const screens = {
 
                         time: {
 
-                            format: "12h",
+                            format:
+                                "12h",
 
-                            size: 72,
+                            size:
+                                72,
 
-                            weight: "normal"
+                            weight:
+                                "normal"
 
                         },
 
@@ -56,24 +76,34 @@ export const screens = {
                             format:
                                 "weekday-month-day",
 
-                            size: 48,
+                            size:
+                                48,
 
-                            weight: "normal"
+                            weight:
+                                "normal"
 
                         },
 
-                        alignment: "left"
+                        alignment:
+                            "left"
 
                     }
 
                 },
 
-                {
-                    name: "photo"
-                },
 
                 {
-                    name: "weather-alerts",
+
+                    name:
+                        "photo"
+
+                },
+
+
+                {
+
+                    name:
+                        "weather-alerts",
 
                     config: {
 
@@ -93,11 +123,13 @@ export const screens = {
 
             "right-panel": {
 
+
                 /*
                  * TOP RIGHT
                  */
 
                 "right-top": {
+
 
                     "calendar-list": [
 
@@ -120,7 +152,8 @@ export const screens = {
 
                                 ],
 
-                                days: 7,
+                                days:
+                                    7,
 
                                 showCalendarName:
                                     false
@@ -134,12 +167,16 @@ export const screens = {
 
                     "right-top-content": {
 
+
                         "top-summary": [
 
                             {
+
                                 name:
                                     "calendar"
+
                             },
+
 
                             {
 
@@ -183,7 +220,9 @@ export const screens = {
 
                 "right-bottom": {
 
+
                     "prayer-column": {
+
 
                         "prayer": [
 
@@ -228,6 +267,7 @@ export const screens = {
 
 
                     "weather-column": {
+
 
                         "weather": [
 
@@ -298,11 +338,14 @@ export const screens = {
 
         duration: {
 
-            minutes: 5
+            minutes:
+                5
 
         },
 
+
         regions: {
+
 
             "calendar-main": [
 
@@ -357,126 +400,152 @@ export const screens = {
     },
 
 
-    /*
-     * ============================================================
-     * CHORES + FUN
-     * ============================================================
-     */
+/*
+ * ============================================================
+ * CHORES + FUN
+ * ============================================================
+ */
 
-    "chores-fun": {
+"chores-fun": {
 
-        layout:
-            "chores-fun-layout",
+    layout:
+        "chores-fun-layout",
 
-        theme:
-            "light",
+    theme:
+        "light",
 
-        duration: {
+    duration: {
 
-            minutes: 5
+        minutes:
+            5
 
-        },
+    },
 
-        regions: {
-
-            /*
-             * FULL-WIDTH BANNER
-             */
-
-            "screen-banner": [
-
-                {
-                    name: "text",
-                    config: {
-                        text: "Hard work before play at 28 Patriot Way"
-                    }
-                }
-
-            ],
+    regions: {
 
 
-            /*
-             * COLUMN 1
-             *
-             * Kids daily / weekly chores
-             */
+        /*
+         * ====================================================
+         * FULL-WIDTH BANNER
+         * ====================================================
+         */
 
-            "column-1": [
-                {
-                    name:
-                        "kids-chores"
-                }
+        "screen-banner": [
 
-            ],
+            {
 
+                name:
+                    "text",
 
-            /*
-             * COLUMN 2
-             *
-             * Household chores + future content
-             */
+                config: {
 
-            "column-2": {
-
-                "household-chores": [
-
-                    {
-
-                        name:
-                            "household-chores"
-
-                    }
-
-                ],
-
-
-                "column-2-bottom": [
-
-                    {
-
-                        name:
-                            "placeholder"
-
-                    }
-
-                ]
-
-            },
-
-
-            /*
-             * COLUMN 3
-             */
-
-            "column-3": [
-
-                {
-
-                    name:
-                        "placeholder"
+                    text:
+                        "Hard work before play at 28 Patriot Way"
 
                 }
 
-            ],
+            }
+
+        ],
 
 
-            /*
-             * COLUMN 4
-             */
+        /*
+         * ====================================================
+         * COLUMN 1
+         *
+         * Kids chores
+         * ====================================================
+         */
 
-            "column-4": [
+        "column-1": [
 
-                {
+            {
 
-                    name:
-                        "placeholder"
+                name:
+                    "kids-chores"
 
-                }
+            }
 
-            ]
+        ],
 
-        }
+
+        /*
+         * ====================================================
+         * COLUMN 2
+         *
+         * Household chores
+         * ====================================================
+         */
+
+        "column-2": [
+
+            {
+
+                name:
+                    "household-chores"
+
+            }
+
+        ],
+
+
+        /*
+         * ====================================================
+         * SCHOOL LUNCH
+         *
+         * Spans columns 1 + 2
+         * ====================================================
+         */
+
+        "school-lunch": [
+
+            {
+
+                name:
+                    "school-lunch"
+
+            }
+
+        ],
+
+
+        /*
+         * ====================================================
+         * COLUMN 3
+         * ====================================================
+         */
+
+        "column-3": [
+
+            {
+
+                name:
+                    "placeholder"
+
+            }
+
+        ],
+
+
+        /*
+         * ====================================================
+         * COLUMN 4
+         * ====================================================
+         */
+
+        "column-4": [
+
+            {
+
+                name:
+                    "placeholder"
+
+            }
+
+        ]
 
     }
+
+}
 
 };

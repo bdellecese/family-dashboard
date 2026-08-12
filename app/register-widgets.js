@@ -73,10 +73,14 @@ export async function registerWidgets() {
         "../widgets/text/text.js"
     );
 
-
     await registerWidget(
         "household-chores",
         "../widgets/household-chores/household-chores.js"
+    );
+
+    await registerWidget(
+        "school-lunch",
+        "../widgets/school-lunch/school-lunch.js"
     );
 
     /*
