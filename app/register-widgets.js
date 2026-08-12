@@ -98,10 +98,21 @@ export async function registerWidgets() {
         "../widgets/dad-wisdom/dad-wisdom.js"
     );
 
-        await registerWidget(
+    await registerWidget(
         "playing-time",
         "../widgets/playing-time/playing-time.js"
     );
+
+    await registerWidget(
+        "on-this-day",
+        "../widgets/on-this-day/on-this-day.js"
+    );
+
+    await registerWidget(
+        "did-you-know",
+        "../widgets/did-you-know/did-you-know.js"
+    );
+
 
     /*
     await registerWidget(
