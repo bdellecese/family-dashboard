@@ -255,7 +255,8 @@ background-colorrgb(139, 64, 0)
 .calendar-list {
     min-width: 0;
     min-height: 0;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .weather-column {
