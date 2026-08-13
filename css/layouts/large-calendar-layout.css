@@ -41,12 +41,7 @@
     min-width: 0;
     min-height: 0;
 
-    overflow-y: auto;
-    overflow-x: hidden;
-
-    touch-action: pan-y;
-    user-select: none;
-
+    overflow: hidden;
 }
 
 
