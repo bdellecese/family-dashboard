@@ -1,140 +1,109 @@
-import {
-    GOOGLE_CALENDAR_CONFIG
-} from "../../config/config.js";
+// ============================================================
+// GOOGLE CALENDAR CLIENT AUTH
+//
+// Google OAuth is handled by the Node server.
+// The browser does NOT perform Google authentication directly.
+// ============================================================
 
+const API_BASE = "";
 
-const CALENDAR_SCOPE =
-    "https://www.googleapis.com/auth/calendar.readonly";
+// ============================================================
+// GET CALENDARS
+// ============================================================
 
+export async function getCalendars() {
 
-let tokenClient = null;
-
-let accessToken = null;
-
-
-function initializeTokenClient() {
-
-    if (
-        typeof google === "undefined" ||
-        !google.accounts ||
-        !google.accounts.oauth2
-    ) {
-
-        throw new Error(
-            "Google Identity Services not loaded."
+    const response =
+        await fetch(
+            `${API_BASE}/api/google-calendar/calendars`
         );
 
+    if (!response.ok) {
+
+        const body =
+            await response.text();
+
+        throw new Error(
+            `Google Calendar calendars API error: ${response.status} ${body}`
+        );
     }
 
+    return await response.json();
+}
 
-    tokenClient =
-        google.accounts.oauth2.initTokenClient({
+// ============================================================
+// GET EVENTS
+// ============================================================
 
-            client_id:
-                GOOGLE_CALENDAR_CONFIG.clientId,
+export async function getEventsForRange(
+    calendarId,
+    start,
+    end
+) {
 
-            scope:
-                CALENDAR_SCOPE,
+    const params =
+        new URLSearchParams({
 
-            callback: (
-                response
-            ) => {
+            calendarId:
+                calendarId,
 
-                if (
-                    response.error
-                ) {
+            start:
+                start.toISOString(),
 
-                    console.error(
-                        "Google Calendar authorization failed:",
-                        response
-                    );
-
-                    return;
-
-                }
-
-
-                accessToken =
-                    response.access_token;
-
-            }
+            end:
+                end.toISOString()
 
         });
 
-}
+    const response =
+        await fetch(
+            `${API_BASE}/api/google-calendar/events?${params}`
+        );
 
+    if (!response.ok) {
 
-export function signInToGoogle() {
+        const body =
+            await response.text();
 
-    if (!tokenClient) {
-
-        initializeTokenClient();
-
+        throw new Error(
+            `Google Calendar events API error: ${response.status} ${body}`
+        );
     }
 
-
-    return new Promise(
-        (
-            resolve,
-            reject
-        ) => {
-
-            tokenClient.callback =
-                (
-                    response
-                ) => {
-
-                    if (
-                        response.error
-                    ) {
-
-                        reject(
-                            response
-                        );
-
-                        return;
-
-                    }
-
-
-                    accessToken =
-                        response.access_token;
-
-
-                    resolve(
-                        accessToken
-                    );
-
-                };
-
-
-            tokenClient.requestAccessToken();
-
-        }
-    );
-
+    return await response.json();
 }
 
+// ============================================================
+// AUTH
+//
+// Kept for compatibility with existing imports.
+// The server handles authentication.
+// ============================================================
+
+export async function signInToGoogle() {
+
+    const response =
+        await fetch(
+            `${API_BASE}/api/google-calendar/status`
+        );
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Unable to contact Google Calendar server."
+        );
+    }
+
+    return await response.json();
+}
 
 export async function getAccessToken() {
 
-    if (
-        accessToken
-    ) {
-
-        return accessToken;
-
-    }
-
-
-    return await signInToGoogle();
-
+    return null;
 }
-
 
 export function clearAccessToken() {
 
-    accessToken =
-        null;
-
+    // Authentication is maintained by the server.
+    return;
 }
