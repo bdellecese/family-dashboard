@@ -8,3 +8,4 @@ node_modules/
 config/todoist.js
 
 config/google-calendar.js
+config/google-calendar-token.json
