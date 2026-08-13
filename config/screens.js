@@ -30,8 +30,8 @@ export const screens = {
 
         duration: {
 
-            seconds:
-                10
+            minutes:
+                2
 
         },
 
@@ -339,7 +339,7 @@ export const screens = {
         duration: {
 
             seconds:
-                10
+                90
 
         },
 
@@ -417,7 +417,7 @@ export const screens = {
     duration: {
 
         seconds:
-            10
+            90
 
     },
 
