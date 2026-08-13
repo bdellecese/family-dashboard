@@ -7,18 +7,18 @@
  *
  * Features:
  *
- *   - Sorted by due date
- *   - Tasks without due dates appear last
- *   - Friendly due-date display
- *   - "Today" and "Tomorrow" labels
- *   - Day-of-week labels for upcoming tasks
- *   - "Overdue" for past-due tasks
- *   - "No due date" for undated tasks
- *   - Recurring indicator inside due-date pill
- *   - Displays assignee when available
- *   - Interactive completion checkbox
- *   - Vertical scrolling for long task lists
- *   - Automatically refreshes every 5 minutes
+ *  - Sorted by due date
+ *  - Tasks without due dates appear last
+ *  - Friendly due-date display
+ *  - "Today" and "Tomorrow" labels
+ *  - Day-of-week labels for upcoming tasks
+ *  - "Overdue" for past-due tasks
+ *  - "No due date" for undated tasks
+ *  - Recurring indicator inside due-date pill
+ *  - Displays assignee when available
+ *  - Interactive completion checkbox
+ *  - Vertical scrolling for long task lists
+ *  - Automatically refreshes every 5 minutes
  *
  * ============================================================
  */
@@ -136,12 +136,12 @@ const householdChores = {
 
 
             /*
-             * ====================================================
+             * =================================================
              * SORT TASKS
              *
              * Tasks with due dates are sorted chronologically.
              * Tasks without due dates appear at the bottom.
-             * ====================================================
+             * =================================================
              */
 
             tasks.sort(
@@ -185,8 +185,9 @@ const householdChores = {
 
 
             /*
-             * Clear the existing task list before
-             * rendering the refreshed data.
+             * =================================================
+             * CLEAR THE EXISTING TASK LIST
+             * =================================================
              */
 
             list.innerHTML =
@@ -194,9 +195,9 @@ const householdChores = {
 
 
             /*
-             * ====================================================
+             * =================================================
              * EMPTY STATE
-             * ====================================================
+             * =================================================
              */
 
             if (
@@ -222,9 +223,9 @@ const householdChores = {
 
 
             /*
-             * ====================================================
+             * =================================================
              * TASKS
-             * ====================================================
+             * =================================================
              */
 
             tasks.forEach(
@@ -255,23 +256,24 @@ const householdChores = {
          * ====================================================
          * FIVE-MINUTE REFRESH
          *
-         * Store the interval on the widget itself so that
-         * repeated renders do not create multiple timers.
+         * Store the interval on the container so that the
+         * screen manager can properly clear it when the
+         * widget is destroyed.
          * ====================================================
          */
 
         if (
-            widget._refreshInterval
+            container._householdChoresRefreshInterval
         ) {
 
             clearInterval(
-                widget._refreshInterval
+                container._householdChoresRefreshInterval
             );
 
         }
 
 
-        widget._refreshInterval =
+        container._householdChoresRefreshInterval =
             setInterval(
                 renderTasks,
                 5 * 60 * 1000
@@ -287,6 +289,37 @@ const householdChores = {
         container.appendChild(
             widget
         );
+
+    },
+
+
+    /*
+     * ========================================================
+     * DESTROY
+     *
+     * Called by screen-manager.js when the screen is removed.
+     *
+     * Clears the refresh interval so repeated screen rotations
+     * do not create multiple Todoist polling timers.
+     * ========================================================
+     */
+
+    async destroy(
+        container
+    ) {
+
+        if (
+            container._householdChoresRefreshInterval
+        ) {
+
+            clearInterval(
+                container._householdChoresRefreshInterval
+            );
+
+            container._householdChoresRefreshInterval =
+                null;
+
+        }
 
     }
 
@@ -566,7 +599,7 @@ function createTask(
      * ========================================================
      * TASK TITLE
      * ========================================================
-     */
+ */
 
     const title =
         document.createElement("span");
