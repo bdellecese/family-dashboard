@@ -7,7 +7,7 @@ import { URL } from "url";
 
 import { TODOIST } from "../config/todoist.js";
 
-const HOST = "127.0.0.1";
+const HOST = "0.0.0.0";
 const PORT = 3000;
 
 
