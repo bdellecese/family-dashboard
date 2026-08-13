@@ -45,6 +45,7 @@
     overflow-x: hidden;
 
     touch-action: pan-y;
+    user-select: none;
 
 }
 
