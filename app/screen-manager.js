@@ -8,6 +8,7 @@ import {
     destroyWidget
 } from "./widget-loader.js";
 
+
 let activeWidgets = [];
 
 async function buildRegion(
@@ -165,6 +166,8 @@ export async function loadScreen(
         );
 
     }
+
+    initializeTouchScrolling(dashboard);
 
 }
 

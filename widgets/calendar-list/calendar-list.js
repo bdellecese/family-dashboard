@@ -7,6 +7,10 @@ import {
     getEventsForRange
 } from "../../services/google-calendar/calendar-data.js";
 
+import {
+    enableTouchScroll
+} from "../../services/ui/touch-scroll.js";
+
 
 const calendarList = {
 
@@ -28,6 +32,15 @@ const calendarList = {
             "calendar-list-widget";
 
         container.appendChild(
+            wrapper
+        );
+
+
+        /*
+         * ENABLE TOUCH SCROLLING
+         */
+
+        enableTouchScroll(
             wrapper
         );
 
