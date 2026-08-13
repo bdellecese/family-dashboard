@@ -1,4 +1,8 @@
-import { GOOGLE_CALENDAR_CONFIG } from "../../config/config.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+import { GOOGLE_CALENDAR } from "../../config/google-calendar.js";
 
 const CALENDAR_API =
     "https://www.googleapis.com/calendar/v3";
@@ -6,24 +10,111 @@ const CALENDAR_API =
 const CALENDAR_SCOPE =
     "https://www.googleapis.com/auth/calendar.readonly";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const TOKEN_FILE =
+    path.resolve(__dirname, "../../config/google-calendar-token.json");
+
 let accessToken = null;
 let accessTokenExpiresAt = 0;
+let refreshToken = null;
+
+// ============================================================
+// TOKEN STORAGE
+// ============================================================
+
+function loadRefreshToken() {
+
+    try {
+
+        if (!fs.existsSync(TOKEN_FILE)) {
+            return null;
+        }
+
+        const data =
+            JSON.parse(
+                fs.readFileSync(
+                    TOKEN_FILE,
+                    "utf8"
+                )
+            );
+
+        return data.refresh_token || null;
+
+    } catch (error) {
+
+        console.error(
+            "Failed to load Google Calendar token:",
+            error
+        );
+
+        return null;
+    }
+}
+
+function saveRefreshToken(
+    token
+) {
+
+    fs.writeFileSync(
+        TOKEN_FILE,
+        JSON.stringify(
+            {
+                refresh_token: token
+            },
+            null,
+            2
+        ),
+        {
+            mode: 0o600
+        }
+    );
+
+    refreshToken =
+        token;
+}
+
+refreshToken =
+    loadRefreshToken();
+
+// ============================================================
+// GOOGLE OAUTH AUTH URL
+// ============================================================
 
 export function getGoogleCalendarAuthUrl() {
-    const params = new URLSearchParams({
-        client_id: GOOGLE_CALENDAR_CONFIG.clientId,
-        redirect_uri: GOOGLE_CALENDAR_CONFIG.redirectUri,
-        response_type: "code",
-        scope: CALENDAR_SCOPE,
-        access_type: "offline",
-        prompt: "consent"
-    });
+
+    const params =
+        new URLSearchParams({
+
+            client_id:
+                GOOGLE_CALENDAR.clientId,
+
+            redirect_uri:
+                GOOGLE_CALENDAR.redirectUri,
+
+            response_type:
+                "code",
+
+            scope:
+                CALENDAR_SCOPE,
+
+            access_type:
+                "offline",
+
+            prompt:
+                "consent"
+        });
 
     return (
         "https://accounts.google.com/o/oauth2/v2/auth?" +
         params.toString()
     );
 }
+
+// ============================================================
+// EXCHANGE AUTHORIZATION CODE
+// ============================================================
 
 export async function exchangeGoogleCode(
     code
@@ -42,13 +133,18 @@ export async function exchangeGoogleCode(
 
                 body:
                     new URLSearchParams({
+
                         code,
+
                         client_id:
-                            GOOGLE_CALENDAR_CONFIG.clientId,
+                            GOOGLE_CALENDAR.clientId,
+
                         client_secret:
-                            GOOGLE_CALENDAR_CONFIG.clientSecret,
+                            GOOGLE_CALENDAR.clientSecret,
+
                         redirect_uri:
-                            GOOGLE_CALENDAR_CONFIG.redirectUri,
+                            GOOGLE_CALENDAR.redirectUri,
+
                         grant_type:
                             "authorization_code"
                     })
@@ -72,8 +168,89 @@ export async function exchangeGoogleCode(
         Date.now() +
         ((data.expires_in || 3600) * 1000);
 
+    if (
+        data.refresh_token
+    ) {
+
+        saveRefreshToken(
+            data.refresh_token
+        );
+
+        console.log(
+            "Google Calendar refresh token saved."
+        );
+    }
+
     return data;
 }
+
+// ============================================================
+// REFRESH ACCESS TOKEN
+// ============================================================
+
+async function refreshGoogleAccessToken() {
+
+    if (
+        !refreshToken
+    ) {
+
+        throw new Error(
+            "Google Calendar is not authorized. Complete the Google authorization flow first."
+        );
+    }
+
+    const response =
+        await fetch(
+            "https://oauth2.googleapis.com/token",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/x-www-form-urlencoded"
+                },
+
+                body:
+                    new URLSearchParams({
+
+                        client_id:
+                            GOOGLE_CALENDAR.clientId,
+
+                        client_secret:
+                            GOOGLE_CALENDAR.clientSecret,
+
+                        refresh_token:
+                            refreshToken,
+
+                        grant_type:
+                            "refresh_token"
+                    })
+            }
+        );
+
+    const data =
+        await response.json();
+
+    if (!response.ok) {
+
+        throw new Error(
+            `Google OAuth token refresh failed: ${response.status} ${JSON.stringify(data)}`
+        );
+    }
+
+    accessToken =
+        data.access_token;
+
+    accessTokenExpiresAt =
+        Date.now() +
+        ((data.expires_in || 3600) * 1000);
+
+    return accessToken;
+}
+
+// ============================================================
+// GET ACCESS TOKEN
+// ============================================================
 
 export async function getGoogleCalendarAccessToken() {
 
@@ -86,10 +263,12 @@ export async function getGoogleCalendarAccessToken() {
         return accessToken;
     }
 
-    throw new Error(
-        "Google Calendar is not authorized. Complete the Google authorization flow first."
-    );
+    return await refreshGoogleAccessToken();
 }
+
+// ============================================================
+// GET CALENDARS
+// ============================================================
 
 export async function getCalendars() {
 
@@ -121,6 +300,7 @@ export async function getCalendars() {
         data.items || []
     ).map(
         calendar => ({
+
             id:
                 calendar.id,
 
@@ -145,6 +325,10 @@ export async function getCalendars() {
     );
 }
 
+// ============================================================
+// GET EVENTS
+// ============================================================
+
 export async function getEventsForRange(
     calendarId,
     start,
@@ -156,6 +340,7 @@ export async function getEventsForRange(
 
     const params =
         new URLSearchParams({
+
             timeMin:
                 start.toISOString(),
 
