@@ -28,7 +28,7 @@ const todoistData = {
 
         const response =
             await fetch(
-                "http://127.0.0.1:3000/api/todoist/tasks"
+                "/api/todoist/tasks"
             );
 
 
@@ -78,7 +78,7 @@ const todoistData = {
 
         const response =
             await fetch(
-                `http://127.0.0.1:3000/api/todoist/tasks/${encodeURIComponent(taskId)}/complete`,
+                `/api/todoist/tasks/${encodeURIComponent(taskId)}/complete`,
                 {
 
                     method:
