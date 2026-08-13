@@ -6,3 +6,5 @@ node_modules/
 
 # Local secrets / credentials
 config/todoist.js
+
+config/google-calendar.js

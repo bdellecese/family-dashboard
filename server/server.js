@@ -7,7 +7,15 @@ import { URL } from "url";
 
 import { TODOIST } from "../config/todoist.js";
 
+import {
+    getGoogleCalendarAuthUrl,
+    exchangeGoogleCode,
+    getCalendars,
+    getEventsForRange
+} from "../services/google-calendar/google-calendar-server.js";
+
 const HOST = "0.0.0.0";
+
 const PORT = 3000;
 
 
@@ -615,6 +623,136 @@ const server =
                         status: "ok"
                     })
                 );
+
+
+                return;
+            }
+
+
+            // ------------------------------------------------
+            // GOOGLE CALENDAR OAUTH
+            // ------------------------------------------------
+
+            if (
+                requestUrl.pathname ===
+                    "/api/google-calendar/auth"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                const authUrl =
+                    getGoogleCalendarAuthUrl();
+
+                response.writeHead(
+                    302,
+                    {
+                        Location:
+                            authUrl
+                    }
+                );
+
+                response.end();
+
+                return;
+            }
+
+
+            // ------------------------------------------------
+            // GOOGLE CALENDAR OAUTH CALLBACK
+            // ------------------------------------------------
+
+            if (
+                requestUrl.pathname ===
+                    "/api/google-calendar/callback"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                try {
+
+                    const code =
+                        requestUrl
+                            .searchParams
+                            .get("code");
+
+                    const error =
+                        requestUrl
+                            .searchParams
+                            .get("error");
+
+
+                    if (error) {
+
+                        throw new Error(
+                            `Google OAuth authorization failed: ${error}`
+                        );
+
+                    }
+
+
+                    if (!code) {
+
+                        throw new Error(
+                            "Google OAuth callback did not contain an authorization code."
+                        );
+
+                    }
+
+
+                    await exchangeGoogleCode(
+                        code
+                    );
+
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "text/html; charset=utf-8"
+                        }
+                    );
+
+
+                    response.end(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Google Calendar Authorized</title>
+            </head>
+            <body>
+                <h1>Google Calendar authorized</h1>
+                <p>You can close this window and return to the Family Dashboard.</p>
+            </body>
+            </html>
+                    `);
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Google Calendar OAuth error:",
+                        error
+                    );
+
+
+                    response.writeHead(
+                        500,
+                        {
+                            "Content-Type":
+                                "text/plain; charset=utf-8"
+                        }
+                    );
+
+
+                    response.end(
+                        `Google Calendar authorization failed:\n\n${error.message}`
+                    );
+
+                }
 
 
                 return;
