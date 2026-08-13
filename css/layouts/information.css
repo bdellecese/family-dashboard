@@ -257,6 +257,8 @@ background-colorrgb(139, 64, 0)
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
+
+    touch-action: pan-y;
 }
 
 .weather-column {
