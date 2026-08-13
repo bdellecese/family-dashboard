@@ -17,6 +17,7 @@ export function enableTouchScroll(
     function onPointerDown(event) {
 
         if (
+            event.pointerType !== "mouse" &&
             event.pointerType !== "touch" &&
             event.pointerType !== "pen"
         ) {
