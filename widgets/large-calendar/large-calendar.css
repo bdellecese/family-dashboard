@@ -633,7 +633,7 @@
 
     grid-template-columns:
         26px
-        125px
+        85px
         minmax(0, 1fr);
 
     column-gap: 6px;
@@ -703,11 +703,9 @@
 
     flex-direction: column;
 
-    width: 125px;
-
-    min-width: 125px;
-
-    max-width: 125px;
+    width: 85px;
+    min-width: 85px;
+    max-width: 85px;
 
     box-sizing: border-box;
 
