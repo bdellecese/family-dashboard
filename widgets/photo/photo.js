@@ -1,6 +1,16 @@
-import icloudPhotoData
-    from "../../services/photos/icloud-photo-data.js";
+const DEFAULT_ALBUM_URL =
+    "https://www.icloud.com/sharedalbum/#B0k5yeZFhGG13uA";
 
+const DEFAULT_ROTATION_INTERVAL =
+    30;
+
+const DEFAULT_BATCH_COUNT =
+    100;
+
+
+// ============================================================
+// PHOTO WIDGET
+// ============================================================
 
 const photo = {
 
@@ -15,23 +25,32 @@ const photo = {
         container.innerHTML = "";
 
 
-        /*
-         * CONFIGURATION
-         */
+        // ====================================================
+        // CONFIGURATION
+        // ====================================================
 
         const albumUrl =
             config.albumUrl ||
-            "https://www.icloud.com/sharedalbum/#B0k5yeZFhGG13uA";
+            DEFAULT_ALBUM_URL;
+
 
         const interval =
             Number(
-                config.interval || 30
+                config.interval ||
+                DEFAULT_ROTATION_INTERVAL
             );
 
 
-        /*
-         * WRAPPER
-         */
+        const batchCount =
+            Number(
+                config.batchCount ||
+                DEFAULT_BATCH_COUNT
+            );
+
+
+        // ====================================================
+        // WRAPPER
+        // ====================================================
 
         const wrapper =
             document.createElement("div");
@@ -44,17 +63,18 @@ const photo = {
         );
 
 
-        /*
-         * LOAD PHOTOS
-         */
+        // ====================================================
+        // LOAD INITIAL PHOTO BATCH
+        // ====================================================
 
         let photos;
 
         try {
 
             photos =
-                await icloudPhotoData.getPhotos(
-                    albumUrl
+                await loadPhotos(
+                    albumUrl,
+                    batchCount
                 );
 
         }
@@ -66,61 +86,48 @@ const photo = {
                 error
             );
 
-            const message =
-                document.createElement("div");
 
-            message.className =
-                "photo-widget__error";
-
-            message.textContent =
-                "Unable to load photos";
-
-            wrapper.appendChild(
-                message
+            showError(
+                wrapper,
+                "Unable to load photos"
             );
 
             return;
+
         }
 
 
-        /*
-         * NO PHOTOS
-         */
+        // ====================================================
+        // NO PHOTOS
+        // ====================================================
 
         if (
             !photos ||
             photos.length === 0
         ) {
 
-            const message =
-                document.createElement("div");
-
-            message.className =
-                "photo-widget__error";
-
-            message.textContent =
-                "No photos found";
-
-            wrapper.appendChild(
-                message
+            showError(
+                wrapper,
+                "No photos found"
             );
 
             return;
+
         }
 
 
-        /*
-         * RANDOMIZE
-         */
+        // ====================================================
+        // RANDOMIZE BATCH
+        // ====================================================
 
         shuffle(
             photos
         );
 
 
-        /*
-         * CREATE TWO IMAGE LAYERS
-         */
+        // ====================================================
+        // CREATE IMAGE LAYERS
+        // ====================================================
 
         const imageA =
             createImage(
@@ -156,9 +163,9 @@ const photo = {
         );
 
 
-        /*
-         * CAPTION
-         */
+        // ====================================================
+        // CAPTION
+        // ====================================================
 
         const caption =
             document.createElement("div");
@@ -167,16 +174,17 @@ const photo = {
             "photo-widget__caption";
 
         caption.textContent =
-            photos[0].caption || "";
+            photos[0].caption ||
+            "";
 
         wrapper.appendChild(
             caption
         );
 
 
-        /*
-         * ROTATION STATE
-         */
+        // ====================================================
+        // ROTATION STATE
+        // ====================================================
 
         let activeImage =
             imageA;
@@ -188,24 +196,132 @@ const photo = {
             0;
 
 
-        /*
-         * ROTATE PHOTO
-         */
+        // ====================================================
+        // LOAD NEXT BATCH
+        // ====================================================
+
+        const loadNextBatch =
+            async () => {
+
+                try {
+
+                    const nextPhotos =
+                        await loadPhotos(
+                            albumUrl,
+                            batchCount
+                        );
+
+
+                    if (
+                        nextPhotos &&
+                        nextPhotos.length > 0
+                    ) {
+
+                        shuffle(
+                            nextPhotos
+                        );
+
+                        photos =
+                            nextPhotos;
+
+                        currentIndex =
+                            0;
+
+                        console.log(
+                            `Photo widget loaded new batch: ${photos.length} photos`
+                        );
+
+                        return true;
+
+                    }
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "iCloud photo batch refresh error:",
+                        error
+                    );
+
+                }
+
+
+                return false;
+
+            };
+
+
+        // ====================================================
+        // ROTATE PHOTO
+        // ====================================================
 
         const rotate =
-            () => {
+            async () => {
 
-                currentIndex =
-                    (
-                        currentIndex + 1
-                    ) %
-                    photos.length;
+                /*
+                 * If we have reached the end of the
+                 * current batch, get another random batch.
+                 */
+
+                if (
+                    currentIndex >=
+                    photos.length - 1
+                ) {
+
+                    const loaded =
+                        await loadNextBatch();
+
+
+                    if (!loaded) {
+
+                        /*
+                         * If the refresh failed, keep using
+                         * the current batch rather than
+                         * breaking the slideshow.
+                         */
+
+                        currentIndex =
+                            0;
+
+                    }
+
+                    else {
+
+                        /*
+                         * The new batch has been loaded.
+                         * Start with its first photo.
+                         */
+
+                        currentIndex =
+                            0;
+
+                    }
+
+                }
+
+                else {
+
+                    currentIndex += 1;
+
+                }
+
 
                 const nextPhoto =
                     photos[
                         currentIndex
                     ];
 
+
+                if (!nextPhoto) {
+                    return;
+                }
+
+
+                /*
+                 * Load the next image into the inactive
+                 * layer before switching visibility.
+                 */
 
                 inactiveImage.src =
                     nextPhoto.url;
@@ -217,6 +333,7 @@ const photo = {
                         activeImage.classList.remove(
                             "photo-widget__image--active"
                         );
+
 
                         inactiveImage.classList.add(
                             "photo-widget__image--active"
@@ -231,8 +348,10 @@ const photo = {
                         const temp =
                             activeImage;
 
+
                         activeImage =
                             inactiveImage;
+
 
                         inactiveImage =
                             temp;
@@ -240,13 +359,15 @@ const photo = {
 
                         inactiveImage.onload =
                             null;
+
                     };
+
             };
 
 
-        /*
-         * START TIMER
-         */
+        // ====================================================
+        // START TIMER
+        // ====================================================
 
         if (
             photos.length > 1
@@ -256,6 +377,7 @@ const photo = {
                 rotate,
                 interval * 1000
             );
+
         }
 
     }
@@ -263,9 +385,132 @@ const photo = {
 };
 
 
-/*
- * CREATE IMAGE
- */
+// ============================================================
+// LOAD PHOTOS FROM DASHBOARD SERVER
+// ============================================================
+
+async function loadPhotos(
+    albumUrl,
+    batchCount
+) {
+
+    const params =
+        new URLSearchParams();
+
+
+    if (albumUrl) {
+
+        params.set(
+            "albumUrl",
+            albumUrl
+        );
+
+    }
+
+
+    /*
+    * Request the configured batch size from the
+    * dashboard server.
+    */
+
+    if (
+        Number.isFinite(
+            Number(batchCount)
+        ) &&
+        Number(batchCount) > 0
+    ) {
+
+        params.set(
+            "photoCount",
+            String(
+                Math.floor(
+                    Number(batchCount)
+                )
+            )
+        );
+
+    }
+
+
+    const response =
+        await fetch(
+            `/api/photos?${params.toString()}`,
+            {
+                method: "GET",
+                cache: "no-store"
+            }
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        throw new Error(
+            `Photo API returned ${response.status}`
+        );
+
+    }
+
+
+    const data =
+        await response.json();
+
+
+    if (
+        data &&
+        data.error
+    ) {
+
+        throw new Error(
+            data.error
+        );
+
+    }
+
+
+    return (
+        data &&
+        Array.isArray(
+            data.photos
+        )
+
+            ? data.photos
+
+            : []
+    );
+
+}
+
+
+// ============================================================
+// SHOW ERROR
+// ============================================================
+
+function showError(
+    wrapper,
+    message
+) {
+
+    const error =
+        document.createElement("div");
+
+    error.className =
+        "photo-widget__error";
+
+    error.textContent =
+        message;
+
+    wrapper.appendChild(
+        error
+    );
+
+}
+
+
+// ============================================================
+// CREATE IMAGE
+// ============================================================
 
 function createImage(
     photo
@@ -274,34 +519,43 @@ function createImage(
     const image =
         document.createElement("img");
 
+
     image.src =
         photo.url;
+
 
     image.alt =
         photo.caption ||
         "Shared album photo";
 
+
     image.loading =
         "eager";
+
 
     image.draggable =
         false;
 
+
     return image;
+
 }
 
 
-/*
- * SHUFFLE
- */
+// ============================================================
+// SHUFFLE
+// ============================================================
 
 function shuffle(
     array
 ) {
 
     for (
-        let i = array.length - 1;
+        let i =
+            array.length - 1;
+
         i > 0;
+
         i--
     ) {
 
@@ -311,6 +565,7 @@ function shuffle(
                 (i + 1)
             );
 
+
         [
             array[i],
             array[j]
@@ -318,9 +573,12 @@ function shuffle(
             array[j],
             array[i]
         ];
+
     }
 
+
     return array;
+
 }
 
 

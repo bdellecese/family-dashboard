@@ -1,20 +1,43 @@
 const DEFAULT_ALBUM_URL =
     "https://www.icloud.com/sharedalbum/#B0k5yeZFhGG13uA";
 
+
+// ============================================================
+// CONFIGURATION
+// ============================================================
+
+const DEFAULT_PHOTO_COUNT =
+    100;
+
+
+// ============================================================
+// ICLOUD PHOTO DATA
+// ============================================================
+
 const icloudPhotoData = {
 
     async getPhotos(
-        albumUrl = DEFAULT_ALBUM_URL
+        albumUrl = DEFAULT_ALBUM_URL,
+        photoCount = DEFAULT_PHOTO_COUNT
     ) {
 
         const albumId =
-            getAlbumId(albumUrl);
+            getAlbumId(
+                albumUrl
+            );
 
         if (!albumId) {
+
             throw new Error(
                 "Invalid iCloud Shared Album URL"
             );
+
         }
+
+
+        // ====================================================
+        // GET PHOTO STREAM
+        // ====================================================
 
         let apiBase =
             `https://sharedstreams.icloud.com/${albumId}/sharedstreams`;
@@ -24,80 +47,219 @@ const icloudPhotoData = {
                 `${apiBase}/webstream`,
                 {
                     method: "POST",
+
                     headers: {
                         "Content-Type":
                             "application/json"
                     },
+
                     body:
                         JSON.stringify({
-                            streamCtag: null
+                            streamCtag:
+                                null
                         })
                 }
             );
 
+
+        if (
+            !streamResponse.ok
+        ) {
+
+            throw new Error(
+                `iCloud stream request returned ${streamResponse.status}`
+            );
+
+        }
+
+
         let stream =
             await streamResponse.json();
 
+
+        // ====================================================
+        // USE APPLE'S CURRENT STREAM HOST IF PROVIDED
+        // ====================================================
+
         const appleHost =
-            stream["X-Apple-MMe-Host"];
+            stream[
+                "X-Apple-MMe-Host"
+            ];
+
 
         if (appleHost) {
 
             apiBase =
                 `https://${appleHost}/${albumId}/sharedstreams`;
 
+
             streamResponse =
                 await fetch(
                     `${apiBase}/webstream`,
                     {
                         method: "POST",
+
                         headers: {
                             "Content-Type":
                                 "application/json"
                         },
+
                         body:
                             JSON.stringify({
-                                streamCtag: null
+                                streamCtag:
+                                    null
                             })
                     }
                 );
 
+
+            if (
+                !streamResponse.ok
+            ) {
+
+                throw new Error(
+                    `iCloud stream request returned ${streamResponse.status}`
+                );
+
+            }
+
+
             stream =
                 await streamResponse.json();
+
         }
+
+
+        // ====================================================
+        // VALIDATE STREAM
+        // ====================================================
 
         if (
             !stream ||
-            !Array.isArray(stream.photos)
+            !Array.isArray(
+                stream.photos
+            )
         ) {
+
             throw new Error(
                 "No photos returned from iCloud Shared Album"
             );
+
         }
 
-        const photoGuids =
+
+        // ====================================================
+        // FILTER PHOTOS WITH VALID GUIDS
+        // ====================================================
+
+        const availablePhotos =
             stream.photos
+                .filter(
+                    photo =>
+                        photo &&
+                        photo.photoGuid
+                );
+
+
+        if (
+            availablePhotos.length === 0
+        ) {
+
+            return [];
+
+        }
+
+
+        // ====================================================
+        // DETERMINE BATCH SIZE
+        // ====================================================
+
+        const requestedPhotoCount =
+            Number(
+                photoCount
+            );
+
+
+        const selectedPhotoCount =
+            Number.isFinite(
+                requestedPhotoCount
+            ) &&
+            requestedPhotoCount > 0
+
+                ? Math.floor(
+                    requestedPhotoCount
+                )
+
+                : DEFAULT_PHOTO_COUNT;
+
+
+        // ====================================================
+        // RANDOMIZE PHOTOS
+        //
+        // Work on a copy so the original iCloud response
+        // remains untouched.
+        // ====================================================
+
+        const shuffledPhotos =
+            [...availablePhotos];
+
+
+        shuffle(
+            shuffledPhotos
+        );
+
+
+        // ====================================================
+        // SELECT RANDOM PHOTO BATCH
+        // ====================================================
+
+        const selectedPhotos =
+            shuffledPhotos.slice(
+                0,
+                Math.min(
+                    selectedPhotoCount,
+                    shuffledPhotos.length
+                )
+            );
+
+
+        // ====================================================
+        // GET PHOTO GUIDS
+        // ====================================================
+
+        const photoGuids =
+            selectedPhotos
                 .map(
                     photo =>
                         photo.photoGuid
                 )
                 .filter(Boolean);
 
+
         if (
             photoGuids.length === 0
         ) {
+
             return [];
+
         }
+
+
+        // ====================================================
+        // GET ASSET URLS
+        // ====================================================
 
         const assetsResponse =
             await fetch(
                 `${apiBase}/webasseturls`,
                 {
                     method: "POST",
+
                     headers: {
                         "Content-Type":
                             "application/json"
                     },
+
                     body:
                         JSON.stringify({
                             photoGuids
@@ -105,14 +267,38 @@ const icloudPhotoData = {
                 }
             );
 
+
+        if (
+            !assetsResponse.ok
+        ) {
+
+            throw new Error(
+                `iCloud asset request returned ${assetsResponse.status}`
+            );
+
+        }
+
+
         const assets =
             await assetsResponse.json();
 
+
+        // ====================================================
+        // BUILD ASSET LOOKUP
+        // ====================================================
+
         const assetLookup =
-            buildAssetLookup(assets);
+            buildAssetLookup(
+                assets
+            );
+
+
+        // ====================================================
+        // BUILD PHOTO RESULTS
+        // ====================================================
 
         const photos =
-            stream.photos
+            selectedPhotos
                 .map(
                     photo => {
 
@@ -121,16 +307,22 @@ const icloudPhotoData = {
                                 photo
                             );
 
+
                         const url =
                             assetLookup[
                                 checksum
                             ];
 
+
                         if (!url) {
+
                             return null;
+
                         }
 
+
                         return {
+
                             id:
                                 photo.photoGuid,
 
@@ -143,49 +335,77 @@ const icloudPhotoData = {
                             date:
                                 photo.dateCreated ||
                                 null
+
                         };
+
                     }
                 )
                 .filter(Boolean);
 
+
+        console.log(
+            `iCloud photos: selected ${selectedPhotos.length}, resolved ${photos.length}`
+        );
+
+
         return photos;
+
     }
+
 };
 
 
-/*
- * GET ALBUM ID
- */
+// ============================================================
+// GET ALBUM ID
+// ============================================================
 
 function getAlbumId(
     albumUrl
 ) {
 
     if (!albumUrl) {
+
         return null;
+
     }
+
 
     const hashIndex =
-        albumUrl.indexOf("#");
+        albumUrl.indexOf(
+            "#"
+        );
 
-    if (hashIndex >= 0) {
+
+    if (
+        hashIndex >= 0
+    ) {
 
         return albumUrl
-            .substring(hashIndex + 1)
+            .substring(
+                hashIndex + 1
+            )
             .trim();
+
     }
 
-    if (!albumUrl.includes("/")) {
+
+    if (
+        !albumUrl.includes("/")
+    ) {
+
         return albumUrl.trim();
+
     }
+
 
     return null;
+
 }
 
 
-/*
- * FIND LARGEST IMAGE
- */
+// ============================================================
+// FIND LARGEST DERIVATIVE
+// ============================================================
 
 function getLargestDerivativeChecksum(
     photo
@@ -197,8 +417,11 @@ function getLargestDerivativeChecksum(
             photo.derivatives
         )
     ) {
+
         return null;
+
     }
+
 
     const derivatives =
         photo.derivatives
@@ -208,36 +431,47 @@ function getLargestDerivativeChecksum(
                     derivative.checksum
             );
 
+
     if (
         derivatives.length === 0
     ) {
+
         return null;
+
     }
+
 
     derivatives.sort(
         (a, b) => {
 
             const aSize =
                 Number(
-                    a.fileSize || 0
+                    a.fileSize ||
+                    0
                 );
+
 
             const bSize =
                 Number(
-                    b.fileSize || 0
+                    b.fileSize ||
+                    0
                 );
 
+
             return bSize - aSize;
+
         }
     );
 
+
     return derivatives[0].checksum;
+
 }
 
 
-/*
- * BUILD ASSET LOOKUP
- */
+// ============================================================
+// BUILD ASSET LOOKUP
+// ============================================================
 
 function buildAssetLookup(
     assets
@@ -245,12 +479,21 @@ function buildAssetLookup(
 
     const lookup = {};
 
+
     if (
         !assets ||
         !assets.items
     ) {
+
         return lookup;
+
     }
+
+
+    // --------------------------------------------------------
+    // iCloud normally returns items as an object keyed
+    // by checksum.
+    // --------------------------------------------------------
 
     if (
         !Array.isArray(
@@ -261,7 +504,12 @@ function buildAssetLookup(
         Object.entries(
             assets.items
         ).forEach(
-            ([key, value]) => {
+            (
+                [
+                    key,
+                    value
+                ]
+            ) => {
 
                 if (
                     value &&
@@ -273,12 +521,21 @@ function buildAssetLookup(
                         buildAssetUrl(
                             value
                         );
+
                 }
+
             }
         );
 
+
         return lookup;
+
     }
+
+
+    // --------------------------------------------------------
+    // Also support an array response.
+    // --------------------------------------------------------
 
     assets.items.forEach(
         item => {
@@ -296,17 +553,21 @@ function buildAssetLookup(
                     buildAssetUrl(
                         item
                     );
+
             }
+
         }
     );
 
+
     return lookup;
+
 }
 
 
-/*
- * BUILD IMAGE URL
- */
+// ============================================================
+// BUILD IMAGE URL
+// ============================================================
 
 function buildAssetUrl(
     asset
@@ -314,14 +575,60 @@ function buildAssetUrl(
 
     const location =
         asset.url_location
-            .startsWith("http")
+            .startsWith(
+                "http"
+            )
+
             ? asset.url_location
+
             : `https://${asset.url_location}`;
+
 
     return (
         location +
         asset.url_path
     );
+
+}
+
+
+// ============================================================
+// SHUFFLE
+// ============================================================
+
+function shuffle(
+    array
+) {
+
+    for (
+        let i =
+            array.length - 1;
+
+        i > 0;
+
+        i--
+    ) {
+
+        const j =
+            Math.floor(
+                Math.random() *
+                (i + 1)
+            );
+
+
+        [
+            array[i],
+            array[j]
+        ] = [
+            array[j],
+            array[i]
+        ];
+
+    }
+
+
+    return array;
+
 }
 
 

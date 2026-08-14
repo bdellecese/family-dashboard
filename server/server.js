@@ -625,9 +625,17 @@ const server =
                             .get("albumUrl") ||
                         undefined;
 
+                    const photoCount =
+                        Number(
+                            requestUrl
+                                .searchParams
+                                .get("photoCount")
+                        ) || undefined;
+
                     const photos =
                         await icloudPhotoData.getPhotos(
-                            albumUrl
+                            albumUrl,
+                            photoCount
                         );
 
                     response.writeHead(
