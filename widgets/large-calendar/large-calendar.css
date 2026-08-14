@@ -53,7 +53,7 @@
     gap: 28px;
 
     padding:
-        14px
+        10px
         0;
 
     margin-bottom: 8px;
@@ -62,8 +62,7 @@
 
     overflow: hidden;
 
-    background:
-        rgba(100, 100, 100, 0.3);
+    background: #f5f5f5;
 
 }
 
