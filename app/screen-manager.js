@@ -167,8 +167,6 @@ export async function loadScreen(
 
     }
 
-    initializeTouchScrolling(dashboard);
-
 }
 
 let currentScreenIndex = 0;
