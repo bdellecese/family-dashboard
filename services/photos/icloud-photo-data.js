@@ -62,17 +62,6 @@ const icloudPhotoData = {
             );
 
 
-        if (
-            !streamResponse.ok
-        ) {
-
-            throw new Error(
-                `iCloud stream request returned ${streamResponse.status}`
-            );
-
-        }
-
-
         let stream =
             await streamResponse.json();
 
@@ -111,17 +100,6 @@ const icloudPhotoData = {
                             })
                     }
                 );
-
-
-            if (
-                !streamResponse.ok
-            ) {
-
-                throw new Error(
-                    `iCloud stream request returned ${streamResponse.status}`
-                );
-
-            }
 
 
             stream =
