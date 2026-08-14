@@ -909,7 +909,7 @@ function createAllDayEvent(
         document.createElement("span");
 
     icon.className =
-        `large-calendar-widget__event-icon fa-fw ${calendar?.icon || "fal fa-calendar"}`;
+        `large-calendar-widget__event-icon fa-fw ${calendar?.icon || "far fa-calendar"}`;
 
     icon.style.color =
         "#ffffff";
