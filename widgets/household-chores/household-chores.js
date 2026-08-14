@@ -511,7 +511,7 @@ function createTask(
 
 
     checkbox.innerHTML =
-        '<i class="fal fa-square"></i>';
+        '<i class="far fa-square"></i>';
 
 
     /*
@@ -528,7 +528,7 @@ function createTask(
                 true;
 
             checkbox.innerHTML =
-                '<i class="fal fa-spinner fa-spin"></i>';
+                '<i class="fas fa-spinner fa-spin"></i>';
 
 
             try {
@@ -545,7 +545,7 @@ function createTask(
 
 
                 checkbox.innerHTML =
-                    '<i class="fal fa-check-square"></i>';
+                    '<i class="far fa-check-square"></i>';
 
             }
 
@@ -561,7 +561,7 @@ function createTask(
                     false;
 
                 checkbox.innerHTML =
-                    '<i class="fal fa-square"></i>';
+                    '<i class="far fa-square"></i>';
 
             }
 
