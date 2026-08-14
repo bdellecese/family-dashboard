@@ -17,6 +17,9 @@ import {
     getEventsForRange
 } from "../services/google-calendar/google-calendar-server.js";
 
+import icloudPhotoData
+    from "../services/photos/icloud-photo-data.js";
+
 const HOST = "0.0.0.0";
 const PORT = 3000;
 
@@ -598,6 +601,74 @@ const server =
                             "ok"
                     })
                 );
+
+                return;
+            }
+
+            // ------------------------------------------------
+            // ICLOUD PHOTOS
+            // ------------------------------------------------
+
+            if (
+                requestUrl.pathname ===
+                    "/api/photos"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                try {
+
+                    const albumUrl =
+                        requestUrl
+                            .searchParams
+                            .get("albumUrl") ||
+                        undefined;
+
+                    const photos =
+                        await icloudPhotoData.getPhotos(
+                            albumUrl
+                        );
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+                    response.end(
+                        JSON.stringify({
+                            photos
+                        })
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "iCloud photo API error:",
+                        error
+                    );
+
+                    response.writeHead(
+                        500,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+                    response.end(
+                        JSON.stringify({
+                            error:
+                                "Unable to load photos"
+                        })
+                    );
+
+                }
 
                 return;
             }
