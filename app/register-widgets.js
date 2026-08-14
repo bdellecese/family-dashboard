@@ -112,13 +112,11 @@ export async function registerWidgets() {
         "did-you-know",
         "../widgets/did-you-know/did-you-know.js"
     );
-
-
-    /*
+    
     await registerWidget(
         "photo",
         "../widgets/photo/photo.js"
     );
-    */
+    
 
 }
