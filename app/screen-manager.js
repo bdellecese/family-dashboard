@@ -174,6 +174,312 @@ let currentScreenIndex = 0;
 let rotationTimer = null;
 
 
+/*
+ * SHOW CURRENT SCREEN
+ */
+
+async function showCurrentScreen() {
+
+    const screenName =
+        screenOrder[
+            currentScreenIndex
+        ];
+
+
+    const screen =
+        screens[screenName];
+
+
+    if (!screen) {
+
+        console.error(
+            "Screen not found:",
+            screenName
+        );
+
+        return;
+
+    }
+
+
+    await loadScreen(
+        screenName
+    );
+
+
+    const durationConfig =
+        screen.duration || { seconds: 15 };
+
+
+    let duration;
+
+
+    if (
+        typeof durationConfig ===
+        "number"
+    ) {
+
+        duration =
+            durationConfig;
+
+    }
+
+
+    else if (
+        durationConfig.minutes
+    ) {
+
+        duration =
+            durationConfig.minutes *
+            60 *
+            1000;
+
+    }
+
+
+    else if (
+        durationConfig.seconds
+    ) {
+
+        duration =
+            durationConfig.seconds *
+            1000;
+
+    }
+
+
+    else {
+
+        duration =
+            15000;
+
+    }
+
+
+    if (rotationTimer) {
+
+        clearTimeout(
+            rotationTimer
+        );
+
+    }
+
+
+    rotationTimer =
+        setTimeout(
+            async () => {
+
+                currentScreenIndex =
+                    (
+                        currentScreenIndex + 1
+                    )
+                    %
+                    screenOrder.length;
+
+
+                await showCurrentScreen();
+
+            },
+            duration
+        );
+
+}
+
+
+/*
+ * PREVIOUS SCREEN
+ */
+
+export async function previousScreen() {
+
+    if (
+        !screenOrder ||
+        screenOrder.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    currentScreenIndex =
+        (
+            currentScreenIndex -
+            1 +
+            screenOrder.length
+        )
+        %
+        screenOrder.length;
+
+
+    await showCurrentScreen();
+
+}
+
+
+/*
+ * NEXT SCREEN
+ */
+
+export async function nextScreen() {
+
+    if (
+        !screenOrder ||
+        screenOrder.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    currentScreenIndex =
+        (
+            currentScreenIndex + 1
+        )
+        %
+        screenOrder.length;
+
+
+    await showCurrentScreen();
+
+}
+
+
+/*
+ * SCREEN NAVIGATION UI
+ */
+
+function initializeScreenNavigation() {
+
+    const dashboardScale =
+        document.getElementById(
+            "dashboard-scale"
+        );
+
+
+    const previousButton =
+        document.getElementById(
+            "prev-screen"
+        );
+
+
+    const nextButton =
+        document.getElementById(
+            "next-screen"
+        );
+
+
+    if (
+        !dashboardScale ||
+        !previousButton ||
+        !nextButton
+    ) {
+
+        console.error(
+            "Screen navigation controls not found."
+        );
+
+        return;
+
+    }
+
+
+    let hideTimer = null;
+
+
+    function showNavigation() {
+
+        dashboardScale.classList.add(
+            "screen-navigation-visible"
+        );
+
+
+        if (hideTimer) {
+
+            clearTimeout(
+                hideTimer
+            );
+
+        }
+
+
+        hideTimer =
+            setTimeout(
+                () => {
+
+                    dashboardScale.classList.remove(
+                        "screen-navigation-visible"
+                    );
+
+                },
+                10000
+            );
+
+    }
+
+
+    previousButton.addEventListener(
+        "click",
+        async event => {
+
+            event.preventDefault();
+
+            showNavigation();
+
+            await previousScreen();
+
+        }
+    );
+
+
+    nextButton.addEventListener(
+        "click",
+        async event => {
+
+            event.preventDefault();
+
+            showNavigation();
+
+            await nextScreen();
+
+        }
+    );
+
+
+    /*
+     * Reveal controls after touch.
+     */
+
+    window.addEventListener(
+        "touchstart",
+        showNavigation,
+        {
+            passive: true
+        }
+    );
+
+
+    /*
+     * Reveal controls while developing
+     * with a mouse.
+     */
+
+    window.addEventListener(
+        "mousemove",
+        showNavigation,
+        {
+            passive: true
+        }
+    );
+
+}
+
+
+/*
+ * START SCREEN ROTATION
+ */
+
 export async function startScreenRotation() {
 
     if (
@@ -190,114 +496,10 @@ export async function startScreenRotation() {
     }
 
 
-    async function showCurrentScreen() {
-
-        const screenName =
-            screenOrder[
-                currentScreenIndex
-            ];
-
-
-        const screen =
-            screens[screenName];
-
-
-        if (!screen) {
-
-            console.error(
-                "Screen not found:",
-                screenName
-            );
-
-            return;
-
-        }
-
-
-        await loadScreen(
-            screenName
-        );
-
-
-        const durationConfig =
-            screen.duration || { seconds: 15 };
-
-
-        let duration;
-
-
-        if (
-            typeof durationConfig ===
-            "number"
-        ) {
-
-            duration =
-                durationConfig;
-
-        }
-
-
-        else if (
-            durationConfig.minutes
-        ) {
-
-            duration =
-                durationConfig.minutes *
-                60 *
-                1000;
-
-        }
-
-
-        else if (
-            durationConfig.seconds
-        ) {
-
-            duration =
-                durationConfig.seconds *
-                1000;
-
-        }
-
-
-        else {
-
-            duration =
-                15000;
-
-        }
-
-        rotationTimer =
-            setTimeout(
-                async () => {
-
-                    currentScreenIndex =
-                        (
-                            currentScreenIndex + 1
-                        )
-                        %
-                        screenOrder.length;
-
-
-                    await showCurrentScreen();
-
-                },
-                duration
-            );
-
-    }
-
-
-    if (rotationTimer) {
-
-        clearTimeout(
-            rotationTimer
-        );
-
-    }
-
-
     currentScreenIndex = 0;
+
+
+    initializeScreenNavigation();
 
 
     await showCurrentScreen();

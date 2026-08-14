@@ -47,13 +47,33 @@
 </head>
 
 <body>
-    
 
     <div id="dashboard-scale">
-
         <div id="dashboard"></div>
 
+        <button
+            id="prev-screen"
+            class="screen-navigation screen-navigation--prev"
+            type="button"
+            aria-label="Previous screen"
+        >
+
+            <span class="fas fa-arrow-circle-left"></span>
+            <span class="screen-navigation__label">Prev Screen</span>
+        </button>
+
+        <button
+            id="next-screen"
+            class="screen-navigation screen-navigation--next"
+            type="button"
+            aria-label="Next screen"
+        >
+            <span class="screen-navigation__label">Next Screen</span>
+            <span class="fas fa-arrow-circle-right"></span>
+        </button>
+
     </div>
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
