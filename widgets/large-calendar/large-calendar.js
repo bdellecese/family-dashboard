@@ -8,6 +8,10 @@ import {
     CALENDARS
 } from "../../config/calendars.js";
 
+import {
+    enableTouchScroll
+} from "../../services/ui/touch-scroll.js";
+
 const largeCalendar = {
 
     name: "large-calendar",
@@ -76,6 +80,14 @@ const largeCalendar = {
             "large-calendar-widget";
 
         container.appendChild(
+            wrapper
+        );
+
+        /*
+         * ENABLE TOUCH SCROLLING
+         */
+
+        enableTouchScroll(
             wrapper
         );
 
