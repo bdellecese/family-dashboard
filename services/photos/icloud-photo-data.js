@@ -300,20 +300,11 @@ const icloudPhotoData = {
 
 
                         return {
-
-                            id:
-                                photo.photoGuid,
-
+                            id: photo.photoGuid,
                             url,
-
-                            caption:
-                                photo.caption ||
-                                "",
-
-                            date:
-                                photo.dateCreated ||
-                                null
-
+                            caption: photo.caption || "",
+                            date: photo.dateCreated || null,
+                            postedBy: photo.contributorFullName || ""
                         };
 
                     }

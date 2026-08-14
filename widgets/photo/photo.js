@@ -162,9 +162,8 @@ const photo = {
             imageB
         );
 
-
         // ====================================================
-        // CAPTION
+        // CAPTION / PHOTO METADATA
         // ====================================================
 
         const caption =
@@ -174,13 +173,13 @@ const photo = {
             "photo-widget__caption";
 
         caption.textContent =
-            photos[0].caption ||
-            "";
+            formatPhotoMetadata(
+                photos[0]
+            );
 
         wrapper.appendChild(
             caption
         );
-
 
         // ====================================================
         // ROTATION STATE
@@ -341,8 +340,9 @@ const photo = {
 
 
                         caption.textContent =
-                            nextPhoto.caption ||
-                            "";
+                            formatPhotoMetadata(
+                                nextPhoto
+                            );
 
 
                         const temp =
@@ -538,6 +538,60 @@ function createImage(
 
 
     return image;
+
+}
+
+// ============================================================
+// CAPTION
+// ============================================================
+
+function formatPhotoMetadata(
+    photo
+) {
+
+    if (!photo) {
+        return "";
+    }
+
+
+    const caption =
+        photo.caption ||
+        "";
+
+
+    const date =
+        photo.date
+            ? new Date(
+                photo.date
+            ).toLocaleDateString(
+                undefined,
+                {
+                    month:
+                        "short",
+                    day:
+                        "numeric",
+                    year:
+                        "numeric",
+                    timeZone:
+                        "UTC"
+                }
+            )
+            : "";
+
+
+    const postedBy =
+        photo.postedBy
+            ? `Posted by ${photo.postedBy}`
+            : "";
+
+
+    return [
+        caption,
+        date,
+        postedBy
+    ]
+        .filter(Boolean)
+        .join(" | ");
 
 }
 
