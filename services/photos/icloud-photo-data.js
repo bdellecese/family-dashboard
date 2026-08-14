@@ -391,23 +391,23 @@ function getLargestDerivativeChecksum(
 
     if (
         !photo ||
-        !Array.isArray(
-            photo.derivatives
-        )
+        !photo.derivatives ||
+        typeof photo.derivatives !== "object" ||
+        Array.isArray(photo.derivatives)
     ) {
-
         return null;
-
     }
 
 
     const derivatives =
-        photo.derivatives
-            .filter(
-                derivative =>
-                    derivative &&
-                    derivative.checksum
-            );
+        Object.values(
+            photo.derivatives
+        )
+        .filter(
+            derivative =>
+                derivative &&
+                derivative.checksum
+        );
 
 
     if (
@@ -428,13 +428,11 @@ function getLargestDerivativeChecksum(
                     0
                 );
 
-
             const bSize =
                 Number(
                     b.fileSize ||
                     0
                 );
-
 
             return bSize - aSize;
 
