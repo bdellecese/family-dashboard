@@ -149,9 +149,6 @@ const largeCalendar = {
                 name.textContent =
                     calendar.name;
 
-                name.style.color =
-                    calendar.color;
-
 
                 item.appendChild(
                     icon

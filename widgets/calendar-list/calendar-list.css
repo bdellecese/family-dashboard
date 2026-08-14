@@ -17,11 +17,20 @@
     overflow-y: auto;
     overflow-x: hidden;
 
+    /* Allow vertical touch scrolling */
     touch-action: pan-y;
+
+     /* Prevent text selection while swiping */
     user-select: none;
 
+    /* Hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
+.calendar-list-widget::-webkit-scrollbar {
+    display: none;
+}
 
 /*
  * DAY HEADER
