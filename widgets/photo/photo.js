@@ -130,9 +130,7 @@ const photo = {
         // ====================================================
 
         const imageA =
-            createImage(
-                photos[0]
-            );
+            createImage();
 
         imageA.classList.add(
             "photo-widget__image",
@@ -141,13 +139,7 @@ const photo = {
 
 
         const imageB =
-            createImage(
-                photos[
-                    photos.length > 1
-                        ? 1
-                        : 0
-                ]
-            );
+            createImage();
 
         imageB.classList.add(
             "photo-widget__image"
@@ -162,6 +154,7 @@ const photo = {
             imageB
         );
 
+
         // ====================================================
         // CAPTION / PHOTO METADATA
         // ====================================================
@@ -172,14 +165,51 @@ const photo = {
         caption.className =
             "photo-widget__caption";
 
-        caption.textContent =
-            formatPhotoMetadata(
-                photos[0]
-            );
 
         wrapper.appendChild(
             caption
         );
+
+
+        // ====================================================
+        // LOAD FIRST VALID PHOTO
+        // ====================================================
+
+        let currentIndex =
+            -1;
+
+        const initialPhoto =
+            await findLoadablePhoto(
+                photos,
+                0
+            );
+
+
+        if (!initialPhoto) {
+
+            showError(
+                wrapper,
+                "Unable to load photos"
+            );
+
+            return;
+
+        }
+
+
+        currentIndex =
+            initialPhoto.index;
+
+
+        imageA.src =
+            initialPhoto.photo.url;
+
+
+        caption.textContent =
+            formatPhotoMetadata(
+                initialPhoto.photo
+            );
+
 
         // ====================================================
         // ROTATION STATE
@@ -190,9 +220,6 @@ const photo = {
 
         let inactiveImage =
             imageB;
-
-        let currentIndex =
-            0;
 
 
         // ====================================================
@@ -224,7 +251,7 @@ const photo = {
                             nextPhotos;
 
                         currentIndex =
-                            0;
+                            -1;
 
                         console.log(
                             `Photo widget loaded new batch: ${photos.length} photos`
@@ -275,92 +302,85 @@ const photo = {
                     if (!loaded) {
 
                         /*
-                         * If the refresh failed, keep using
-                         * the current batch rather than
-                         * breaking the slideshow.
+                         * If the refresh failed, start again
+                         * from the current batch.
                          */
 
                         currentIndex =
-                            0;
+                            -1;
 
                     }
 
-                    else {
-
-                        /*
-                         * The new batch has been loaded.
-                         * Start with its first photo.
-                         */
-
-                        currentIndex =
-                            0;
-
-                    }
-
-                }
-
-                else {
-
-                    currentIndex += 1;
-
-                }
-
-
-                const nextPhoto =
-                    photos[
-                        currentIndex
-                    ];
-
-
-                if (!nextPhoto) {
-                    return;
                 }
 
 
                 /*
-                 * Load the next image into the inactive
-                 * layer before switching visibility.
+                 * Find the next photo that actually loads.
+                 *
+                 * We deliberately preload the image using a
+                 * temporary Image object rather than assigning
+                 * the URL directly to the visible image.
+                 *
+                 * This prevents a broken-image thumbnail from
+                 * appearing when an iCloud asset URL fails.
+                 */
+
+                const nextPhoto =
+                    await findLoadablePhoto(
+                        photos,
+                        currentIndex + 1
+                    );
+
+
+                if (!nextPhoto) {
+
+                    return;
+
+                }
+
+
+                currentIndex =
+                    nextPhoto.index;
+
+
+                /*
+                 * The image has already been successfully loaded
+                 * by findLoadablePhoto().
+                 *
+                 * It is now safe to assign the URL to the
+                 * inactive display layer.
                  */
 
                 inactiveImage.src =
-                    nextPhoto.url;
+                    nextPhoto.photo.url;
 
 
-                inactiveImage.onload =
-                    () => {
-
-                        activeImage.classList.remove(
-                            "photo-widget__image--active"
-                        );
+                activeImage.classList.remove(
+                    "photo-widget__image--active"
+                );
 
 
-                        inactiveImage.classList.add(
-                            "photo-widget__image--active"
-                        );
+                inactiveImage.classList.add(
+                    "photo-widget__image--active"
+                );
 
 
-                        caption.textContent =
-                            formatPhotoMetadata(
-                                nextPhoto
-                            );
+                caption.textContent =
+                    formatPhotoMetadata(
+                        nextPhoto.photo
+                    );
 
 
-                        const temp =
-                            activeImage;
+                const temp =
+                    activeImage;
 
 
-                        activeImage =
-                            inactiveImage;
+                activeImage =
+                    inactiveImage;
 
 
-                        inactiveImage =
-                            temp;
-
-
-                        inactiveImage.onload =
-                            null;
-
-                    };
+                inactiveImage =
+                    temp;
 
             };
 
@@ -409,9 +429,9 @@ async function loadPhotos(
 
 
     /*
-    * Request the configured batch size from the
-    * dashboard server.
-    */
+     * Request the configured batch size from the
+     * dashboard server.
+     */
 
     if (
         Number.isFinite(
@@ -484,6 +504,136 @@ async function loadPhotos(
 
 
 // ============================================================
+// FIND LOADABLE PHOTO
+// ============================================================
+
+async function findLoadablePhoto(
+    photos,
+    startIndex
+) {
+
+    if (
+        !photos ||
+        photos.length === 0
+    ) {
+
+        return null;
+
+    }
+
+
+    /*
+     * Try each photo once, wrapping around to the beginning
+     * if necessary.
+     */
+
+    for (
+        let offset = 0;
+        offset < photos.length;
+        offset++
+    ) {
+
+        const index =
+            (
+                startIndex +
+                offset
+            ) % photos.length;
+
+
+        const photo =
+            photos[index];
+
+
+        if (
+            !photo ||
+            !photo.url
+        ) {
+
+            continue;
+
+        }
+
+
+        try {
+
+            await preloadImage(
+                photo.url
+            );
+
+
+            return {
+                photo,
+                index
+            };
+
+        }
+
+        catch (error) {
+
+            console.warn(
+                "Photo failed to load, skipping:",
+                photo.url,
+                error
+            );
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+// ============================================================
+// PRELOAD IMAGE
+// ============================================================
+
+function preloadImage(
+    url
+) {
+
+    return new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            const image =
+                new Image();
+
+
+            image.onload =
+                () => {
+
+                    resolve();
+
+                };
+
+
+            image.onerror =
+                () => {
+
+                    reject(
+                        new Error(
+                            "Image failed to load"
+                        )
+                    );
+
+                };
+
+
+            image.src =
+                url;
+
+        }
+    );
+
+}
+
+
+// ============================================================
 // SHOW ERROR
 // ============================================================
 
@@ -512,20 +662,13 @@ function showError(
 // CREATE IMAGE
 // ============================================================
 
-function createImage(
-    photo
-) {
+function createImage() {
 
     const image =
         document.createElement("img");
 
 
-    image.src =
-        photo.url;
-
-
     image.alt =
-        photo.caption ||
         "Shared album photo";
 
 
@@ -540,6 +683,7 @@ function createImage(
     return image;
 
 }
+
 
 // ============================================================
 // CAPTION
