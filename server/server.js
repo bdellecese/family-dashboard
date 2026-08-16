@@ -20,8 +20,9 @@ import {
 import icloudPhotoData
     from "../services/photos/icloud-photo-data.js";
 
-import sonosData
-    from "../services/sonos/sonos-data.js";
+import {
+    getStatus
+} from "../services/sonos/sonos-data.js";
 
 const HOST = "0.0.0.0";
 const PORT = 3000;
@@ -718,7 +719,7 @@ const server =
 
 
                     const status =
-                        await sonosData.getStatus(
+                        await getStatus(
                             speaker
                         );
 
