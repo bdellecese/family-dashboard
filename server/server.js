@@ -20,6 +20,9 @@ import {
 import icloudPhotoData
     from "../services/photos/icloud-photo-data.js";
 
+import sonosData
+    from "../services/sonos/sonos-data.js";
+
 const HOST = "0.0.0.0";
 const PORT = 3000;
 
@@ -673,6 +676,93 @@ const server =
                         JSON.stringify({
                             error:
                                 "Unable to load photos"
+                        })
+                    );
+
+                }
+
+                return;
+            }
+
+            // ------------------------------------------------
+            // SONOS STATUS
+            // ------------------------------------------------
+
+            if (
+                requestUrl.pathname ===
+                    "/api/sonos"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                try {
+
+                    const speaker =
+                        requestUrl
+                            .searchParams
+                            .get(
+                                "speaker"
+                            );
+
+
+                    if (
+                        !speaker
+                    ) {
+
+                        throw new Error(
+                            "speaker is required."
+                        );
+
+                    }
+
+
+                    const status =
+                        await sonosData.getStatus(
+                            speaker
+                        );
+
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify(
+                            status
+                        )
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Sonos status error:",
+                        error
+                    );
+
+
+                    response.writeHead(
+                        500,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            error:
+                                error.message
+
                         })
                     );
 
