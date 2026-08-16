@@ -654,26 +654,18 @@ function createImageLayer() {
 
 
     /*
-     * Blurred background image.
+     * Blurred background.
+     *
+     * This is a CSS background rather than a second
+     * <img>. This prevents the iCloud image from being
+     * requested twice.
      */
 
     const background =
-        document.createElement("img");
+        document.createElement("div");
 
     background.className =
         "photo-widget__image-background";
-
-
-    background.alt =
-        "";
-
-
-    background.loading =
-        "eager";
-
-
-    background.draggable =
-        false;
 
 
     /*
@@ -686,14 +678,11 @@ function createImageLayer() {
     image.className =
         "photo-widget__image";
 
-
     image.alt =
         "Shared album photo";
 
-
     image.loading =
         "eager";
-
 
     image.draggable =
         false;
@@ -729,41 +718,19 @@ function setImage(
     /*
      * Use the same photo for both layers.
      *
-     * The background uses cover + blur.
-     * The foreground uses contain.
+     * Background:
+     *     cover + blur
+     *
+     * Foreground:
+     *     contain
      */
 
-    layer.background.src =
-        url;
+    layer.background.style.backgroundImage =
+        `url("${url}")`;
 
 
     layer.image.src =
         url;
-
-}
-
-
-// ============================================================
-// SHOW ERROR
-// ============================================================
-
-function showError(
-    wrapper,
-    message
-) {
-
-    const error =
-        document.createElement("div");
-
-    error.className =
-        "photo-widget__error";
-
-    error.textContent =
-        message;
-
-    wrapper.appendChild(
-        error
-    );
 
 }
 
