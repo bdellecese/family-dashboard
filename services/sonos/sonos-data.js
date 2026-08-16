@@ -302,28 +302,27 @@ function getXmlValue(
     tag
 ) {
 
+    const escapedTag =
+        tag.replace(
+            /[.*+?^${}()|[\]\\]/g,
+            "\\$&"
+        );
+
     const match =
         xml.match(
             new RegExp(
-                `<${tag}[^>]*>([\\s\\S]*?)</${tag}>`,
+                `<${escapedTag}(?:\\s[^>]*)?>([\\s\\S]*?)</${escapedTag}>`,
                 "i"
             )
         );
 
-
-    if (
-        !match
-    ) {
-
+    if (!match) {
         return "";
-
     }
 
-
     return decodeXml(
-        match[1]
+        match[1].trim()
     );
-
 }
 
 
