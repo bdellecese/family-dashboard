@@ -5,9 +5,10 @@
  */
 
 export const screenOrder = [
-    "information",
+/*    "information",
     "calendar",
-    "chores-fun"
+    "chores-fun",*/
+    "sports"
 ];
 
 
@@ -570,6 +571,221 @@ export const screens = {
                     "dad-wisdom"
 
             }
+        ]
+
+    }
+
+},
+
+/*
+ * ============================================================
+ * SPORTS
+ * ============================================================
+ */
+
+sports: {
+
+    layout:
+        "sports-layout",
+
+    theme:
+        "dark",
+
+    duration: {
+
+        seconds:
+            60
+
+    },
+
+    regions: {
+
+
+        /*
+         * ====================================================
+         * SCOREBOARD
+         * ====================================================
+         */
+
+        "scoreboard": [
+
+            {
+
+                name:
+                    "sports-scoreboard",
+
+                config: {
+
+                    rotationSeconds:
+                        20,
+
+                    sports: [
+
+                        {
+
+                            sport:
+                                "mlb",
+
+                            team:
+                                "boston-red-sox",
+
+                            season: {
+
+                                start:
+                                    "03-01",
+
+                                end:
+                                    "10-31"
+
+                            },
+
+                            priority:
+                                1,
+
+                            featured: {
+
+                                left: {
+
+                                    teamId:
+                                        111
+
+                                },
+
+                                right: {
+
+                                    teamId:
+                                        138
+
+                                }
+
+                            }
+
+                        }
+
+                    ]
+
+                }
+
+            }
+
+        ],
+
+
+        /*
+         * ====================================================
+         * STANDINGS
+         * ====================================================
+         */
+
+        "standings": [
+
+            {
+
+                name:
+                    "sports-standings",
+
+                config: {
+
+                    rotationSeconds:
+                        20,
+
+                    sports: [
+
+                        "mlb"
+
+                    ]
+
+                }
+
+            }
+
+        ],
+
+
+        /*
+         * ====================================================
+         * COLUMN 2
+         *
+         * Sports News
+         * Upcoming Games
+         * ====================================================
+         */
+
+        "column-2": [
+
+            {
+
+                name:
+                    "news",
+
+                config: {
+
+                    feed:
+                        "http://feeds.bbci.co.uk/sport/rss.xml",
+
+                    label:
+                        "SPORTS NEWS",
+
+                    rotationSeconds:
+                        30
+
+                }
+
+            },
+
+
+            {
+
+                name:
+                    "calendar-list",
+
+                config: {
+
+                    calendars: [
+
+                        "146377806ee0218992f826b434d72b37455f216a16304399637f785714487d17@group.calendar.google.com"
+
+                    ],
+
+                    days:
+                        7,
+
+                    showCalendarName:
+                        false
+
+                }
+
+            }
+
+        ],
+
+
+        /*
+         * ====================================================
+         * COLUMN 3
+         *
+         * Photos
+         * Future widget
+         * ====================================================
+         */
+
+        "column-3": [
+
+            {
+
+                name:
+                    "placeholder"
+
+            },
+
+
+            {
+
+                name:
+                    "placeholder"
+
+            }
+
         ]
 
     }

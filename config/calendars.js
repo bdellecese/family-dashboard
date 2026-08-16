@@ -91,5 +91,11 @@ export const CALENDARS = {
         name: "US Holidays",
         icon: "fa-fw fas fa-calendar-days", 
         color: "rgb(167, 155, 142)"
-    }
+    },
+
+    "146377806ee0218992f826b434d72b37455f216a16304399637f785714487d17@group.calendar.google.com": {
+        name: "Sports",
+        icon: "fa-fw fas fa-trophy",
+        color: "#f5a623"
+    },
 };

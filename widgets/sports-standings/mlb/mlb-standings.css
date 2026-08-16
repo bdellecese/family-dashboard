@@ -1,0 +1,758 @@
+/*
+ * ============================================================
+ * MLB STANDINGS
+ * ============================================================
+ */
+
+.sports-standings__sport--mlb {
+
+    --mlb-green:
+        #123524;
+
+    --mlb-cream:
+        #F3EBD3;
+
+    --mlb-gold:
+        #FFE27A;
+
+    --mlb-line:
+        rgba(
+            243,
+            235,
+            211,
+            0.22
+        );
+
+    --mlb-muted:
+        rgba(
+            243,
+            235,
+            211,
+            0.65
+        );
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+    background:
+        var(--mlb-green);
+
+    color:
+        var(--mlb-cream);
+
+    font-family:
+        "Oswald",
+        sans-serif;
+
+}
+
+
+/*
+ * ============================================================
+ * ROOT
+ * ============================================================
+ */
+
+.mlb-standings {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    padding:
+        18px 24px;
+
+    box-sizing:
+        border-box;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * HEADER
+ * ============================================================
+ */
+
+.mlb-standings-header {
+
+    flex:
+        0 0 auto;
+
+    display:
+        flex;
+
+    align-items:
+        baseline;
+
+    justify-content:
+        space-between;
+
+    margin-bottom:
+        12px;
+
+    padding-bottom:
+        7px;
+
+    border-bottom:
+        1px solid
+        var(--mlb-line);
+
+}
+
+
+.mlb-standings-title {
+
+    font-size:
+        clamp(
+            20px,
+            1.8vw,
+            34px
+        );
+
+    font-weight:
+        500;
+
+    letter-spacing:
+        5px;
+
+    line-height:
+        1;
+
+}
+
+
+.mlb-standings-date {
+
+    font-size:
+        clamp(
+            10px,
+            0.75vw,
+            20px
+        );
+
+    letter-spacing:
+        3px;
+
+    color:
+        var(--mlb-muted);
+
+    text-transform:
+        uppercase;
+
+}
+
+
+/*
+ * ============================================================
+ * MAIN
+ * ============================================================
+ */
+
+.mlb-standings-main {
+
+    flex:
+        1 1 auto;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * 4 × 2 GRID
+ * ============================================================
+ */
+
+.mlb-standings-grid {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    grid-template-rows:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    column-gap:
+        28px;
+
+    row-gap:
+        18px;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * DIVISION PANEL
+ * ============================================================
+ */
+
+.mlb-standings-division {
+
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * DIVISION TITLE
+ * ============================================================
+ */
+
+.mlb-standings-division-title {
+
+    margin-bottom:
+        8px;
+
+    padding-bottom:
+        5px;
+
+    border-bottom:
+        1px solid
+        var(--mlb-cream);
+
+    font-size:
+        clamp(
+            12px,
+            0.9vw,
+            28px
+        );
+
+    font-weight:
+        500;
+
+    letter-spacing:
+        3px;
+
+    line-height:
+        1;
+
+}
+
+
+/*
+ * ============================================================
+ * COLUMN HEADERS
+ *
+ * ORDER:
+ *
+ * # | TEAM | W-L | GB | L10
+ *
+ * Percentage-based columns are intentional.
+ *
+ * The panels are very narrow, so fixed pixel widths cause
+ * the TEAM column to collapse and numeric columns to overflow.
+ *
+ * ============================================================
+ */
+
+.mlb-standings-columns {
+
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    box-sizing:
+        border-box;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        9%
+        19%
+        24%
+        18%
+        30%;
+
+    align-items:
+        center;
+
+    height:
+        24px;
+
+    padding:
+        3px 0;
+
+    color:
+        var(--mlb-muted);
+
+    font-size:
+        clamp(
+            8px,
+            0.5vw,
+            14px
+        );
+
+    letter-spacing:
+        1px;
+
+    line-height:
+        1;
+
+}
+
+
+/*
+ * ============================================================
+ * TEAM ROW
+ *
+ * ORDER:
+ *
+ * # | TEAM | W-L | GB | L10
+ *
+ * MUST MATCH THE HEADER GRID EXACTLY.
+ * ============================================================
+ */
+
+.mlb-standings-team {
+
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    box-sizing:
+        border-box;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        9%
+        19%
+        24%
+        18%
+        30%;
+
+    align-items:
+        center;
+
+    padding:
+        4px 0;
+
+    border-bottom:
+        1px solid
+        var(--mlb-line);
+
+    font-size:
+        clamp(
+            11px,
+            0.8vw,
+            28px
+        );
+
+    line-height:
+        1.1;
+
+}
+
+
+/*
+ * ============================================================
+ * RANK
+ * ============================================================
+ */
+
+.mlb-standings-rank {
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    color:
+        var(--mlb-muted);
+
+    font-variant-numeric:
+        tabular-nums;
+
+}
+
+
+/*
+ * ============================================================
+ * TEAM
+ * ============================================================
+ */
+
+.mlb-standings-team-name {
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    white-space:
+        nowrap;
+
+    text-overflow:
+        ellipsis;
+
+    letter-spacing:
+        0.5px;
+
+}
+
+
+/*
+ * ============================================================
+ * RECORD
+ * ============================================================
+ */
+
+.mlb-standings-record {
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    text-align:
+        right;
+
+    white-space:
+        nowrap;
+
+    font-variant-numeric:
+        tabular-nums;
+
+    letter-spacing:
+        0;
+
+}
+
+
+/*
+ * ============================================================
+ * GAMES BACK
+ * ============================================================
+ */
+
+.mlb-standings-games-back {
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    text-align:
+        right;
+
+    white-space:
+        nowrap;
+
+    font-variant-numeric:
+        tabular-nums;
+
+    letter-spacing:
+        0;
+
+}
+
+
+/*
+ * ============================================================
+ * LAST 10
+ * ============================================================
+ */
+
+.mlb-standings-last10 {
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    text-align:
+        right;
+
+    white-space:
+        nowrap;
+
+    color:
+        var(--mlb-muted);
+
+    font-size:
+        0.9em;
+
+    font-variant-numeric:
+        tabular-nums;
+
+    letter-spacing:
+        0;
+
+}
+
+
+/*
+ * ============================================================
+ * HEADER ALIGNMENT
+ * ============================================================
+ */
+
+.mlb-standings-columns span:nth-child(1) {
+
+    text-align:
+        left;
+
+}
+
+
+.mlb-standings-columns span:nth-child(2) {
+
+    text-align:
+        left;
+
+}
+
+
+.mlb-standings-columns span:nth-child(3),
+.mlb-standings-columns span:nth-child(4),
+.mlb-standings-columns span:nth-child(5) {
+
+    text-align:
+        right;
+
+}
+
+
+/*
+ * ============================================================
+ * DIVISION LEADER
+ * ============================================================
+ */
+
+.mlb-standings-division-leader
+.mlb-standings-team-name {
+
+    font-weight:
+        500;
+
+}
+
+
+.mlb-standings-division-leader
+.mlb-standings-rank {
+
+    color:
+        var(--mlb-gold);
+
+}
+
+
+/*
+ * ============================================================
+ * WILD CARD LEADER
+ * ============================================================
+ */
+
+.mlb-standings-wild-card-leader
+.mlb-standings-team-name {
+
+    font-weight:
+        500;
+
+}
+
+
+.mlb-standings-wild-card-leader
+.mlb-standings-rank {
+
+    color:
+        var(--mlb-gold);
+
+}
+
+
+/*
+ * ============================================================
+ * LOADING / ERROR
+ * ============================================================
+ */
+
+.mlb-standings-loading,
+.mlb-standings-message {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    color:
+        var(--mlb-muted);
+
+    font-size:
+        12px;
+
+    letter-spacing:
+        2px;
+
+}
+
+
+/*
+ * ============================================================
+ * SMALLER DASHBOARD HEIGHTS
+ * ============================================================
+ */
+
+@media (
+    max-height: 700px
+) {
+
+    .mlb-standings {
+
+        padding:
+            12px 18px;
+
+    }
+
+
+    .mlb-standings-header {
+
+        margin-bottom:
+            7px;
+
+    }
+
+
+    .mlb-standings-grid {
+
+        column-gap:
+            18px;
+
+        row-gap:
+            12px;
+
+    }
+
+
+    .mlb-standings-division-title {
+
+        margin-bottom:
+            5px;
+
+    }
+
+
+    /*
+     * Keep the same five-column proportions.
+     * Do NOT redefine the grid here.
+     */
+
+    .mlb-standings-columns {
+
+        height:
+            21px;
+
+        padding:
+            2px 0;
+
+    }
+
+
+    .mlb-standings-team {
+
+        padding:
+            3px 0;
+
+    }
+
+}

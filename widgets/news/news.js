@@ -117,6 +117,7 @@ const news = {
             "news-widget__label";
 
         label.textContent =
+            config.label ||
             "WORLD NEWS";
 
 

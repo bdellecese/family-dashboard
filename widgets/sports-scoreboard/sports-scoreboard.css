@@ -1,0 +1,631 @@
+/*
+ * ============================================================
+ * SPORTS SCOREBOARD
+ * ============================================================
+ */
+
+.sports-scoreboard__sport {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * MLB / FENWAY
+ * ============================================================
+ */
+
+.sports-scoreboard__sport--mlb {
+
+    --mlb-green:
+        #123524;
+
+    --mlb-cream:
+        #F3EBD3;
+
+    --mlb-gold:
+        #FFE27A;
+
+    --mlb-line:
+        rgba(
+            243,
+            235,
+            211,
+            0.22
+        );
+
+    --mlb-muted:
+        rgba(
+            243,
+            235,
+            211,
+            0.65
+        );
+
+    background:
+        var(--mlb-green);
+
+    color:
+        var(--mlb-cream);
+
+    font-family:
+        "Oswald",
+        sans-serif;
+
+}
+
+
+/*
+ * ============================================================
+ * MLB ROOT
+ * ============================================================
+ */
+
+.mlb-scoreboard {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    padding:
+        18px 24px;
+
+    box-sizing:
+        border-box;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * HEADER
+ * ============================================================
+ */
+
+.mlb-header {
+
+    text-align:
+        center;
+
+    margin-bottom:
+        12px;
+
+}
+
+
+.mlb-title {
+
+    font-size:
+        clamp(
+            20px,
+            1.8vw,
+            34px
+        );
+
+    font-weight:
+        500;
+
+    letter-spacing:
+        5px;
+
+    line-height:
+        1;
+
+}
+
+
+.mlb-date {
+
+    margin-top:
+        5px;
+
+    font-size:
+        clamp(
+            10px,
+            0.75vw,
+            16px
+        );
+
+    letter-spacing:
+        3px;
+
+    color:
+        var(--mlb-muted);
+
+    text-transform:
+        uppercase;
+
+}
+
+
+/*
+ * ============================================================
+ * FEATURED GAMES
+ * ============================================================
+ */
+
+.mlb-featured-games {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    column-gap:
+        28px;
+
+    margin-bottom:
+        10px;
+
+}
+
+
+.mlb-featured-game {
+
+    min-width:
+        0;
+
+}
+
+
+.mlb-box-score {
+
+    width:
+        100%;
+
+    overflow:
+        hidden;
+
+}
+
+
+.mlb-inning-header,
+.mlb-inning-row {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        42px
+        repeat(
+            10,
+            minmax(
+                0,
+                1fr
+            )
+        )
+        34px
+        34px
+        34px;
+
+    align-items:
+        center;
+
+}
+
+
+.mlb-inning-header {
+
+    font-size:
+        10px;
+
+    color:
+        var(--mlb-muted);
+
+    letter-spacing:
+        1px;
+
+    margin-bottom:
+        2px;
+
+}
+
+
+.mlb-inning-row {
+
+    font-size:
+        clamp(
+            13px,
+            1vw,
+            22px
+        );
+
+    letter-spacing:
+        1px;
+
+    padding:
+        2px 0;
+
+}
+
+
+.mlb-inning-row span:not(:first-child),
+.mlb-inning-header span:not(:first-child) {
+
+    text-align:
+        center;
+
+}
+
+
+.mlb-inning-header span:nth-last-child(3),
+.mlb-inning-row span:nth-last-child(3) {
+
+    border-left:
+        1px solid
+        var(--mlb-cream);
+
+    padding-left:
+        7px;
+
+    margin-left:
+        4px;
+
+}
+
+
+.mlb-inning-header span:nth-last-child(-n+2),
+.mlb-inning-row span:nth-last-child(-n+2) {
+
+    padding-left:
+        3px;
+
+}
+
+
+.mlb-team {
+
+    font-weight:
+        500;
+
+}
+
+
+.mlb-decisions {
+
+    margin-top:
+        4px;
+
+    font-size:
+        clamp(
+            8px,
+            0.65vw,
+            13px
+        );
+
+    letter-spacing:
+        1px;
+
+    color:
+        var(--mlb-muted);
+
+    white-space:
+        nowrap;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+}
+
+
+.mlb-game-length {
+
+    margin-bottom:
+        2px;
+
+}
+
+
+.mlb-home-runs {
+
+    margin-top:
+        2px;
+
+    font-size:
+        clamp(
+            8px,
+            0.65vw,
+            13px
+        );
+
+    letter-spacing:
+        0.75px;
+
+    color:
+        var(--mlb-muted);
+
+    white-space:
+        nowrap;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+}
+
+
+.mlb-featured-message {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        80px;
+
+    font-size:
+        14px;
+
+    letter-spacing:
+        3px;
+
+    color:
+        var(--mlb-muted);
+
+}
+
+
+/*
+ * ============================================================
+ * OUT-OF-TOWN SCOREBOARD
+ * ============================================================
+ */
+
+.mlb-games {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    column-gap:
+        28px;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+}
+
+
+.mlb-league-header {
+
+    margin-bottom:
+        5px;
+
+    padding-bottom:
+        4px;
+
+    border-bottom:
+        1px solid
+        var(--mlb-cream);
+
+    font-size:
+        clamp(
+            12px,
+            0.9vw,
+            18px
+        );
+
+    font-weight:
+        500;
+
+    letter-spacing:
+        3px;
+
+}
+
+
+.mlb-league-games {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    column-gap:
+        18px;
+
+    margin-bottom:
+        8px;
+
+}
+
+
+.mlb-game-column {
+
+    min-width:
+        0;
+
+}
+
+
+.mlb-game {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(
+            0,
+            1fr
+        )
+        32px;
+
+    align-items:
+        center;
+
+    padding:
+        3px 0;
+
+    border-bottom:
+        1px solid
+        var(--mlb-line);
+
+}
+
+
+.mlb-team-row {
+
+    display:
+        contents;
+
+}
+
+
+.mlb-team {
+
+    font-size:
+        clamp(
+            11px,
+            0.8vw,
+            17px
+        );
+
+    font-weight:
+        400;
+
+    letter-spacing:
+        1px;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.mlb-score {
+
+    font-size:
+        clamp(
+            11px,
+            0.8vw,
+            17px
+        );
+
+    text-align:
+        right;
+
+    letter-spacing:
+        1px;
+
+    font-variant-numeric:
+        tabular-nums;
+
+}
+
+
+.mlb-loading,
+.mlb-no-games {
+
+    padding:
+        20px;
+
+    text-align:
+        center;
+
+    font-size:
+        12px;
+
+    letter-spacing:
+        2px;
+
+    color:
+        var(--mlb-muted);
+
+}
+
+
+/*
+ * ============================================================
+ * SMALLER DASHBOARD HEIGHTS
+ * ============================================================
+ */
+
+@media (
+    max-height: 700px
+) {
+
+    .mlb-scoreboard {
+
+        padding:
+            12px 18px;
+
+    }
+
+
+    .mlb-header {
+
+        margin-bottom:
+            7px;
+
+    }
+
+
+    .mlb-featured-games {
+
+        margin-bottom:
+            6px;
+
+    }
+
+}

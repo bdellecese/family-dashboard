@@ -118,5 +118,14 @@ export async function registerWidgets() {
         "../widgets/photo/photo.js"
     );
 
+    await registerWidget(
+        "sports-scoreboard",
+        "../widgets/sports-scoreboard/sports-scoreboard.js"
+    );
+
+    await registerWidget(
+        "sports-standings",
+        "../widgets/sports-standings/sports-standings.js"
+    )
 
 }
