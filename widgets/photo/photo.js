@@ -130,28 +130,30 @@ const photo = {
         // ====================================================
 
         const imageA =
-            createImage();
-
-        imageA.classList.add(
-            "photo-widget__image",
-            "photo-widget__image--active"
-        );
+            createImageLayer();
 
 
         const imageB =
-            createImage();
+            createImageLayer();
 
-        imageB.classList.add(
-            "photo-widget__image"
+
+        imageA.wrapper.classList.add(
+            "photo-widget__image-layer",
+            "photo-widget__image-layer--active"
+        );
+
+
+        imageB.wrapper.classList.add(
+            "photo-widget__image-layer"
         );
 
 
         wrapper.appendChild(
-            imageA
+            imageA.wrapper
         );
 
         wrapper.appendChild(
-            imageB
+            imageB.wrapper
         );
 
 
@@ -201,8 +203,10 @@ const photo = {
             initialPhoto.index;
 
 
-        imageA.src =
-            initialPhoto.photo.url;
+        setImage(
+            imageA,
+            initialPhoto.photo.url
+        );
 
 
         caption.textContent =
@@ -316,13 +320,6 @@ const photo = {
 
                 /*
                  * Find the next photo that actually loads.
-                 *
-                 * We deliberately preload the image using a
-                 * temporary Image object rather than assigning
-                 * the URL directly to the visible image.
-                 *
-                 * This prevents a broken-image thumbnail from
-                 * appearing when an iCloud asset URL fails.
                  */
 
                 const nextPhoto =
@@ -344,24 +341,30 @@ const photo = {
 
 
                 /*
-                 * The image has already been successfully loaded
-                 * by findLoadablePhoto().
+                 * The image has already been successfully
+                 * preloaded.
                  *
-                 * It is now safe to assign the URL to the
-                 * inactive display layer.
+                 * Load it into the inactive layer before
+                 * making that layer visible.
                  */
 
-                inactiveImage.src =
-                    nextPhoto.photo.url;
-
-
-                activeImage.classList.remove(
-                    "photo-widget__image--active"
+                setImage(
+                    inactiveImage,
+                    nextPhoto.photo.url
                 );
 
 
-                inactiveImage.classList.add(
-                    "photo-widget__image--active"
+                /*
+                 * Crossfade to the new image.
+                 */
+
+                activeImage.wrapper.classList.remove(
+                    "photo-widget__image-layer--active"
+                );
+
+
+                inactiveImage.wrapper.classList.add(
+                    "photo-widget__image-layer--active"
                 );
 
 
@@ -370,6 +373,10 @@ const photo = {
                         nextPhoto.photo
                     );
 
+
+                /*
+                 * Swap active/inactive layers.
+                 */
 
                 const temp =
                     activeImage;
@@ -634,6 +641,109 @@ function preloadImage(
 
 
 // ============================================================
+// CREATE IMAGE LAYER
+// ============================================================
+
+function createImageLayer() {
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className =
+        "photo-widget__image-layer";
+
+
+    /*
+     * Blurred background image.
+     */
+
+    const background =
+        document.createElement("img");
+
+    background.className =
+        "photo-widget__image-background";
+
+
+    background.alt =
+        "";
+
+
+    background.loading =
+        "eager";
+
+
+    background.draggable =
+        false;
+
+
+    /*
+     * Actual photo.
+     */
+
+    const image =
+        document.createElement("img");
+
+    image.className =
+        "photo-widget__image";
+
+
+    image.alt =
+        "Shared album photo";
+
+
+    image.loading =
+        "eager";
+
+
+    image.draggable =
+        false;
+
+
+    wrapper.appendChild(
+        background
+    );
+
+    wrapper.appendChild(
+        image
+    );
+
+
+    return {
+        wrapper,
+        background,
+        image
+    };
+
+}
+
+
+// ============================================================
+// SET IMAGE
+// ============================================================
+
+function setImage(
+    layer,
+    url
+) {
+
+    /*
+     * Use the same photo for both layers.
+     *
+     * The background uses cover + blur.
+     * The foreground uses contain.
+     */
+
+    layer.background.src =
+        url;
+
+
+    layer.image.src =
+        url;
+
+}
+
+
+// ============================================================
 // SHOW ERROR
 // ============================================================
 
@@ -654,33 +764,6 @@ function showError(
     wrapper.appendChild(
         error
     );
-
-}
-
-
-// ============================================================
-// CREATE IMAGE
-// ============================================================
-
-function createImage() {
-
-    const image =
-        document.createElement("img");
-
-
-    image.alt =
-        "Shared album photo";
-
-
-    image.loading =
-        "eager";
-
-
-    image.draggable =
-        false;
-
-
-    return image;
 
 }
 

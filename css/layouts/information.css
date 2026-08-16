@@ -1,313 +1,632 @@
+/*
+ * ============================================================
+ * INFORMATION LAYOUT
+ *
+ * Main screen is divided into:
+ *
+ * LEFT PANEL  |  RIGHT PANEL
+ *
+ * Left panel:
+ *   - Date / Time
+ *   - Photo
+ *   - Weather Alerts
+ *
+ * Right panel:
+ *   - Top: Calendar + News + Countdown
+ *   - Bottom: Prayer/WiFi + Weather + Menu
+ * ============================================================
+ */
+
 .information-layout {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
 
-    width: 100%;
-    height: 100%;
-    min-height: 0;
+    display:
+        grid;
 
-    gap: 10px;
+    grid-template-columns:
+        1fr
+        2fr;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-height:
+        0;
+
+    gap:
+        10px;
 }
 
+
 /*
+ * ============================================================
  * LEFT PANEL
+ *
+ * Contains:
+ *   1. Date / Time
+ *   2. Photo
+ *   3. Weather Alerts
+ *
+ * Layout:
+ *   auto
+ *   flexible photo area
+ *   auto
+ * ============================================================
  */
 
 .left-panel {
 
-    display: grid;
+    display:
+        grid;
 
     grid-template-rows:
         auto
         minmax(0, 1fr)
         auto;
 
-    width: 100%;
-    height: 100%;
+    width:
+        100%;
 
-    min-height: 0;
-    min-width: 0;
+    height:
+        100%;
 
-    gap: 10px;
+    min-height:
+        0;
 
-    overflow: hidden;
+    min-width:
+        0;
+
+    gap:
+        10px;
+
+    overflow:
+        hidden;
 }
 
+
 /*
-RIGHT PANEL
-*/
+ * ============================================================
+ * RIGHT PANEL
+ *
+ * Divided vertically into:
+ *
+ *   TOP    = Calendar / News / Countdown
+ *   BOTTOM = Prayer / WiFi / Weather / Menu
+ *
+ * Top occupies approximately 1/3.
+ * Bottom occupies approximately 2/3.
+ * ============================================================
+ */
 
 .right-panel {
 
-    display: grid;
+    display:
+        grid;
 
     grid-template-rows:
         minmax(0, 1fr)
         minmax(0, 2fr);
 
-    width: 100%;
-    height: 100%;
-    min-height: 0;
+    width:
+        100%;
 
-    gap: 10px;
+    height:
+        100%;
+
+    min-height:
+        0;
+
+    gap:
+        10px;
 }
 
 
 /*
-TOP RIGHT
-*/
-
+ * ============================================================
+ * RIGHT TOP
+ *
+ * Divided horizontally into:
+ *
+ *   LEFT  = Calendar
+ *   RIGHT = News + Countdown
+ *
+ * Column proportions:
+ *   1/3 Calendar
+ *   2/3 News + Countdown
+ *
+ * Purple gradient provides the shared background.
+ * ============================================================
+ */
 
 .right-top {
 
-    display: grid;
+    display:
+        grid;
 
     grid-template-columns:
         minmax(0, 1fr)
         minmax(0, 2fr);
 
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
+    width:
+        100%;
 
-    gap: 10px;
+    height:
+        100%;
 
-    border-radius: 16px;
+    min-width:
+        0;
 
-    color: rgb(255, 255, 255);
+    min-height:
+        0;
 
-    background-color: rgb(62, 44, 147);
+    gap:
+        10px;
 
-    background: linear-gradient(
-        135deg,
-        rgb(62, 44, 147) 0%,
-        rgb(142, 14, 140) 100%
-    );
+    border-radius:
+        16px;
+
+    color:
+        rgb(255, 255, 255);
+
+    background-color:
+        rgb(62, 44, 147);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgb(62, 44, 147) 0%,
+            rgb(142, 14, 140) 100%
+        );
 }
 
+
 /*
-RIGHT TOP CONTENT
-*/
+ * ============================================================
+ * RIGHT TOP CONTENT
+ *
+ * Contains the News / Calendar summary area and Countdown.
+ *
+ * Split vertically:
+ *
+ *   TOP    = Calendar + News
+ *   BOTTOM = Countdown
+ * ============================================================
+ */
 
 .right-top-content {
-    display: grid;
+
+    display:
+        grid;
 
     grid-template-rows:
         minmax(0, 1fr)
         minmax(0, 1fr);
 
-    width: 100%;
-    min-height: 0;
+    width:
+        100%;
 
-    gap: 10px;
+    min-height:
+        0;
+
+    gap:
+        10px;
 }
 
 
 /*
-TOP SUMMARY
-*/
+ * ============================================================
+ * TOP SUMMARY
+ *
+ * Divided horizontally into:
+ *
+ *   LEFT  = Calendar
+ *   RIGHT = News
+ *
+ * Each occupies 50%.
+ * ============================================================
+ */
 
 .top-summary {
 
-    display: grid;
+    display:
+        grid;
 
     grid-template-columns:
         minmax(0, 1fr)
         minmax(0, 1fr);
 
-    width: 100%;
-    min-height: 0;
+    width:
+        100%;
 
-    gap: 10px;
+    min-height:
+        0;
+
+    gap:
+        10px;
 }
 
 
 /*
-COUNTDOWN
-*/
+ * ============================================================
+ * COUNTDOWN
+ *
+ * Occupies the bottom half of the Right Top Content area.
+ * ============================================================
+ */
 
 .countdown {
-    width: 100%;
-    min-height: 0;
+
+    width:
+        100%;
+
+    min-height:
+        0;
 }
 
 
 /*
-RIGHT BOTTOM
-*/
-
-/*
-RIGHT BOTTOM
-*/
+ * ============================================================
+ * RIGHT BOTTOM
+ *
+ * Divided horizontally into three columns:
+ *
+ *   COLUMN 1 = Prayer + WiFi
+ *   COLUMN 2 = Weather + Placeholder
+ *   COLUMN 3 = Family Menu
+ *
+ * Each column occupies approximately 1/3 width.
+ * ============================================================
+ */
 
 .right-bottom {
 
-    display: grid;
+    display:
+        grid;
 
     grid-template-columns:
         minmax(0, 1fr)
         minmax(0, 1fr)
         minmax(0, 1fr);
 
-    width: 100%;
-    height: 100%;
-    min-height: 0;
+    width:
+        100%;
 
-    gap: 10px;
+    height:
+        100%;
 
-    overflow: hidden;
+    min-height:
+        0;
+
+    gap:
+        10px;
+
+    overflow:
+        hidden;
 }
 
+
 /*
-RIGHT BOTTOM COLUMNS
-background-colorrgb(139, 64, 0)
-*/
+ * ============================================================
+ * PRAYER COLUMN
+ *
+ * Contains:
+ *
+ *   TOP    = Prayer
+ *   BOTTOM = WiFi
+ *
+ * Proportions:
+ *   3/4 Prayer
+ *   1/4 WiFi
+ * ============================================================
+ */
 
 .prayer-column {
 
-    display: grid;
+    display:
+        grid;
 
     grid-template-rows:
         minmax(0, 3fr)
         minmax(0, 1fr);
 
-    width: 100%;
-    height: 100%;
-    min-height: 0;
+    width:
+        100%;
 
-    gap: 10px;
+    height:
+        100%;
 
-    border-radius: 16px;
+    min-height:
+        0;
 
-    overflow: hidden;
+    gap:
+        10px;
 
+    border-radius:
+        16px;
+
+    overflow:
+        hidden;
 }
+
+
+/*
+ * ============================================================
+ * PRAYER WIDGET
+ *
+ * Large upper section of the Prayer column.
+ * ============================================================
+ */
 
 .prayer {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
 
-    border-radius: 16px;
+    width:
+        100%;
 
-    background-color: rgb(139, 64, 0);
+    height:
+        100%;
 
-    overflow: hidden;
+    min-height:
+        0;
+
+    border-radius:
+        16px;
+
+    background-color:
+        rgb(139, 64, 0);
+
+    overflow:
+        hidden;
 }
+
+
+/*
+ * ============================================================
+ * WIFI WIDGET
+ *
+ * Smaller lower section of the Prayer column.
+ * ============================================================
+ */
 
 .wifi {
-    width: 100%;
-    height: 100%;
 
-    min-height: 0;
+    width:
+        100%;
 
-    border-radius: 16px;
+    height:
+        100%;
 
-    background-color: rgb(255,255,255);
+    min-height:
+        0;
 
-    overflow: hidden;
+    border-radius:
+        16px;
+
+    background-color:
+        rgb(255, 255, 255);
+
+    overflow:
+        hidden;
 }
+
+
+/*
+ * ============================================================
+ * PHOTO WIDGET
+ *
+ * Used by the large photo area in the left panel.
+ * ============================================================
+ */
 
 .photo {
-    width: 100%;
-    height: 100%;
 
-    min-height: 0;
+    width:
+        100%;
 
-    border-radius: 16px;
+    height:
+        100%;
 
-    background-color: rgb(255,255,255);
+    min-height:
+        0;
 
-    overflow: hidden;
+    border-radius:
+        16px;
+
+    overflow:
+        hidden;
 }
+
+
+/*
+ * ============================================================
+ * WEATHER ALERTS WIDGET
+ *
+ * Small weather alert area in the left panel.
+ * ============================================================
+ */
 
 .weather-alerts {
-    width: 100%;
-    height: 100%;
 
-    min-height: 0;
+    width:
+        100%;
 
-    border-radius: 16px;
+    height:
+        100%;
 
-    background-color: rgb(255,255,255);
+    min-height:
+        0;
 
-    overflow: hidden;
+    border-radius:
+        16px;
+
+    overflow:
+        hidden;
 }
 
 
-.weather {
-    width: 100%;
-    height: 100%;
-
-    min-height: 0;
-
-    border-radius: 16px;
-
-    background-color: rgb(19, 153, 176);
-
-    background: linear-gradient(
-        135deg,
-        rgb(19, 153, 176) 0%,
-        rgb(62, 144, 147) 100%
-    );
-
-}
-
-.calendar-list {
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-
-    touch-action: none;
-}
+/*
+ * ============================================================
+ * WEATHER COLUMN
+ *
+ * Contains:
+ *
+ *   TOP    = Weather
+ *   BOTTOM = Placeholder
+ *
+ * Proportions:
+ *   3/4 Weather
+ *   1/4 Placeholder
+ * ============================================================
+ */
 
 .weather-column {
 
-    width: 100%;
-    height: 100%;
-    min-height: 0;
+    width:
+        100%;
 
-    display: grid;
+    height:
+        100%;
+
+    min-height:
+        0;
+
+    display:
+        grid;
 
     grid-template-rows:
         minmax(0, 3fr)
         minmax(0, 1fr);
 
-    overflow: hidden;
+    overflow:
+        hidden;
 }
 
 
+/*
+ * ============================================================
+ * WEATHER WIDGET
+ *
+ * Main weather display in the Weather column.
+ * ============================================================
+ */
+
+.weather {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-height:
+        0;
+
+    border-radius:
+        16px;
+
+    background-color:
+        rgb(19, 153, 176);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgb(19, 153, 176) 0%,
+            rgb(62, 144, 147) 100%
+        );
+}
+
+
+/*
+ * ============================================================
+ * CALENDAR LIST
+ *
+ * Prevents calendar content from overflowing its region.
+ * ============================================================
+ */
+
+.calendar-list {
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+    touch-action:
+        none;
+}
+
+
+/*
+ * ============================================================
+ * MENU COLUMN
+ *
+ * Contains the Family Menu widget.
+ *
+ * Occupies the full height of the third column.
+ * ============================================================
+ */
+
 .menu-column {
 
-    display: grid;
+    display:
+        grid;
 
     grid-template-rows:
         minmax(0, 1fr);
 
-    width: 100%;
-    height: 100%;
-    min-height: 0;
+    width:
+        100%;
 
-    border-radius: 16px;
+    height:
+        100%;
 
-    color: rgb(255, 255, 255);
-    background-color: rgb(0, 71, 113);
+    min-height:
+        0;
 
-    overflow: hidden;
+    border-radius:
+        16px;
+
+    color:
+        rgb(255, 255, 255);
+
+    background-color:
+        rgb(0, 71, 113);
+
+    overflow:
+        hidden;
 }
 
+
 /*
-WIDGET DEFAULTS
-*/
+ * ============================================================
+ * WIDGET DEFAULTS
+ *
+ * Generic widget container rules used throughout the
+ * information layout.
+ *
+ * Prevents widgets from overflowing their grid cells.
+ * ============================================================
+ */
 
 .widget {
 
-    min-height: 0;
-    min-width: 0;
+    min-height:
+        0;
 
-    width: 100%;
-    height: 100%;
+    min-width:
+        0;
 
-    overflow: hidden;
+    width:
+        100%;
+
+    height:
+        100%;
+
+    overflow:
+        hidden;
 }

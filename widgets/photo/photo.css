@@ -16,6 +16,74 @@
 }
 
 
+/* ============================================================
+ * IMAGE LAYER
+ * ============================================================ */
+
+.photo-widget__image-layer {
+
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    opacity: 0;
+
+    transition:
+        opacity 1.5s ease-in-out;
+
+}
+
+
+/* ============================================================
+ * ACTIVE IMAGE LAYER
+ * ============================================================ */
+
+.photo-widget__image-layer--active {
+
+    opacity: 1;
+
+}
+
+
+/* ============================================================
+ * BLURRED BACKGROUND
+ * ============================================================ */
+
+.photo-widget__image-background {
+
+    position: absolute;
+
+    inset: -20px;
+
+    width: calc(100% + 40px);
+    height: calc(100% + 40px);
+
+    object-fit: cover;
+
+    filter:
+        blur(20px);
+
+    transform:
+        scale(1.05);
+
+    opacity: .65;
+
+    user-select: none;
+
+    pointer-events: none;
+
+}
+
+
+/* ============================================================
+ * ACTUAL PHOTO
+ * ============================================================ */
+
 .photo-widget__image {
 
     position: absolute;
@@ -25,24 +93,18 @@
     width: 100%;
     height: 100%;
 
-    object-fit: cover;
-
-    opacity: 0;
-
-    transition:
-        opacity 1.5s ease-in-out;
+    object-fit: contain;
 
     user-select: none;
 
     pointer-events: none;
+
 }
 
 
-.photo-widget__image--active {
-
-    opacity: 1;
-}
-
+/* ============================================================
+ * CAPTION
+ * ============================================================ */
 
 .photo-widget__caption {
 
@@ -74,8 +136,13 @@
         );
 
     opacity: .9;
+
 }
 
+
+/* ============================================================
+ * ERROR
+ * ============================================================ */
 
 .photo-widget__error {
 
@@ -92,4 +159,5 @@
     font-size: .7vw;
 
     opacity: .65;
+
 }
