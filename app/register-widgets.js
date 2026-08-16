@@ -126,6 +126,6 @@ export async function registerWidgets() {
     await registerWidget(
         "sports-standings",
         "../widgets/sports-standings/sports-standings.js"
-    )
+    );
 
 }

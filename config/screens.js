@@ -5,9 +5,9 @@
  */
 
 export const screenOrder = [
-/*    "information",
+    "information",
     "calendar",
-    "chores-fun",*/
+    "chores-fun",
     "sports"
 ];
 
@@ -720,42 +720,34 @@ sports: {
 
                 config: {
 
-                    feed:
-                        "http://feeds.bbci.co.uk/sport/rss.xml",
+                    feeds: [
+
+                       "http://feeds.bbci.co.uk/sport/rss.xml",
+
+                        "https://www.eyefootball.com/football_news.xml"
+
+                    ],
 
                     label:
                         "SPORTS NEWS",
 
                     rotationSeconds:
-                        30
+                        30,
 
+                    includeImage:
+                        true
                 }
 
             },
 
-
             {
 
                 name:
-                    "calendar-list",
-
-                config: {
-
-                    calendars: [
-
-                        "146377806ee0218992f826b434d72b37455f216a16304399637f785714487d17@group.calendar.google.com"
-
-                    ],
-
-                    days:
-                        7,
-
-                    showCalendarName:
-                        false
-
-                }
+                    "placeholder"
 
             }
+
+
 
         ],
 
@@ -778,13 +770,29 @@ sports: {
 
             },
 
-
-            {
+                        {
 
                 name:
-                    "placeholder"
+                    "calendar-list",
+
+                config: {
+
+                    calendars: [
+
+                        "146377806ee0218992f826b434d72b37455f216a16304399637f785714487d17@group.calendar.google.com"
+
+                    ],
+
+                    days:
+                        7,
+
+                    showCalendarName:
+                        false
+
+                }
 
             }
+
 
         ]
 

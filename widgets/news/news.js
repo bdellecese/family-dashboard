@@ -16,13 +16,39 @@ const news = {
          * CONFIGURATION
          */
 
-        const feedUrl =
-            config.feed ||
-            "http://feeds.bbci.co.uk/news/world/rss.xml";
+        let feedUrls;
+
+        if (
+            Array.isArray(
+                config.feeds
+            ) &&
+            config.feeds.length > 0
+        ) {
+
+            feedUrls =
+                config.feeds;
+
+        }
+
+        else {
+
+            feedUrls = [
+
+                config.feed ||
+                "http://feeds.bbci.co.uk/news/world/rss.xml"
+
+            ];
+
+        }
+
 
         const rotationSeconds =
             config.rotationSeconds ||
             30;
+
+
+        const includeImage =
+            config.includeImage === true;
 
 
         /*
@@ -41,19 +67,27 @@ const news = {
 
 
         /*
-         * LOAD FEED
+         * LOAD FEEDS
          */
 
-        let stories;
+        let feedResults;
 
         try {
 
-            stories =
-                await rssData.getFeed(
-                    feedUrl
+            feedResults =
+                await Promise.allSettled(
+
+                    feedUrls.map(
+                        feedUrl =>
+                            rssData.getFeed(
+                                feedUrl
+                            )
+                    )
+
                 );
 
         }
+
         catch (error) {
 
             console.error(
@@ -61,22 +95,81 @@ const news = {
                 error
             );
 
-            const errorMessage =
-                document.createElement("div");
-
-            errorMessage.className =
-                "news-widget__error";
-
-            errorMessage.textContent =
-                "Unable to load news";
-
-            wrapper.appendChild(
-                errorMessage
-            );
-
-            return;
+            feedResults = [];
 
         }
+
+
+        /*
+         * COMBINE STORIES
+         */
+
+        const stories =
+            feedResults
+                .filter(
+                    result =>
+                        result.status ===
+                        "fulfilled"
+                )
+                .flatMap(
+                    result =>
+                        result.value || []
+                );
+
+
+        /*
+         * LOG FAILED FEEDS
+         */
+
+        feedResults
+            .forEach(
+                (result, index) => {
+
+                    if (
+                        result.status ===
+                        "rejected"
+                    ) {
+
+                        console.error(
+                            `News feed error (${feedUrls[index]}):`,
+                            result.reason
+                        );
+
+                    }
+
+                }
+            );
+
+
+        /*
+         * SORT STORIES
+         *
+         * Newest stories first.
+         */
+
+        stories.sort(
+            (
+                a,
+                b
+            ) => {
+
+                const dateA =
+                    new Date(
+                        a.published
+                    ).getTime();
+
+                const dateB =
+                    new Date(
+                        b.published
+                    ).getTime();
+
+                return (
+                    dateB -
+                    dateA
+                );
+
+            }
+        );
 
 
         /*
@@ -84,7 +177,6 @@ const news = {
          */
 
         if (
-            !stories ||
             stories.length === 0
         ) {
 
@@ -121,6 +213,57 @@ const news = {
             "WORLD NEWS";
 
 
+        /*
+         * STORY CONTENT
+         */
+
+        const storyContent =
+            document.createElement("div");
+
+        storyContent.className =
+            "news-widget__story";
+
+
+        /*
+         * IMAGE
+         */
+
+        let image = null;
+
+        if (
+            includeImage
+        ) {
+
+            image =
+                document.createElement("img");
+
+            image.className =
+                "news-widget__image";
+
+            image.alt =
+                "";
+
+            image.loading =
+                "eager";
+
+            storyContent.appendChild(
+                image
+            );
+
+        }
+
+
+        /*
+         * TEXT
+         */
+
+        const textContent =
+            document.createElement("div");
+
+        textContent.className =
+            "news-widget__text";
+
+
         const headline =
             document.createElement("div");
 
@@ -142,6 +285,28 @@ const news = {
             "news-widget__metadata";
 
 
+        textContent.appendChild(
+            headline
+        );
+
+        textContent.appendChild(
+            description
+        );
+
+        textContent.appendChild(
+            metadata
+        );
+
+
+        storyContent.appendChild(
+            textContent
+        );
+
+
+        /*
+         * PROGRESS
+         */
+
         const progress =
             document.createElement("div");
 
@@ -161,20 +326,16 @@ const news = {
         );
 
 
+        /*
+         * BUILD WIDGET
+         */
+
         wrapper.appendChild(
             label
         );
 
         wrapper.appendChild(
-            headline
-        );
-
-        wrapper.appendChild(
-            description
-        );
-
-        wrapper.appendChild(
-            metadata
+            storyContent
         );
 
         wrapper.appendChild(
@@ -187,7 +348,10 @@ const news = {
          */
 
         let currentIndex =
-            0;
+            Math.floor(
+                Math.random() *
+                stories.length
+            );
 
 
         function renderStory() {
@@ -239,11 +403,64 @@ const news = {
             );
 
 
+            if (
+                image
+            ) {
+
+                image.classList.remove(
+                    "news-widget__fade"
+                );
+
+            }
+
+
             /*
              * Force animation restart
              */
 
             void headline.offsetWidth;
+
+
+            /*
+             * IMAGE
+             */
+
+            if (
+                image
+            ) {
+
+                if (
+                    story.image
+                ) {
+
+                    image.src =
+                        story.image;
+
+                    image.style.display =
+                        "block";
+
+                    storyContent.classList.add(
+                        "news-widget__story--image"
+                    );
+
+                }
+
+                else {
+
+                    image.removeAttribute(
+                        "src"
+                    );
+
+                    image.style.display =
+                        "none";
+
+                    storyContent.classList.remove(
+                        "news-widget__story--image"
+                    );
+
+                }
+
+            }
 
 
             /*
@@ -275,7 +492,7 @@ const news = {
 
 
             /*
-             * Fade in
+             * FADE IN
              */
 
             headline.classList.add(
@@ -291,8 +508,20 @@ const news = {
             );
 
 
+            if (
+                image &&
+                story.image
+            ) {
+
+                image.classList.add(
+                    "news-widget__fade"
+                );
+
+            }
+
+
             /*
-             * Reset progress bar
+             * RESET PROGRESS BAR
              */
 
             progressBar.style.animation =

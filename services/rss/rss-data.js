@@ -108,7 +108,12 @@ const rssData = {
 
                     source:
                         data.feed?.title ||
-                        ""
+                        "",
+
+                    image:
+                        getImageUrl(
+                            item
+                        )
 
                 })
             )
@@ -120,6 +125,136 @@ const rssData = {
     }
 
 };
+
+
+/*
+ * GET IMAGE URL
+ *
+ * rss2json can expose images in
+ * several different places depending
+ * on the source feed.
+ */
+
+function getImageUrl(
+    item
+) {
+
+    /*
+     * Thumbnail
+     */
+
+    if (
+        item.thumbnail
+    ) {
+
+        return item.thumbnail;
+
+    }
+
+
+    /*
+     * Enclosure
+     */
+
+    if (
+        item.enclosure?.link
+    ) {
+
+        return item.enclosure.link;
+
+    }
+
+
+    /*
+     * Media content
+     */
+
+    if (
+        item.media?.content?.url
+    ) {
+
+        return item.media.content.url;
+
+    }
+
+
+    /*
+     * Media thumbnail
+     */
+
+    if (
+        item.media?.thumbnail?.url
+    ) {
+
+        return item.media.thumbnail.url;
+
+    }
+
+
+    /*
+     * IMAGE IN DESCRIPTION
+     *
+     * Some RSS feeds, including
+     * EyeFootball, embed the image
+     * directly inside the description HTML.
+     */
+
+    if (
+        item.description
+    ) {
+
+        const match =
+            item.description.match(
+                /<img[^>]+src=["']([^"']+)["']/i
+            );
+
+        if (
+            match &&
+            match[1]
+        ) {
+
+            return match[1];
+
+        }
+
+    }
+
+
+    /*
+     * IMAGE IN CONTENT
+     *
+     * Fallback for feeds that put
+     * the image in content instead.
+     */
+
+    if (
+        item.content
+    ) {
+
+        const match =
+            item.content.match(
+                /<img[^>]+src=["']([^"']+)["']/i
+            );
+
+        if (
+            match &&
+            match[1]
+        ) {
+
+            return match[1];
+
+        }
+
+    }
+
+
+    /*
+     * No image available
+     */
+
+    return null;
+
+}
 
 
 export default rssData;
