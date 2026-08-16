@@ -119,6 +119,11 @@ export async function registerWidgets() {
     );
 
     await registerWidget(
+        "sonos-status",
+        "../widgets/sonos-status/sonos-status.js"
+    );
+
+    await registerWidget(
         "sports-scoreboard",
         "../widgets/sports-scoreboard/sports-scoreboard.js"
     );

@@ -536,6 +536,35 @@
         );
 }
 
+/*
+ * ============================================================
+ * SONOS STATUS WIDGET
+ *
+ * Bottom section of the Weather column.
+ * ============================================================
+ */
+
+.sonos-status {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-height:
+        0;
+
+    border-radius:
+        16px;
+
+    background-color:
+        rgb(35, 35, 35);
+
+    overflow:
+        hidden;
+}
+
 
 /*
  * ============================================================

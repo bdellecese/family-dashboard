@@ -119,14 +119,18 @@ export const screens = {
 
 
             /*
+             * ====================================================
              * RIGHT PANEL
+             * ====================================================
              */
 
             "right-panel": {
 
 
                 /*
+                 * ==================================================
                  * TOP RIGHT
+                 * ==================================================
                  */
 
                 "right-top": {
@@ -216,11 +220,19 @@ export const screens = {
 
 
                 /*
+                 * ==================================================
                  * RIGHT BOTTOM
+                 * ==================================================
                  */
 
                 "right-bottom": {
 
+
+                    /*
+                     * =================================================
+                     * PRAYER + WIFI
+                     * =================================================
+                     */
 
                     "prayer-column": {
 
@@ -267,6 +279,12 @@ export const screens = {
                     },
 
 
+                    /*
+                     * =================================================
+                     * WEATHER + SONOS
+                     * =================================================
+                     */
+
                     "weather-column": {
 
 
@@ -289,12 +307,22 @@ export const screens = {
                         ],
 
 
-                        "placeholder": [
+                        "sonos-status": [
 
                             {
 
                                 name:
-                                    "placeholder"
+                                    "sonos-status",
+
+                                config: {
+
+                                    speaker:
+                                        "Kitchen",
+
+                                    refreshInterval:
+                                        10000
+
+                                }
 
                             }
 
@@ -302,6 +330,12 @@ export const screens = {
 
                     },
 
+
+                    /*
+                     * =================================================
+                     * FAMILY MENU
+                     * =================================================
+                     */
 
                     "menu-column": [
 
@@ -401,403 +435,390 @@ export const screens = {
     },
 
 
-/*
- * ============================================================
- * CHORES + FUN
- * ============================================================
- */
+    /*
+     * ============================================================
+     * CHORES + FUN
+     * ============================================================
+     */
 
-"chores-fun": {
+    "chores-fun": {
 
-    layout:
-        "chores-fun-layout",
+        layout:
+            "chores-fun-layout",
 
-    theme:
-        "light",
+        theme:
+            "light",
 
-    duration: {
+        duration: {
 
-        seconds:
-            60
+            seconds:
+                60
 
-    },
+        },
 
-    regions: {
+        regions: {
 
 
-        /*
-         * ====================================================
-         * FULL-WIDTH BANNER
-         * ====================================================
-         */
+            /*
+             * ====================================================
+             * FULL-WIDTH BANNER
+             * ====================================================
+             */
 
-        "screen-banner": [
+            "screen-banner": [
 
-            {
+                {
 
-                name:
-                    "text",
+                    name:
+                        "text",
 
-                config: {
+                    config: {
 
-                    text:
-                        "Hard work before play at 28 Patriot Way"
+                        text:
+                            "Hard work before play at 28 Patriot Way"
+
+                    }
 
                 }
 
-            }
-
-        ],
+            ],
 
 
-        /*
-         * ====================================================
-         * COLUMN 1
-         *
-         * Kids chores
-         * ====================================================
-         */
+            /*
+             * ====================================================
+             * COLUMN 1
+             * ====================================================
+             */
 
-        "column-1": [
+            "column-1": [
 
-            {
+                {
 
-                name:
-                    "kids-chores"
+                    name:
+                        "kids-chores"
 
-            }
+                }
 
-        ],
+            ],
 
 
-        /*
-         * ====================================================
-         * COLUMN 2
-         *
-         * Household chores
-         * ====================================================
-         */
+            /*
+             * ====================================================
+             * COLUMN 2
+             * ====================================================
+             */
 
-        "column-2": [
+            "column-2": [
 
-            {
+                {
 
-                name:
-                    "household-chores"
+                    name:
+                        "household-chores"
 
-            }
+                }
 
-        ],
+            ],
 
 
-        /*
-         * ====================================================
-         * SCHOOL LUNCH
-         *
-         * Spans columns 1 + 2
-         * ====================================================
-         */
+            /*
+             * ====================================================
+             * SCHOOL LUNCH
+             * ====================================================
+             */
 
-        "school-lunch": [
+            "school-lunch": [
 
-            {
+                {
 
-                name:
-                    "school-lunch"
+                    name:
+                        "school-lunch"
 
-            }
+                }
 
-        ],
+            ],
 
 
-        /*
-         * ====================================================
-         * COLUMN 3
-         * ====================================================
-         */
+            /*
+             * ====================================================
+             * COLUMN 3
+             * ====================================================
+             */
 
-        "column-3": [
+            "column-3": [
 
-            {
+                {
 
-                name:
-                    "playing-time"
+                    name:
+                        "playing-time"
 
-            },
+                },
 
-            {
+                {
 
-                name:
-                    "on-this-day"
+                    name:
+                        "on-this-day"
 
-            },
+                },
 
-            {
+                {
 
-                name:
-                    "did-you-know"
+                    name:
+                        "did-you-know"
 
-            },
+                }
+
+            ],
 
 
-        ],
+            /*
+             * ====================================================
+             * COLUMN 4
+             * ====================================================
+             */
 
+            "column-4": [
 
-        /*
-         * ====================================================
-         * COLUMN 4
-         * ====================================================
-         */
+                {
 
-        "column-4": [
+                    name:
+                        "word-of-day"
 
-            {
+                },
 
-                name:
-                    "word-of-day"
+                {
 
-            },
+                    name:
+                        "quote-of-day"
 
-            {
+                },
 
-                name:
-                    "quote-of-day"
+                {
 
-            },
+                    name:
+                        "dad-wisdom"
 
-            {
+                }
 
-                name:
-                    "dad-wisdom"
+            ]
 
-            }
-        ]
-
-    }
-
-},
-
-/*
- * ============================================================
- * SPORTS
- * ============================================================
- */
-
-sports: {
-
-    layout:
-        "sports-layout",
-
-    theme:
-        "dark",
-
-    duration: {
-
-        seconds:
-            60
+        }
 
     },
 
-    regions: {
+
+    /*
+     * ============================================================
+     * SPORTS
+     * ============================================================
+     */
+
+    sports: {
+
+        layout:
+            "sports-layout",
+
+        theme:
+            "dark",
+
+        duration: {
+
+            seconds:
+                60
+
+        },
+
+        regions: {
 
 
-        /*
-         * ====================================================
-         * SCOREBOARD
-         * ====================================================
-         */
+            /*
+             * ====================================================
+             * SCOREBOARD
+             * ====================================================
+             */
 
-        "scoreboard": [
+            "scoreboard": [
 
-            {
+                {
 
-                name:
-                    "sports-scoreboard",
+                    name:
+                        "sports-scoreboard",
 
-                config: {
+                    config: {
 
-                    rotationSeconds:
-                        20,
+                        rotationSeconds:
+                            20,
 
-                    sports: [
+                        sports: [
 
-                        {
+                            {
 
-                            sport:
-                                "mlb",
+                                sport:
+                                    "mlb",
 
-                            team:
-                                "boston-red-sox",
+                                team:
+                                    "boston-red-sox",
 
-                            season: {
+                                season: {
 
-                                start:
-                                    "03-01",
+                                    start:
+                                        "03-01",
 
-                                end:
-                                    "10-31"
-
-                            },
-
-                            priority:
-                                1,
-
-                            featured: {
-
-                                left: {
-
-                                    teamId:
-                                        111
+                                    end:
+                                        "10-31"
 
                                 },
 
-                                right: {
+                                priority:
+                                    1,
 
-                                    teamId:
-                                        138
+                                featured: {
+
+                                    left: {
+
+                                        teamId:
+                                            111
+
+                                    },
+
+                                    right: {
+
+                                        teamId:
+                                            138
+
+                                    }
 
                                 }
 
                             }
 
-                        }
+                        ]
 
-                    ]
-
-                }
-
-            }
-
-        ],
-
-
-        /*
-         * ====================================================
-         * STANDINGS
-         * ====================================================
-         */
-
-        "standings": [
-
-            {
-
-                name:
-                    "sports-standings",
-
-                config: {
-
-                    rotationSeconds:
-                        20,
-
-                    sports: [
-
-                        "mlb"
-
-                    ]
+                    }
 
                 }
 
-            }
-
-        ],
+            ],
 
 
-        /*
-         * ====================================================
-         * COLUMN 2
-         *
-         * Sports News
-         * Upcoming Games
-         * ====================================================
-         */
+            /*
+             * ====================================================
+             * STANDINGS
+             * ====================================================
+             */
 
-        "column-2": [
+            "standings": [
 
-            {
+                {
 
-                name:
-                    "news",
+                    name:
+                        "sports-standings",
 
-                config: {
+                    config: {
 
-                    feeds: [
+                        rotationSeconds:
+                            20,
 
-                       "http://feeds.bbci.co.uk/sport/rss.xml",
+                        sports: [
 
-                        "https://www.eyefootball.com/football_news.xml"
+                            "mlb"
 
-                    ],
+                        ]
 
-                    label:
-                        "SPORTS NEWS",
-
-                    rotationSeconds:
-                        30,
-
-                    includeImage:
-                        true
-                }
-
-            },
-
-            {
-
-                name:
-                    "placeholder"
-
-            }
-
-
-
-        ],
-
-
-        /*
-         * ====================================================
-         * COLUMN 3
-         *
-         * Photos
-         * Future widget
-         * ====================================================
-         */
-
-        "column-3": [
-
-            {
-
-                name:
-                    "placeholder"
-
-            },
-
-                        {
-
-                name:
-                    "calendar-list",
-
-                config: {
-
-                    calendars: [
-
-                        "146377806ee0218992f826b434d72b37455f216a16304399637f785714487d17@group.calendar.google.com"
-
-                    ],
-
-                    days:
-                        7,
-
-                    showCalendarName:
-                        false
+                    }
 
                 }
 
-            }
+            ],
 
 
-        ]
+            /*
+             * ====================================================
+             * COLUMN 2
+             * ====================================================
+             */
+
+            "column-2": [
+
+                {
+
+                    name:
+                        "news",
+
+                    config: {
+
+                        feeds: [
+
+                            "http://feeds.bbci.co.uk/sport/rss.xml",
+
+                            "https://www.eyefootball.com/football_news.xml"
+
+                        ],
+
+                        label:
+                            "SPORTS NEWS",
+
+                        rotationSeconds:
+                            30,
+
+                        includeImage:
+                            true
+
+                    }
+
+                },
+
+                {
+
+                    name:
+                        "placeholder"
+
+                }
+
+            ],
+
+
+            /*
+             * ====================================================
+             * COLUMN 3
+             * ====================================================
+             */
+
+            "column-3": [
+
+                {
+
+                    name:
+                        "placeholder"
+
+                },
+
+                {
+
+                    name:
+                        "calendar-list",
+
+                    config: {
+
+                        calendars: [
+
+                            "146377806ee0218992f826b434d72b37455f216a16304399637f785714487d17@group.calendar.google.com"
+
+                        ],
+
+                        days:
+                            7,
+
+                        showCalendarName:
+                            false
+
+                    }
+
+                }
+
+            ]
+
+        }
 
     }
-
-}
 
 };
