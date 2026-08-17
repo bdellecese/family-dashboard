@@ -750,6 +750,8 @@ export const screens = {
 
                             "http://feeds.bbci.co.uk/sport/rss.xml",
 
+                            "https://www.espn.com/espn/rss/news",
+
                             "https://www.eyefootball.com/football_news.xml"
 
                         ],
@@ -758,7 +760,7 @@ export const screens = {
                             "SPORTS NEWS",
 
                         rotationSeconds:
-                            30,
+                            20,
 
                         includeImage:
                             true

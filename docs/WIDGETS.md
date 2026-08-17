@@ -63,20 +63,33 @@ external API
 
 # Widget Inventory
 
-| Widget         | Purpose                      | Configurable | Data Source                  | Status         |
-| -------------- | ---------------------------- | -----------: | ---------------------------- | -------------- |
-| date-time      | Current date and time        |          Yes | Browser                      | Complete       |
-| weather        | Current weather and forecast |          Yes | Open-Meteo                   | Complete       |
-| weather-alerts | Active weather alerts        |          Yes | NWS / Open-Meteo             | Complete       |
-| calendar       | Calendar display             |          Yes | Google Calendar              | Complete       |
-| large-calendar | Four-week calendar + weather |          Yes | Google Calendar / Open-Meteo | Complete       |
-| calendar-list  | Multi-calendar event list    |          Yes | Google Calendar              | Complete       |
-| countdown      | Event countdowns             |          Yes | Configuration / data         | Complete       |
-| news           | Rotating news headlines      |          Yes | RSS                          | Complete       |
-| prayer-list    | Prayer list                  |          TBD | Configuration / data         | Complete       |
-| family-menu    | Family menu                  |          TBD | Configuration / data         | Complete       |
-| wifi           | Wi-Fi information / QR       |          Yes | Configuration                | Complete       |
-| photo          | Rotating photos              |          Yes | iCloud shared album          | In development |
+| Widget | Purpose | Configurable | Data Source | Status |
+| --- | --- | ---: | --- | --- |
+| date-time | Current date and time | Yes | Browser | Complete |
+| weather | Current weather and forecast | Yes | Open-Meteo | Complete |
+| weather-alerts | Active weather alerts | Yes | NWS / Open-Meteo | Complete |
+| calendar | Calendar display | Yes | Google Calendar | Complete |
+| large-calendar | Four-week calendar + weather | Yes | Google Calendar / Open-Meteo | Complete |
+| calendar-list | Multi-calendar event list | Yes | Google Calendar | Complete |
+| countdown | Event countdowns | Yes | Configuration / data | Complete |
+| news | Rotating news headlines | Yes | RSS | Complete |
+| prayer-list | Prayer list | TBD | Configuration / data | Complete |
+| family-menu | Family menu | TBD | Configuration / data | Complete |
+| wifi | Wi-Fi information / QR | Yes | Configuration | Complete |
+| photo | Rotating photos | Yes | iCloud shared album | In development |
+| sonos-status | Current Sonos playback status | Yes | Sonos API | Complete |
+| sports-scoreboard | Live / recent sports scores | Yes | Sports data service | Complete |
+| sports-standings | League standings | Yes | Sports data service | Complete |
+| upcoming-games | Upcoming games and schedules | Yes | Sports data service | Complete |
+| kids-chores | Kids' daily chores | TBD | Configuration / data | Complete |
+| household-chores | Household chores | TBD | Configuration / data | Complete |
+| school-lunch | School lunch information | TBD | Configuration / data | Complete |
+| playing-time | Playing-time information | TBD | Configuration / data | Complete |
+| on-this-day | Historical "On This Day" information | TBD | Configuration / data | Complete |
+| did-you-know | Fun facts | TBD | Configuration / data | Complete |
+| word-of-day | Word of the day | TBD | Configuration / data | Complete |
+| quote-of-day | Quote of the day | TBD | Configuration / data | Complete |
+| dad-wisdom | Dad wisdom / family sayings | TBD | Configuration / data | Complete |
 
 ---
 
@@ -239,7 +252,6 @@ Example:
             "Holden, MA"
 
     }
-
 }
 ```
 
@@ -441,7 +453,6 @@ Example:
         ]
 
     }
-
 }
 ```
 
@@ -631,7 +642,8 @@ calendar-list
 
 Displays upcoming events from multiple configured calendars.
 
-This widget is currently used in the Information screen.
+This widget is currently used in the Information screen and can also be
+used by other screens that require a compact event list.
 
 ## Configuration
 
@@ -657,7 +669,6 @@ Example:
         showCalendarName: false
 
     }
-
 }
 ```
 
@@ -708,6 +719,9 @@ news
 
 Displays rotating news headlines.
 
+The same news widget can be used for general news or sports news by
+providing different RSS feeds through configuration.
+
 ## Configuration
 
 Example:
@@ -725,9 +739,10 @@ Example:
             30
 
     }
-
 }
 ```
+
+Multiple feeds can also be configured when supported by the widget.
 
 ## Data Source
 
@@ -736,6 +751,9 @@ RSS feed.
 ## Notes
 
 The feed URL and rotation interval are configurable.
+
+The sports screen uses the same shared `news` widget with sports-specific
+RSS feeds.
 
 ## Status
 
@@ -872,6 +890,580 @@ In development.
 
 ---
 
+# Sonos Status
+
+## Widget
+
+```text
+sonos-status
+```
+
+## Purpose
+
+Displays the current playback status of a configured Sonos speaker.
+
+The widget provides a compact view of:
+
+* Room / speaker name
+* Playback state
+* Song title
+* Artist
+* Album
+* Album artwork
+
+The widget is currently used on the Information screen.
+
+## Configuration
+
+Example:
+
+```text
+{
+    name: "sonos-status",
+
+    config: {
+
+        speaker:
+            "Kitchen",
+
+        refreshInterval:
+            10000
+
+    }
+}
+```
+
+`speaker` identifies the Sonos room to query.
+
+`refreshInterval` controls how frequently the widget refreshes its data,
+in milliseconds.
+
+The current default speaker is:
+
+```text
+Kitchen
+```
+
+The current default refresh interval is:
+
+```text
+10000
+```
+
+or 10 seconds.
+
+## Data Source
+
+The widget retrieves Sonos data through the dashboard's local API:
+
+```text
+/api/sonos?speaker=<speaker>
+```
+
+The API communicates with the Sonos system on the local network and returns
+normalized playback information.
+
+## Data Flow
+
+```text
+screen configuration
+        |
+        v
+sonos-status widget
+        |
+        v
+/api/sonos
+        |
+        v
+local Sonos API
+        |
+        v
+Sonos speaker
+        |
+        v
+normalized playback data
+        |
+        v
+sonos-status widget
+```
+
+## Display
+
+When music is playing or paused, the widget displays the available album
+artwork alongside the playback information.
+
+Playback states include:
+
+```text
+PLAYING
+PAUSED_PLAYBACK
+STOPPED
+```
+
+These are translated into user-friendly labels such as:
+
+```text
+Playing
+Paused
+Stopped
+```
+
+The widget uses different visual treatments for playing and paused states.
+
+## Environment Considerations
+
+The Sonos widget requires access to the local Sonos API.
+
+The dashboard can run on different systems, but the API endpoint must be
+available from the machine hosting the dashboard.
+
+VS Code Live Server by itself does not provide the `/api/sonos` endpoint.
+
+When developing locally, the dashboard may therefore need to be served
+through the dashboard application's server or configured to use the
+appropriate API host.
+
+The Raspberry Pi deployment should provide the Sonos API endpoint locally.
+
+## Status
+
+Complete.
+
+---
+
+# Sports Scoreboard
+
+## Widget
+
+```text
+sports-scoreboard
+```
+
+## Purpose
+
+Displays sports scores for configured teams and leagues.
+
+The scoreboard is designed for the Sports screen and provides a quick
+visual summary of current, recent, and relevant games.
+
+## Configuration
+
+Example:
+
+```text
+{
+    name: "sports-scoreboard",
+
+    config: {
+
+        rotationSeconds:
+            20,
+
+        sports: [
+
+            {
+
+                sport:
+                    "mlb",
+
+                team:
+                    "boston-red-sox",
+
+                season: {
+
+                    start:
+                        "03-01",
+
+                    end:
+                        "10-31"
+
+                },
+
+                priority:
+                    1
+
+            }
+
+        ]
+
+    }
+}
+```
+
+Sports and teams are supplied through configuration rather than being
+hard-coded into the widget.
+
+The current Sports screen is configured for the Boston Red Sox.
+
+## Data Source
+
+Sports data service / external sports API.
+
+## Display
+
+The scoreboard is intended to display:
+
+* Team names
+* Team logos when available
+* Scores
+* Game status
+* Game date / time
+* Relevant game state
+
+The widget supports rotating scoreboard content when multiple sports or
+teams are configured.
+
+## Status
+
+Complete.
+
+---
+
+# Sports Standings
+
+## Widget
+
+```text
+sports-standings
+```
+
+## Purpose
+
+Displays league standings for configured sports.
+
+The widget provides a quick view of team position within the relevant
+division or league.
+
+## Configuration
+
+Example:
+
+```text
+{
+    name: "sports-standings",
+
+    config: {
+
+        rotationSeconds:
+            20,
+
+        sports: [
+
+            "mlb"
+
+        ]
+
+    }
+}
+```
+
+## Data Source
+
+Sports data service / external sports API.
+
+## Display
+
+Depending on the configured sport, standings may include:
+
+* Team
+* Wins
+* Losses
+* Winning percentage
+* Games behind
+* Division / conference position
+* Other sport-specific standings information
+
+## Status
+
+Complete.
+
+---
+
+# Upcoming Games
+
+## Widget
+
+```text
+upcoming-games
+```
+
+## Purpose
+
+Displays upcoming games for configured teams and sports.
+
+The widget is intended to complement the scoreboard by focusing on future
+games rather than current or recently completed games.
+
+## Configuration
+
+The widget should support configuration for the relevant sports and teams,
+including the number of upcoming games to display when applicable.
+
+Example:
+
+```text
+{
+    name: "upcoming-games",
+
+    config: {
+
+        sports: [
+
+            {
+
+                sport:
+                    "mlb",
+
+                team:
+                    "boston-red-sox"
+
+            }
+
+        ]
+
+    }
+}
+```
+
+## Data Source
+
+Sports data service / external sports API.
+
+## Display
+
+The widget may display:
+
+* Opponent
+* Game date
+* Game time
+* Home / away status
+* Venue when available
+* Team logos when available
+* Game status when applicable
+
+## Status
+
+Complete.
+
+---
+
+# Kids Chores
+
+## Widget
+
+```text
+kids-chores
+```
+
+## Purpose
+
+Displays the children's daily chores.
+
+The widget is used by the Chores + Fun screen.
+
+## Data Source
+
+Configuration / dashboard data.
+
+## Status
+
+Complete.
+
+---
+
+# Household Chores
+
+## Widget
+
+```text
+household-chores
+```
+
+## Purpose
+
+Displays household chores and responsibilities.
+
+The widget is used by the Chores + Fun screen.
+
+## Data Source
+
+Configuration / dashboard data.
+
+## Status
+
+Complete.
+
+---
+
+# School Lunch
+
+## Widget
+
+```text
+school-lunch
+```
+
+## Purpose
+
+Displays school lunch information.
+
+The widget is used by the Chores + Fun screen.
+
+## Data Source
+
+Configuration / dashboard data.
+
+## Status
+
+Complete.
+
+---
+
+# Playing Time
+
+## Widget
+
+```text
+playing-time
+```
+
+## Purpose
+
+Displays information related to available playing time.
+
+The widget is used by the Chores + Fun screen.
+
+## Data Source
+
+Configuration / dashboard data.
+
+## Status
+
+Complete.
+
+---
+
+# On This Day
+
+## Widget
+
+```text
+on-this-day
+```
+
+## Purpose
+
+Displays historical information associated with the current date.
+
+The widget is used by the Chores + Fun screen as a rotating informational
+element.
+
+## Data Source
+
+Configuration / dashboard data.
+
+## Status
+
+Complete.
+
+---
+
+# Did You Know
+
+## Widget
+
+```text
+did-you-know
+```
+
+## Purpose
+
+Displays interesting facts and trivia.
+
+The widget is used by the Chores + Fun screen.
+
+## Data Source
+
+Configuration / dashboard data.
+
+## Status
+
+Complete.
+
+---
+
+# Word of the Day
+
+## Widget
+
+```text
+word-of-day
+```
+
+## Purpose
+
+Displays a word of the day and associated information.
+
+The widget is used by the Chores + Fun screen.
+
+## Data Source
+
+Configuration / dashboard data.
+
+## Status
+
+Complete.
+
+---
+
+# Quote of the Day
+
+## Widget
+
+```text
+quote-of-day
+```
+
+## Purpose
+
+Displays a quote of the day.
+
+The widget is used by the Chores + Fun screen.
+
+## Data Source
+
+Configuration / dashboard data.
+
+## Status
+
+Complete.
+
+---
+
+# Dad Wisdom
+
+## Widget
+
+```text
+dad-wisdom
+```
+
+## Purpose
+
+Displays family-oriented advice, sayings, or "Dad Wisdom."
+
+The widget is used by the Chores + Fun screen.
+
+## Data Source
+
+Configuration / dashboard data.
+
+## Status
+
+Complete.
+
+---
+
 # Widget Development Guidelines
 
 When creating a new widget:
@@ -919,9 +1511,13 @@ Configuration should be used for values such as:
 * Locations
 * Calendar IDs
 * RSS feeds
+* Sports
+* Teams
 * Rotation intervals
 * Screen durations
 * Display preferences
+* Sonos speaker names
+* Refresh intervals
 
 When a value is temporarily hard-coded during development, it should
 eventually be moved into configuration when the widget architecture is
@@ -956,16 +1552,90 @@ Failed to fetch
 CORS errors
 
 404 Not Found
+
+500 Internal Server Error
 ```
+
+For widgets that depend on local services, also verify that the required
+API or data service is reachable from the machine running the dashboard.
+
+---
+
+# Screens
+
+The dashboard currently contains four screens built from the shared widget
+architecture:
+
+```text
+information
+calendar
+chores-fun
+sports
+```
+
+## Information
+
+The Information screen combines:
+
+* Date / time
+* Photos
+* Weather alerts
+* Calendar
+* News
+* Countdown
+* Prayer list
+* Wi-Fi information
+* Weather
+* Sonos status
+* Family menu
+
+## Calendar
+
+The Calendar screen is centered around the large-calendar widget and
+provides a four-week calendar view with integrated weather information.
+
+## Chores + Fun
+
+The Chores + Fun screen combines:
+
+* Kids' chores
+* Household chores
+* School lunch
+* Playing time
+* On This Day
+* Did You Know
+* Word of the Day
+* Quote of the Day
+* Dad Wisdom
+
+## Sports
+
+The Sports screen combines:
+
+* Sports scoreboard
+* Sports standings
+* Sports news
+* Upcoming games
+* Calendar information
+
+Completed screens should continue to reuse existing widgets and data services
+where practical rather than creating screen-specific implementations.
 
 ---
 
 # Future Widgets / Screens
 
-The dashboard now has two completed screens built from the shared widget
-architecture.
-
-Completed screens should continue to reuse existing widgets and data services
-where practical rather than creating screen-specific implementations.
-
 Additional widgets and screens can be added as dashboard requirements evolve.
+
+When adding new functionality, prefer extending the shared widget and data
+service architecture rather than creating screen-specific implementations.
+
+Potential future areas include:
+
+* Additional sports and teams
+* Expanded Sonos support
+* Additional music services
+* Improved photo integration
+* Additional family information
+* Additional household automation
+* More personalized dashboard content
