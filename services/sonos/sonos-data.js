@@ -336,11 +336,11 @@ function decodeXml(
     value
 ) {
 
+    function decodeXml(
+    value
+) {
+
     return value
-        .replace(
-            /&amp;/g,
-            "&"
-        )
         .replace(
             /&lt;/g,
             "<"
@@ -360,7 +360,13 @@ function decodeXml(
         .replace(
             /&apos;/g,
             "'"
+        )
+        .replace(
+            /&amp;/g,
+            "&"
         );
+
+    }
 
 }
 
