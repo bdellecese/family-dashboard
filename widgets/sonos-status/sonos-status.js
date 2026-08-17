@@ -205,10 +205,53 @@ const sonosStatus = {
 
             }
 
+            const groupMembers =
+                data.group?.members || [];
 
-            room.textContent =
-                data.speaker.name ||
-                speaker;
+            const speakerNames =
+                groupMembers
+                    .map(
+                        member =>
+                            member.name
+                    )
+                    .filter(
+                        Boolean
+                    );
+
+            const orderedSpeakerNames =
+                [
+                    speakerNames.find(
+                        name =>
+                            name.toLowerCase() ===
+                            speaker.toLowerCase()
+                    ),
+                    ...speakerNames.filter(
+                        name =>
+                            name.toLowerCase() !==
+                            speaker.toLowerCase()
+                    )
+                ].filter(
+                    Boolean
+                );
+
+            if (
+                data.group?.grouped &&
+                orderedSpeakerNames.length > 1
+            ) {
+
+                room.textContent =
+                    orderedSpeakerNames.length === 2
+                        ? `${orderedSpeakerNames[0]} & ${orderedSpeakerNames[1]}`
+                        : `${orderedSpeakerNames.slice(0, -1).join(", ")} & ${orderedSpeakerNames.at(-1)}`;
+
+            }
+            else {
+
+                room.textContent =
+                    data.speaker.name ||
+                    speaker;
+
+            }
 
 
             const playbackState =
