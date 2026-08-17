@@ -13,8 +13,10 @@
  * - Get current track metadata
  * - Get album artwork
  * - Determine group membership
+ * - Use the group coordinator for playback information
  *
  * The browser never communicates directly with Sonos.
+ *
  * ============================================================
  */
 
@@ -45,6 +47,7 @@ const SONOS_PORT =
  *
  * Uses Avahi because the Pi already has avahi-utils installed
  * and the Sonos devices are visible through mDNS.
+ *
  * ============================================================
  */
 
@@ -85,7 +88,9 @@ async function discoverPlayers() {
             );
 
 
-        if (serviceMatch) {
+        if (
+            serviceMatch
+        ) {
 
             const serviceName =
                 serviceMatch[1].trim();
@@ -226,6 +231,14 @@ async function sonosSoapRequest(
         `http://${address}:${SONOS_PORT}${service}`;
 
 
+    const serviceName =
+        service.includes(
+            "AVTransport"
+        )
+            ? "AVTransport"
+            : "ZoneGroupTopology";
+
+
     const envelope =
         `<?xml version="1.0" encoding="utf-8"?>
 <s:Envelope
@@ -235,7 +248,7 @@ async function sonosSoapRequest(
     <s:Body>
 
         <u:${action}
-            xmlns:u="urn:schemas-upnp-org:service:${service.includes("AVTransport") ? "AVTransport" : "ZoneGroupTopology"}:1">
+            xmlns:u="urn:schemas-upnp-org:service:${serviceName}:1">
 
             ${body || ""}
 
@@ -260,7 +273,7 @@ async function sonosSoapRequest(
                         'text/xml; charset="utf-8"',
 
                     "SOAPACTION":
-                        `"urn:schemas-upnp-org:service:${service.includes("AVTransport") ? "AVTransport" : "ZoneGroupTopology"}:1#${action}"`
+                        `"urn:schemas-upnp-org:service:${serviceName}:1#${action}"`
 
                 },
 
@@ -308,6 +321,7 @@ function getXmlValue(
             "\\$&"
         );
 
+
     const match =
         xml.match(
             new RegExp(
@@ -316,13 +330,20 @@ function getXmlValue(
             )
         );
 
-    if (!match) {
+
+    if (
+        !match
+    ) {
+
         return "";
+
     }
+
 
     return decodeXml(
         match[1].trim()
     );
+
 }
 
 
@@ -337,14 +358,27 @@ function decodeXml(
 ) {
 
     let decoded =
-        String(value || "");
+        String(
+            value || ""
+        );
+
 
     let previous;
+
+
+    /*
+     * Sonos can return XML nested inside an
+     * XML response, resulting in multiple levels
+     * of escaping.
+     *
+     * Keep decoding until the value stops changing.
+     */
 
     do {
 
         previous =
             decoded;
+
 
         decoded =
             decoded
@@ -377,9 +411,12 @@ function decodeXml(
                     "'"
                 );
 
+
     } while (
-        decoded !== previous
+        decoded !==
+        previous
     );
+
 
     return decoded;
 
@@ -515,6 +552,21 @@ async function getCurrentTrack(
  * ============================================================
  * GROUP INFORMATION
  * ============================================================
+ *
+ * Sonos returns ZoneGroupState as escaped XML inside
+ * the SOAP response.
+ *
+ * Example:
+ *
+ * <ZoneGroupState>
+ *     &lt;ZoneGroupState&gt;
+ *         &lt;ZoneGroups&gt;
+ *             ...
+ *
+ * Therefore we must extract and decode ZoneGroupState
+ * before parsing the ZoneGroup elements.
+ *
+ * ============================================================
  */
 
 async function getGroupInfo(
@@ -531,13 +583,22 @@ async function getGroupInfo(
         );
 
 
+    const decodedXml =
+        decodeXml(
+            getXmlValue(
+                xml,
+                "ZoneGroupState"
+            )
+        );
+
+
     /*
      * Find the ZoneGroup containing our player UUID.
      */
 
     const groups =
         [
-            ...xml.matchAll(
+            ...decodedXml.matchAll(
                 /<ZoneGroup\b([^>]*)>([\s\S]*?)<\/ZoneGroup>/gi
             )
         ];
@@ -546,6 +607,12 @@ async function getGroupInfo(
     for (
         const groupMatch of groups
     ) {
+
+        const groupAttributes =
+            parseAttributes(
+                groupMatch[1]
+            );
+
 
         const groupXml =
             groupMatch[2];
@@ -604,6 +671,11 @@ async function getGroupInfo(
             grouped:
                 members.length > 1,
 
+            coordinator:
+                groupAttributes.Coordinator ||
+                groupAttributes.coordinator ||
+                null,
+
             members
 
         };
@@ -611,10 +683,18 @@ async function getGroupInfo(
     }
 
 
+    /*
+     * If Sonos does not return a group for the player,
+     * treat the player as a standalone speaker.
+     */
+
     return {
 
         grouped:
             false,
+
+        coordinator:
+            player.uuid,
 
         members: [
 
@@ -656,7 +736,8 @@ function parseAttributes(
 
 
     while (
-        (match = regex.exec(text)) !== null
+        (match =
+            regex.exec(text)) !== null
     ) {
 
         attributes[
@@ -677,6 +758,27 @@ function parseAttributes(
 /*
  * ============================================================
  * GET SONOS STATUS
+ * ============================================================
+ *
+ * The requested speaker remains the speaker displayed
+ * by the widget.
+ *
+ * If that speaker is part of a group, however, playback
+ * information is retrieved from the group's coordinator.
+ *
+ * Example:
+ *
+ * Requested speaker:
+ *
+ *     Kitchen
+ *
+ * Group:
+ *
+ *     Family Room  <-- coordinator
+ *     Kitchen
+ *
+ * Playback is therefore queried from Family Room.
+ *
  * ============================================================
  */
 
@@ -721,19 +823,62 @@ async function getStatus(
     }
 
 
-    const [
-        track,
-        group
-    ] =
-        await Promise.all([
-            getCurrentTrack(
-                player
-            ),
+    /*
+     * Determine whether the requested speaker
+     * is part of a group.
+     */
 
-            getGroupInfo(
-                player
-            )
-        ]);
+    const group =
+        await getGroupInfo(
+            player
+        );
+
+
+    /*
+     * Default to the requested speaker.
+     *
+     * If grouped, this will be replaced with
+     * the group coordinator below.
+     */
+
+    let playbackPlayer =
+        player;
+
+
+    if (
+        group.grouped &&
+        group.coordinator
+    ) {
+
+        const coordinator =
+            players.find(
+                item =>
+                    item.uuid ===
+                    group.coordinator
+            );
+
+
+        if (
+            coordinator
+        ) {
+
+            playbackPlayer =
+                coordinator;
+
+        }
+
+    }
+
+
+    /*
+     * Retrieve playback information from the
+     * appropriate player.
+     */
+
+    const track =
+        await getCurrentTrack(
+            playbackPlayer
+        );
 
 
     return {
@@ -775,6 +920,7 @@ async function getStatus(
     };
 
 }
+
 
 /*
  * ============================================================
