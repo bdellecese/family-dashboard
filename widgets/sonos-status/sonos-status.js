@@ -6,6 +6,25 @@ const DEFAULT_REFRESH_INTERVAL =
 
 
 // ============================================================
+// API CONFIGURATION
+// ============================================================
+//
+// When running through VS Code Live Server on the Mac,
+// call the Raspberry Pi directly.
+//
+// When running on the Raspberry Pi itself, use the
+// relative /api/sonos path so the widget talks to the
+// local dashboard server.
+//
+// ============================================================
+
+const SONOS_API_BASE_URL =
+    window.location.hostname === "localhost"
+        ? "http://192.168.4.49:3000"
+        : "";
+
+
+// ============================================================
 // SONOS STATUS WIDGET
 // ============================================================
 
@@ -285,7 +304,7 @@ const sonosStatus = {
 
                 const response =
                     await fetch(
-                        `/api/sonos?speaker=${encodeURIComponent(speaker)}`
+                        `${SONOS_API_BASE_URL}/api/sonos?speaker=${encodeURIComponent(speaker)}`
                     );
 
 
