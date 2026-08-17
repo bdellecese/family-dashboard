@@ -119,8 +119,8 @@ const schoolLunch = {
         const monday =
             new Date(
                 2026,
-                8,
-                7
+                7,
+                24
             );
 
 
