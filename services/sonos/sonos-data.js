@@ -356,6 +356,10 @@ function decodeXml(
         .replace(
             /&#39;/g,
             "'"
+        )
+        .replace(
+            /&apos;/g,
+            "'"
         );
 
 }
@@ -750,7 +754,6 @@ async function getStatus(
     };
 
 }
-
 
 /*
  * ============================================================
