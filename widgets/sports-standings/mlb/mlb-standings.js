@@ -748,12 +748,6 @@ async function loadStandings() {
         `hydrate=team,division,league`;
 
 
-    console.log(
-        "Loading MLB regular-season standings:",
-        url
-    );
-
-
     const response =
         await fetch(
             url
@@ -813,13 +807,6 @@ async function loadStandings() {
             ).values()
         );
 
-
-    console.log(
-        "MLB unique regular-season team count:",
-        uniqueTeams.length
-    );
-
-
     return uniqueTeams;
 
 }
@@ -850,12 +837,6 @@ async function loadWildCardStandings() {
         `season=${season}&` +
         `standingsTypes=wildCard&` +
         `hydrate=team,division,league`;
-
-
-    console.log(
-        "Loading MLB Wild Card standings:",
-        url
-    );
 
 
     const response =
@@ -916,12 +897,6 @@ async function loadWildCardStandings() {
                 )
             ).values()
         );
-
-
-    console.log(
-        "MLB unique Wild Card team count:",
-        uniqueTeams.length
-    );
 
 
     return uniqueTeams;
@@ -1442,19 +1417,6 @@ export default {
                         loadWildCardStandings()
                     ]
                 );
-
-
-            console.log(
-                "MLB regular-season records:",
-                regularSeasonRecords
-            );
-
-
-            console.log(
-                "MLB Wild Card records:",
-                wildCardRecords
-            );
-
 
             main.innerHTML =
                 "";

@@ -23,6 +23,7 @@
     },
     "homepage": "https://github.com/bdellecese/family-dashboard#readme",
     "dependencies": {
-        "dotenv": "^17.4.2"
+        "dotenv": "^17.4.2",
+        "pdf-parse": "^2.4.5"
     }
 }

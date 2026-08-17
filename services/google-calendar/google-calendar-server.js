@@ -175,10 +175,6 @@ export async function exchangeGoogleCode(
         saveRefreshToken(
             data.refresh_token
         );
-
-        console.log(
-            "Google Calendar refresh token saved."
-        );
     }
 
     return data;

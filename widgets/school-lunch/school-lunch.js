@@ -5,22 +5,22 @@
  *
  * Displays the weekly school lunch menu.
  *
- * V2:
+ * The browser talks to the dashboard server through:
  *
- * - Single combined table
- * - School names as first column
- * - Monday-Friday columns
- * - Elementary / Middle
- * - Wachusett Regional High School
- * - Highlights today
- * - No student names
- * - No buy/bring tracking
+ *     /api/school-lunch
+ *
+ * The server is responsible for:
+ *
+ *     Google Sheet
+ *     PDF downloads
+ *     PDF parsing
+ *     Menu normalization
+ *
+ * The browser must NOT import schoolLunchData directly because
+ * that service uses the Node-only pdf-parse package.
  *
  * ============================================================
  */
-
-import schoolLunchData
-    from "../../services/school-lunch/school-lunch-data.js";
 
 
 const schoolLunch = {
@@ -86,7 +86,7 @@ const schoolLunch = {
 
         /*
          * ====================================================
-         * MENU
+         * MENU CONTAINER
          * ====================================================
          */
 
@@ -106,18 +106,21 @@ const schoolLunch = {
          * ====================================================
          * TEST WEEK
          *
-         * June 15, 2026
+         * August 31, 2026
          *
-         * Switch back to current week once
-         * visual design is finalized.
+         * This crosses the August / September boundary and
+         * is useful for testing that both PDFs are loaded.
+         *
+         * Once visual testing is complete, this can be changed
+         * to the current week's Monday.
          * ====================================================
          */
 
         const monday =
             new Date(
                 2026,
-                5,
-                15
+                8,
+                7
             );
 
 
@@ -127,10 +130,9 @@ const schoolLunch = {
         try {
 
             data =
-                await schoolLunchData
-                    .getWeeklyMenu(
-                        monday
-                    );
+                await getSchoolLunchMenu(
+                    monday
+                );
 
         }
 
@@ -211,7 +213,7 @@ const schoolLunch = {
          * ====================================================
          * TABLE
          * ====================================================
-         */
+ */
 
         const table =
             createLunchTable(
@@ -228,7 +230,7 @@ const schoolLunch = {
          * ====================================================
          * ADD WIDGET
          * ====================================================
-         */
+ */
 
         container.appendChild(
             widget
@@ -237,6 +239,58 @@ const schoolLunch = {
     }
 
 };
+
+
+/*
+ * ============================================================
+ * GET SCHOOL LUNCH MENU
+ * ============================================================
+ *
+ * Browser-side API call.
+ *
+ * IMPORTANT:
+ * Do not import schoolLunchData here.
+ *
+ * ============================================================
+ */
+
+async function getSchoolLunchMenu(
+    monday
+) {
+
+    const weekStart =
+        formatDate(
+            monday
+        );
+
+
+    const response =
+        await fetch(
+            `/api/school-lunch?weekStart=${encodeURIComponent(weekStart)}`,
+            {
+                method:
+                    "GET",
+
+                cache:
+                    "no-store"
+            }
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        throw new Error(
+            `School lunch API returned ${response.status}`
+        );
+
+    }
+
+
+    return await response.json();
+
+}
 
 
 /*
@@ -276,7 +330,7 @@ function createLunchTable(
 
     const schoolHeader =
         document.createElement("div");
-    
+
     schoolHeader.className =
         "school-lunch-widget__day-heading";
 
@@ -364,6 +418,7 @@ function createLunchTable(
 
 
     return table;
+
 }
 
 
@@ -428,6 +483,7 @@ function createSchoolRow(
 
 
     return row;
+
 }
 
 
@@ -505,7 +561,10 @@ function createDayCell(
      */
 
     items.forEach(
-        (item, index) => {
+        (
+            item,
+            index
+        ) => {
 
             const element =
                 document.createElement("div");
@@ -594,6 +653,7 @@ function createDayCell(
 
 
     return cell;
+
 }
 
 
@@ -621,6 +681,7 @@ function formatWeekLabel(
         parseLocalDate(
             days[0].date
         );
+
 
     const last =
         parseLocalDate(
@@ -754,6 +815,7 @@ function formatDate(
     const year =
         date.getFullYear();
 
+
     const month =
         String(
             date.getMonth() + 1
@@ -761,6 +823,7 @@ function formatDate(
             2,
             "0"
         );
+
 
     const day =
         String(

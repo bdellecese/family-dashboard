@@ -257,10 +257,6 @@ const photo = {
                         currentIndex =
                             -1;
 
-                        console.log(
-                            `Photo widget loaded new batch: ${photos.length} photos`
-                        );
-
                         return true;
 
                     }

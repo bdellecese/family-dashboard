@@ -311,12 +311,6 @@ const icloudPhotoData = {
                 )
                 .filter(Boolean);
 
-
-        console.log(
-            `iCloud photos: selected ${selectedPhotos.length}, resolved ${photos.length}`
-        );
-
-
         return photos;
 
     }

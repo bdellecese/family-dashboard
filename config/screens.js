@@ -750,7 +750,7 @@ export const screens = {
 
                             "http://feeds.bbci.co.uk/sport/rss.xml",
 
-                            "https://www.espn.com/espn/rss/news",
+//                            "https://www.espn.com/espn/rss/news",
 
                             "https://www.eyefootball.com/football_news.xml"
 

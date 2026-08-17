@@ -24,24 +24,43 @@ import {
     getStatus
 } from "../services/sonos/sonos-data.js";
 
+import schoolLunchData
+    from "../services/school-lunch/school-lunch-data.js";
+
+
 const HOST = "0.0.0.0";
 const PORT = 3000;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const ROOT_DIR = path.resolve(__dirname, "..");
+
+const __filename =
+    fileURLToPath(import.meta.url);
+
+const __dirname =
+    path.dirname(__filename);
+
+const ROOT_DIR =
+    path.resolve(
+        __dirname,
+        ".."
+    );
+
 
 // ============================================================
 // TODOIST HELPERS
 // ============================================================
 
-async function todoistSync(resourceTypes) {
+async function todoistSync(
+    resourceTypes
+) {
 
     if (!TODOIST.token) {
+
         throw new Error(
             "Todoist API token is not configured."
         );
+
     }
+
 
     const todoistResponse =
         await fetch(
@@ -50,6 +69,7 @@ async function todoistSync(resourceTypes) {
                 method: "POST",
 
                 headers: {
+
                     "Authorization":
                         `Bearer ${TODOIST.token}`,
 
@@ -58,40 +78,63 @@ async function todoistSync(resourceTypes) {
 
                     "Accept":
                         "application/json"
+
                 },
 
-                body: new URLSearchParams({
-                    sync_token: "*",
+                body:
+                    new URLSearchParams({
 
-                    resource_types:
-                        JSON.stringify(resourceTypes)
-                })
+                        sync_token:
+                            "*",
+
+                        resource_types:
+                            JSON.stringify(
+                                resourceTypes
+                            )
+
+                    })
+
             }
         );
+
 
     const data =
         await todoistResponse.json();
 
-    if (!todoistResponse.ok) {
+
+    if (
+        !todoistResponse.ok
+    ) {
+
         throw new Error(
             `Todoist Sync API returned ${todoistResponse.status}: ${JSON.stringify(data)}`
         );
+
     }
 
+
     return data;
+
 }
+
 
 // ============================================================
 // TODOIST FILTER
 // ============================================================
 
-async function getTodoistFilter(filterName) {
+async function getTodoistFilter(
+    filterName
+) {
 
     const data =
-        await todoistSync(["filters"]);
+        await todoistSync(
+            ["filters"]
+        );
+
 
     const filters =
         data.filters || [];
+
 
     const filter =
         filters.find(
@@ -100,20 +143,28 @@ async function getTodoistFilter(filterName) {
                 item.name === filterName
         );
 
+
     if (!filter) {
+
         throw new Error(
             `Todoist filter "${filterName}" was not found.`
         );
+
     }
 
+
     return filter;
+
 }
+
 
 // ============================================================
 // TODOIST PROJECT COLLABORATORS
 // ============================================================
 
-async function getTodoistCollaborators(projectId) {
+async function getTodoistCollaborators(
+    projectId
+) {
 
     const todoistResponse =
         await fetch(
@@ -122,26 +173,38 @@ async function getTodoistCollaborators(projectId) {
                 method: "GET",
 
                 headers: {
+
                     "Authorization":
                         `Bearer ${TODOIST.token}`,
 
                     "Accept":
                         "application/json"
+
                 }
+
             }
         );
+
 
     const data =
         await todoistResponse.json();
 
-    if (!todoistResponse.ok) {
+
+    if (
+        !todoistResponse.ok
+    ) {
+
         throw new Error(
             `Todoist collaborators API returned ${todoistResponse.status}: ${JSON.stringify(data)}`
         );
+
     }
 
+
     return data.results || [];
+
 }
+
 
 // ============================================================
 // ASSIGNEE LOOKUP
@@ -155,18 +218,26 @@ function getAssigneeName(
     const assigneeId =
         taskItem.responsible_uid;
 
+
     if (!assigneeId) {
+
         return null;
+
     }
+
 
     const collaborator =
         collaboratorLookup.get(
             String(assigneeId)
         );
 
+
     if (!collaborator) {
+
         return null;
+
     }
+
 
     return (
         collaborator.name ||
@@ -174,7 +245,9 @@ function getAssigneeName(
         collaborator.email ||
         null
     );
+
 }
+
 
 // ============================================================
 // NORMALIZE TASK
@@ -198,7 +271,9 @@ function normalizeTask(
             task.description || "",
 
         checked:
-            Boolean(task.checked),
+            Boolean(
+                task.checked
+            ),
 
         dueDate:
             task.due?.date || null,
@@ -216,8 +291,11 @@ function normalizeTask(
                 taskItem,
                 collaboratorLookup
             )
+
     };
+
 }
+
 
 // ============================================================
 // GET TODOIST TASKS
@@ -229,39 +307,39 @@ async function getTodoistTasks(
 
     let query;
 
+
     if (filterOverride) {
 
         query =
             filterOverride;
 
-    } else {
+    }
+
+    else {
 
         const filter =
             await getTodoistFilter(
                 TODOIST.filterName
             );
 
+
         query =
             filter.query;
 
-        console.log(
-            `Todoist filter: ${filter.name}`
-        );
-
-        console.log(
-            `Todoist query: ${filter.query}`
-        );
     }
+
 
     const url =
         new URL(
             "https://api.todoist.com/api/v1/tasks/filter"
         );
 
+
     url.searchParams.set(
         "query",
         query
     );
+
 
     const todoistResponse =
         await fetch(
@@ -270,32 +348,47 @@ async function getTodoistTasks(
                 method: "GET",
 
                 headers: {
+
                     "Authorization":
                         `Bearer ${TODOIST.token}`,
 
                     "Accept":
                         "application/json"
+
                 }
+
             }
         );
+
 
     const taskData =
         await todoistResponse.json();
 
-    if (!todoistResponse.ok) {
+
+    if (
+        !todoistResponse.ok
+    ) {
+
         throw new Error(
             `Todoist task API returned ${todoistResponse.status}: ${JSON.stringify(taskData)}`
         );
+
     }
 
+
     const syncData =
-        await todoistSync(["items"]);
+        await todoistSync(
+            ["items"]
+        );
+
 
     const items =
         syncData.items || [];
 
+
     const itemLookup =
         new Map();
+
 
     for (
         const item of items
@@ -307,8 +400,11 @@ async function getTodoistTasks(
                 String(item.id),
                 item
             );
+
         }
+
     }
+
 
     const projectIds =
         [
@@ -324,8 +420,10 @@ async function getTodoistTasks(
             )
         ];
 
+
     const collaboratorLookup =
         new Map();
+
 
     for (
         const projectId of projectIds
@@ -336,11 +434,14 @@ async function getTodoistTasks(
                 projectId
             );
 
+
         for (
             const collaborator of collaborators
         ) {
 
-            if (collaborator.id) {
+            if (
+                collaborator.id
+            ) {
 
                 collaboratorLookup.set(
                     String(
@@ -348,9 +449,13 @@ async function getTodoistTasks(
                     ),
                     collaborator
                 );
+
             }
+
         }
+
     }
+
 
     const tasks =
         (taskData.results || [])
@@ -362,13 +467,16 @@ async function getTodoistTasks(
                             String(task.id)
                         );
 
+
                     return normalizeTask(
                         task,
                         taskItem || {},
                         collaboratorLookup
                     );
+
                 }
             );
+
 
     return {
 
@@ -377,8 +485,11 @@ async function getTodoistTasks(
 
         next_cursor:
             taskData.next_cursor || null
+
     };
+
 }
+
 
 // ============================================================
 // COMPLETE TODOIST TASK
@@ -389,10 +500,13 @@ async function completeTodoistTask(
 ) {
 
     if (!taskId) {
+
         throw new Error(
             "Task ID is required."
         );
+
     }
+
 
     const todoistResponse =
         await fetch(
@@ -401,24 +515,33 @@ async function completeTodoistTask(
                 method: "POST",
 
                 headers: {
+
                     "Authorization":
                         `Bearer ${TODOIST.token}`,
 
                     "Accept":
                         "application/json"
+
                 }
+
             }
         );
 
-    if (!todoistResponse.ok) {
+
+    if (
+        !todoistResponse.ok
+    ) {
 
         const body =
             await todoistResponse.text();
 
+
         throw new Error(
             `Todoist complete task API returned ${todoistResponse.status}: ${body}`
         );
+
     }
+
 
     return {
 
@@ -427,8 +550,11 @@ async function completeTodoistTask(
 
         taskId:
             taskId
+
     };
+
 }
+
 
 // ============================================================
 // STATIC FILE SERVER
@@ -444,6 +570,7 @@ function serveStaticFile(
             requestUrl.pathname
         );
 
+
     if (
         requestedPath === "/" ||
         requestedPath === ""
@@ -451,13 +578,16 @@ function serveStaticFile(
 
         requestedPath =
             "/index.html";
+
     }
+
 
     const filePath =
         path.resolve(
             ROOT_DIR,
             "." + requestedPath
         );
+
 
     if (
         !filePath.startsWith(
@@ -473,25 +603,36 @@ function serveStaticFile(
             }
         );
 
+
         response.end(
             "Forbidden"
         );
 
+
         return true;
+
     }
 
+
     if (
-        !fs.existsSync(filePath) ||
-        !fs.statSync(filePath).isFile()
+        !fs.existsSync(
+            filePath
+        ) ||
+        !fs.statSync(
+            filePath
+        ).isFile()
     ) {
 
         return false;
+
     }
+
 
     const extension =
         path.extname(
             filePath
         ).toLowerCase();
+
 
     const contentTypes = {
 
@@ -521,7 +662,9 @@ function serveStaticFile(
 
         ".ico":
             "image/x-icon"
+
     };
+
 
     response.writeHead(
         200,
@@ -532,12 +675,18 @@ function serveStaticFile(
         }
     );
 
+
     response.end(
-        fs.readFileSync(filePath)
+        fs.readFileSync(
+            filePath
+        )
     );
 
+
     return true;
+
 }
+
 
 // ============================================================
 // HTTP SERVER
@@ -555,26 +704,34 @@ const server =
                 "*"
             );
 
+
             response.setHeader(
                 "Access-Control-Allow-Methods",
                 "GET, POST, OPTIONS"
             );
+
 
             response.setHeader(
                 "Access-Control-Allow-Headers",
                 "Content-Type, Authorization"
             );
 
+
             if (
                 request.method ===
                 "OPTIONS"
             ) {
 
-                response.writeHead(204);
+                response.writeHead(
+                    204
+                );
+
                 response.end();
 
                 return;
+
             }
+
 
             const requestUrl =
                 new URL(
@@ -582,9 +739,98 @@ const server =
                     `http://${HOST}:${PORT}`
                 );
 
-            // ------------------------------------------------
+
+            // =================================================
+            // SCHOOL LUNCH
+            // =================================================
+
+            if (
+                requestUrl.pathname ===
+                    "/api/school-lunch"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                try {
+
+                    const weekStart =
+                        requestUrl
+                            .searchParams
+                            .get(
+                                "weekStart"
+                            );
+
+
+                    const monday =
+                        weekStart
+                            ? new Date(
+                                `${weekStart}T00:00:00`
+                            )
+                            : new Date();
+
+
+                    const data =
+                        await schoolLunchData
+                            .getWeeklyMenu(
+                                monday
+                            );
+
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify(
+                            data
+                        )
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "School lunch error:",
+                        error
+                    );
+
+
+                    response.writeHead(
+                        500,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            error:
+                                error.message
+
+                        })
+                    );
+
+                }
+
+
+                return;
+
+            }
+
+
+            // =================================================
             // HEALTH CHECK
-            // ------------------------------------------------
+            // =================================================
 
             if (
                 requestUrl.pathname ===
@@ -599,19 +845,25 @@ const server =
                     }
                 );
 
+
                 response.end(
                     JSON.stringify({
+
                         status:
                             "ok"
+
                     })
                 );
 
+
                 return;
+
             }
 
-            // ------------------------------------------------
+
+            // =================================================
             // ICLOUD PHOTOS
-            // ------------------------------------------------
+            // =================================================
 
             if (
                 requestUrl.pathname ===
@@ -626,21 +878,29 @@ const server =
                     const albumUrl =
                         requestUrl
                             .searchParams
-                            .get("albumUrl") ||
+                            .get(
+                                "albumUrl"
+                            ) ||
                         undefined;
+
 
                     const photoCount =
                         Number(
                             requestUrl
                                 .searchParams
-                                .get("photoCount")
-                        ) || undefined;
+                                .get(
+                                    "photoCount"
+                                )
+                        ) ||
+                        undefined;
+
 
                     const photos =
                         await icloudPhotoData.getPhotos(
                             albumUrl,
                             photoCount
                         );
+
 
                     response.writeHead(
                         200,
@@ -650,9 +910,12 @@ const server =
                         }
                     );
 
+
                     response.end(
                         JSON.stringify({
+
                             photos
+
                         })
                     );
 
@@ -665,6 +928,7 @@ const server =
                         error
                     );
 
+
                     response.writeHead(
                         500,
                         {
@@ -673,21 +937,27 @@ const server =
                         }
                     );
 
+
                     response.end(
                         JSON.stringify({
+
                             error:
                                 "Unable to load photos"
+
                         })
                     );
 
                 }
 
+
                 return;
+
             }
 
-            // ------------------------------------------------
+
+            // =================================================
             // SONOS STATUS
-            // ------------------------------------------------
+            // =================================================
 
             if (
                 requestUrl.pathname ===
@@ -769,12 +1039,15 @@ const server =
 
                 }
 
+
                 return;
+
             }
 
-            // ------------------------------------------------
+
+            // =================================================
             // GOOGLE CALENDAR OAUTH
-            // ------------------------------------------------
+            // =================================================
 
             if (
                 requestUrl.pathname ===
@@ -787,6 +1060,7 @@ const server =
                 const authUrl =
                     getGoogleCalendarAuthUrl();
 
+
                 response.writeHead(
                     302,
                     {
@@ -795,14 +1069,17 @@ const server =
                     }
                 );
 
+
                 response.end();
 
                 return;
+
             }
 
-            // ------------------------------------------------
+
+            // =================================================
             // GOOGLE CALENDAR OAUTH CALLBACK
-            // ------------------------------------------------
+            // =================================================
 
             if (
                 requestUrl.pathname ===
@@ -817,30 +1094,45 @@ const server =
                     const code =
                         requestUrl
                             .searchParams
-                            .get("code");
+                            .get(
+                                "code"
+                            );
+
 
                     const error =
                         requestUrl
                             .searchParams
-                            .get("error");
+                            .get(
+                                "error"
+                            );
 
-                    if (error) {
+
+                    if (
+                        error
+                    ) {
 
                         throw new Error(
                             `Google OAuth authorization failed: ${error}`
                         );
+
                     }
 
-                    if (!code) {
+
+                    if (
+                        !code
+                    ) {
 
                         throw new Error(
                             "Google OAuth callback did not contain an authorization code."
                         );
+
                     }
+
 
                     await exchangeGoogleCode(
                         code
                     );
+
 
                     response.writeHead(
                         200,
@@ -849,6 +1141,7 @@ const server =
                                 "text/html; charset=utf-8"
                         }
                     );
+
 
                     response.end(`
 <!DOCTYPE html>
@@ -873,6 +1166,7 @@ const server =
                         error
                     );
 
+
                     response.writeHead(
                         500,
                         {
@@ -881,17 +1175,22 @@ const server =
                         }
                     );
 
+
                     response.end(
                         `Google Calendar authorization failed:\n\n${error.message}`
                     );
+
                 }
 
+
                 return;
+
             }
 
-            // ------------------------------------------------
+
+            // =================================================
             // GOOGLE CALENDARS
-            // ------------------------------------------------
+            // =================================================
 
             if (
                 requestUrl.pathname ===
@@ -906,6 +1205,7 @@ const server =
                     const calendars =
                         await getCalendars();
 
+
                     response.writeHead(
                         200,
                         {
@@ -913,6 +1213,7 @@ const server =
                                 "application/json"
                         }
                     );
+
 
                     response.end(
                         JSON.stringify(
@@ -929,6 +1230,7 @@ const server =
                         error
                     );
 
+
                     response.writeHead(
                         500,
                         {
@@ -937,20 +1239,27 @@ const server =
                         }
                     );
 
+
                     response.end(
                         JSON.stringify({
+
                             error:
                                 error.message
+
                         })
                     );
+
                 }
 
+
                 return;
+
             }
 
-            // ------------------------------------------------
+
+            // =================================================
             // GOOGLE CALENDAR EVENTS
-            // ------------------------------------------------
+            // =================================================
 
             if (
                 requestUrl.pathname ===
@@ -969,6 +1278,7 @@ const server =
                                 "calendarId"
                             );
 
+
                     const start =
                         requestUrl
                             .searchParams
@@ -976,12 +1286,14 @@ const server =
                                 "start"
                             );
 
+
                     const end =
                         requestUrl
                             .searchParams
                             .get(
                                 "end"
                             );
+
 
                     if (
                         !calendarId ||
@@ -992,7 +1304,9 @@ const server =
                         throw new Error(
                             "calendarId, start, and end are required."
                         );
+
                     }
+
 
                     const events =
                         await getEventsForRange(
@@ -1001,6 +1315,7 @@ const server =
                             new Date(end)
                         );
 
+
                     response.writeHead(
                         200,
                         {
@@ -1008,6 +1323,7 @@ const server =
                                 "application/json"
                         }
                     );
+
 
                     response.end(
                         JSON.stringify(
@@ -1024,6 +1340,7 @@ const server =
                         error
                     );
 
+
                     response.writeHead(
                         500,
                         {
@@ -1032,20 +1349,27 @@ const server =
                         }
                     );
 
+
                     response.end(
                         JSON.stringify({
+
                             error:
                                 error.message
+
                         })
                     );
+
                 }
 
+
                 return;
+
             }
 
-            // ------------------------------------------------
+
+            // =================================================
             // TODOIST TASKS
-            // ------------------------------------------------
+            // =================================================
 
             if (
                 requestUrl.pathname ===
@@ -1064,10 +1388,12 @@ const server =
                                 "filter"
                             );
 
+
                     const data =
                         await getTodoistTasks(
                             filter
                         );
+
 
                     response.writeHead(
                         200,
@@ -1076,6 +1402,7 @@ const server =
                                 "application/json"
                         }
                     );
+
 
                     response.end(
                         JSON.stringify(
@@ -1092,6 +1419,7 @@ const server =
                         error
                     );
 
+
                     response.writeHead(
                         500,
                         {
@@ -1100,20 +1428,27 @@ const server =
                         }
                     );
 
+
                     response.end(
                         JSON.stringify({
+
                             error:
                                 error.message
+
                         })
                     );
+
                 }
 
+
                 return;
+
             }
 
-            // ------------------------------------------------
+
+            // =================================================
             // COMPLETE TODOIST TASK
-            // ------------------------------------------------
+            // =================================================
 
             if (
                 requestUrl.pathname.startsWith(
@@ -1135,13 +1470,16 @@ const server =
                             .pathname
                             .split("/");
 
+
                     const taskId =
                         pathParts[4];
+
 
                     const result =
                         await completeTodoistTask(
                             taskId
                         );
+
 
                     response.writeHead(
                         200,
@@ -1150,6 +1488,7 @@ const server =
                                 "application/json"
                         }
                     );
+
 
                     response.end(
                         JSON.stringify(
@@ -1166,6 +1505,7 @@ const server =
                         error
                     );
 
+
                     response.writeHead(
                         500,
                         {
@@ -1174,20 +1514,27 @@ const server =
                         }
                     );
 
+
                     response.end(
                         JSON.stringify({
+
                             error:
                                 error.message
+
                         })
                     );
+
                 }
 
+
                 return;
+
             }
 
-            // ------------------------------------------------
+
+            // =================================================
             // STATIC DASHBOARD FILES
-            // ------------------------------------------------
+            // =================================================
 
             if (
                 request.method ===
@@ -1200,14 +1547,21 @@ const server =
                         response
                     );
 
-                if (served) {
+
+                if (
+                    served
+                ) {
+
                     return;
+
                 }
+
             }
 
-            // ------------------------------------------------
+
+            // =================================================
             // 404
-            // ------------------------------------------------
+            // =================================================
 
             response.writeHead(
                 404,
@@ -1217,14 +1571,19 @@ const server =
                 }
             );
 
+
             response.end(
                 JSON.stringify({
+
                     error:
                         "Not found"
+
                 })
             );
+
         }
     );
+
 
 // ============================================================
 // START SERVER

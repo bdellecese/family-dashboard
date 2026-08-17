@@ -303,13 +303,6 @@ const largeCalendar = {
                     );
 
 
-                console.log(
-                    "Large calendar events:",
-                    calendarId,
-                    events.length
-                );
-
-
                 for (
                     const event
                     of events
