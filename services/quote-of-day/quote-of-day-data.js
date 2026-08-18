@@ -3,20 +3,16 @@
  * QUOTE OF THE DAY DATA SERVICE
  * ============================================================
  *
- * Loads the daily Quote of the Day using the reusable
- * RSS data service.
+ * Loads the daily Quote of the Day directly from FixQuotes.
  *
  * FixQuotes RSS format:
  *
  * title       = author
  * description = quote
+ * link        = quote page
  *
  * ============================================================
  */
-
-import rssData
-from "../rss/rss-data.js";
-
 
 const quoteOfDayData = {
 
@@ -35,15 +31,91 @@ const quoteOfDayData = {
 
         try {
 
-            const stories =
-                await rssData.getFeed(
-                    feedUrl
+            /*
+             * ====================================================
+             * FETCH RSS FEED DIRECTLY
+             * ====================================================
+             */
+
+            const response =
+                await fetch(
+                    feedUrl,
+                    {
+                        cache:
+                            "no-store"
+                    }
                 );
 
 
             if (
-                !stories ||
-                stories.length === 0
+                !response.ok
+            ) {
+
+                throw new Error(
+                    `Quote feed request failed: ${response.status}`
+                );
+
+            }
+
+
+            /*
+             * ====================================================
+             * READ RSS
+             * ====================================================
+             */
+
+            const xml =
+                await response.text();
+
+
+            const parser =
+                new DOMParser();
+
+
+            const document =
+                parser.parseFromString(
+                    xml,
+                    "application/xml"
+                );
+
+
+            /*
+             * ====================================================
+             * CHECK FOR PARSE ERRORS
+             * ====================================================
+             */
+
+            const parserError =
+                document.querySelector(
+                    "parsererror"
+                );
+
+
+            if (
+                parserError
+            ) {
+
+                throw new Error(
+                    "Unable to parse Quote of the Day feed."
+                );
+
+            }
+
+
+            /*
+             * ====================================================
+             * GET FIRST ITEM
+             * ====================================================
+ */
+
+            const item =
+                document.querySelector(
+                    "item"
+                );
+
+
+            if (
+                !item
             ) {
 
                 return {
@@ -61,40 +133,75 @@ const quoteOfDayData = {
 
             /*
              * ====================================================
-             * FIRST STORY
+             * EXTRACT FIELDS
              * ====================================================
-             */
-
-            const story =
-                stories[0];
-
-
-            /*
-             * ====================================================
-             * FIXQUOTES FORMAT
-             *
-             * title       = author
-             * description = quote
-             * ====================================================
-             */
+ */
 
             const quote =
                 cleanText(
-                    story.description
+                    getElementText(
+                        item,
+                        "description"
+                    )
                 );
 
 
             const author =
                 cleanText(
-                    story.title
+                    getElementText(
+                        item,
+                        "title"
+                    )
                 );
+
+
+            const link =
+                getElementText(
+                    item,
+                    "link"
+                );
+
+
+            const published =
+                getElementText(
+                    item,
+                    "pubDate"
+                );
+
+
+            /*
+             * ====================================================
+             * IMAGE
+             * ====================================================
+ */
+
+            const mediaContent =
+                item.querySelector(
+                    "media\\:content"
+                );
+
+
+            const enclosure =
+                item.querySelector(
+                    "enclosure"
+                );
+
+
+            const image =
+                mediaContent?.getAttribute(
+                    "url"
+                ) ||
+                enclosure?.getAttribute(
+                    "url"
+                ) ||
+                "";
 
 
             /*
              * ====================================================
              * VALIDATE
              * ====================================================
-             */
+ */
 
             if (
                 !quote
@@ -117,7 +224,7 @@ const quoteOfDayData = {
              * ====================================================
              * FINAL DATA
              * ====================================================
-             */
+ */
 
             return {
 
@@ -134,13 +241,25 @@ const quoteOfDayData = {
                     "FixQuotes",
 
                 link:
-                    story.link || ""
+                    link,
+
+                published:
+                    published,
+
+                image:
+                    image
 
             };
 
         }
 
         catch (error) {
+
+            console.error(
+                "Quote of the Day feed error:",
+                error
+            );
+
 
             throw error;
 
@@ -149,6 +268,40 @@ const quoteOfDayData = {
     }
 
 };
+
+
+/*
+ * ============================================================
+ * GET ELEMENT TEXT
+ * ============================================================
+ */
+
+function getElementText(
+    parent,
+    selector
+) {
+
+    const element =
+        parent.querySelector(
+            selector
+        );
+
+
+    if (
+        !element
+    ) {
+
+        return "";
+
+    }
+
+
+    return (
+        element.textContent ||
+        ""
+    ).trim();
+
+}
 
 
 /*
@@ -170,21 +323,7 @@ function cleanText(
     }
 
 
-    const temp =
-        document.createElement(
-            "div"
-        );
-
-
-    temp.innerHTML =
-        value;
-
-
-    return (
-        temp.textContent ||
-        temp.innerText ||
-        ""
-    )
+    return value
         .replace(
             /\s+/g,
             " "
