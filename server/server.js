@@ -296,7 +296,7 @@ function normalizeTask(
 
 }
 
-
+// =================================================
 // ============================================================
 // GET TODOIST TASKS
 // ============================================================
@@ -741,6 +741,132 @@ const server =
 
 
             // =================================================
+            // ON THIS DAY SPORTS
+            // =================================================
+
+            if (
+                requestUrl.pathname ===
+                    "/api/on-this-day-sports"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                try {
+
+                    const month =
+                        requestUrl
+                            .searchParams
+                            .get("month");
+
+                    const day =
+                        requestUrl
+                            .searchParams
+                            .get("day");
+
+
+                    if (
+                        !month ||
+                        !day
+                    ) {
+
+                        response.writeHead(
+                            400,
+                            {
+                                "Content-Type":
+                                    "application/json"
+                            }
+                        );
+
+                        response.end(
+                            JSON.stringify({
+                                error:
+                                    "month and day are required"
+                            })
+                        );
+
+                        return;
+
+                    }
+
+
+                    const sourceUrl =
+                        `https://on-this-day.com/cgi-bin/otd/sportsotd.pl?month=${encodeURIComponent(month)}&day=${encodeURIComponent(day)}`;
+
+
+                    const sportsResponse =
+                        await fetch(
+                            sourceUrl
+                        );
+
+
+                    if (
+                        !sportsResponse.ok
+                    ) {
+
+                        throw new Error(
+                            `On This Day sports request returned ${sportsResponse.status}`
+                        );
+
+                    }
+
+
+                    const body =
+                        await sportsResponse.text();
+
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "text/html; charset=utf-8",
+                            "Access-Control-Allow-Origin":
+                                "*"
+                        }
+                    );
+
+
+                    response.end(
+                        body
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "On This Day sports request failed:",
+                        error
+                    );
+
+
+                    response.writeHead(
+                        500,
+                        {
+                            "Content-Type":
+                                "application/json",
+                            "Access-Control-Allow-Origin":
+                                "*"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+                            error:
+                                error.message
+                        })
+                    );
+
+                }
+
+
+                return;
+
+            }
+
+
+            // =================================================
             // SCHOOL LUNCH
             // =================================================
 
@@ -943,6 +1069,133 @@ const server =
 
                             error:
                                 "Unable to load photos"
+
+                        })
+                    );
+
+                }
+
+
+                return;
+
+            }
+
+
+            // =================================================
+            // =================================================
+
+            if (
+                requestUrl.pathname ===
+                    "/api/on-this-day-sports"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                try {
+
+                    const month =
+                        requestUrl
+                            .searchParams
+                            .get("month");
+
+                    const day =
+                        requestUrl
+                            .searchParams
+                            .get("day");
+
+
+                    if (
+                        !month ||
+                        !day
+                    ) {
+
+                        response.writeHead(
+                            400,
+                            {
+                                "Content-Type":
+                                    "application/json"
+                            }
+                        );
+
+
+                        response.end(
+                            JSON.stringify({
+
+                                error:
+                                    "month and day are required"
+
+                            })
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    const sourceUrl =
+                        `https://on-this-day.com/cgi-bin/otd/sportsotd.pl?month=${encodeURIComponent(month)}&day=${encodeURIComponent(day)}`;
+
+
+                    const sportsResponse =
+                        await fetch(
+                            sourceUrl
+                        );
+
+
+                    if (
+                        !sportsResponse.ok
+                    ) {
+
+                        throw new Error(
+                            `On This Day sports request returned ${sportsResponse.status}`
+                        );
+
+                    }
+
+
+                    const body =
+                        await sportsResponse.text();
+
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "text/html; charset=utf-8"
+                        }
+                    );
+
+
+                    response.end(
+                        body
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "On This Day sports request failed:",
+                        error
+                    );
+
+
+                    response.writeHead(
+                        500,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            error:
+                                error.message
 
                         })
                     );

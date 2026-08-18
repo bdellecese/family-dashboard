@@ -172,7 +172,11 @@
  * 25% width
  * Full height
  *
- * Designed for 2–4 stacked widgets.
+ * Four stacked widgets:
+ *   1. News
+ *   2. On This Day in Sports
+ *   3. Placeholder
+ *   4. Placeholder
  * ============================================================
  */
 
@@ -205,6 +209,38 @@
 
 }
 
+
+/*
+ * ============================================================
+ * COLUMN 3 WIDGETS
+ *
+ * Four widgets share the available height equally.
+ * ============================================================
+ */
+
+.sports-layout
+.column-3
+.widget {
+
+    flex:
+        1 1 0;
+
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+    border-radius:
+        16px;
+
+}
 
 /*
  * ============================================================

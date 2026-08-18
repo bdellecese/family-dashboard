@@ -133,4 +133,8 @@ export async function registerWidgets() {
         "../widgets/sports-standings/sports-standings.js"
     );
 
+    await registerWidget(
+        "on-this-day-sports",
+        "../widgets/on-this-day-sports/on-this-day-sports.js"
+    );
 }

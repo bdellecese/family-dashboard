@@ -900,11 +900,13 @@ sonos-status
 
 ## Purpose
 
-Displays the current playback status of a configured Sonos speaker.
+Displays the current playback status of a configured Sonos speaker and,
+when that speaker is grouped with other Sonos speakers, displays the full
+group.
 
 The widget provides a compact view of:
 
-* Room / speaker name
+* Sonos room / group name
 * Playback state
 * Song title
 * Artist
@@ -933,24 +935,73 @@ Example:
 }
 ```
 
-`speaker` identifies the Sonos room to query.
+`speaker` identifies the Sonos room used as the starting point for the
+query.
+
+If the configured speaker is currently grouped with other Sonos speakers,
+the widget displays all members of that group.
+
+The configured speaker is displayed first in the group name.
 
 `refreshInterval` controls how frequently the widget refreshes its data,
 in milliseconds.
 
-The current default speaker is:
+The current defaults are:
+
+```text
+speaker:
+    Kitchen
+
+refreshInterval:
+    10000
+```
+
+or 10 seconds.
+
+## Group Display
+
+When the configured speaker is not grouped, the widget displays only that
+speaker:
 
 ```text
 Kitchen
 ```
 
-The current default refresh interval is:
+When the configured speaker is grouped with another speaker:
 
 ```text
-10000
+Kitchen & Family Room
 ```
 
-or 10 seconds.
+When the configured speaker is grouped with multiple speakers:
+
+```text
+Kitchen, Family Room & Bedroom
+```
+
+The configured speaker is always placed first, regardless of the order in
+which Sonos reports the group members.
+
+For example, if the API returns:
+
+```text
+Family Room
+Kitchen
+Bedroom
+```
+
+for a widget configured for:
+
+```text
+speaker:
+    Kitchen
+```
+
+the widget displays:
+
+```text
+Kitchen, Family Room & Bedroom
+```
 
 ## Data Source
 
@@ -960,8 +1011,32 @@ The widget retrieves Sonos data through the dashboard's local API:
 /api/sonos?speaker=<speaker>
 ```
 
-The API communicates with the Sonos system on the local network and returns
-normalized playback information.
+The API communicates with Sonos players on the local network and returns
+normalized playback and group information.
+
+The API response includes:
+
+```text
+speaker
+state
+track
+group
+```
+
+The `group` object includes:
+
+```text
+grouped
+coordinator
+members
+```
+
+Each group member includes:
+
+```text
+uuid
+name
+```
 
 ## Data Flow
 
@@ -972,25 +1047,34 @@ screen configuration
 sonos-status widget
         |
         v
-/api/sonos
+/api/sonos?speaker=<speaker>
         |
         v
-local Sonos API
+Sonos data service
         |
-        v
-Sonos speaker
-        |
-        v
-normalized playback data
-        |
-        v
-sonos-status widget
+        +----------------------+
+        |                      |
+        v                      v
+Sonos player             Zone Group State
+        |                      |
+        +----------+-----------+
+                   |
+                   v
+          normalized Sonos data
+                   |
+                   v
+            sonos-status
 ```
 
-## Display
+## Playback Information
 
-When music is playing or paused, the widget displays the available album
-artwork alongside the playback information.
+The widget displays:
+
+* Playback state
+* Track title
+* Artist
+* Album
+* Album artwork
 
 Playback states include:
 
@@ -1000,7 +1084,7 @@ PAUSED_PLAYBACK
 STOPPED
 ```
 
-These are translated into user-friendly labels such as:
+These are translated into user-friendly labels:
 
 ```text
 Playing
@@ -1010,20 +1094,132 @@ Stopped
 
 The widget uses different visual treatments for playing and paused states.
 
+## Album Artwork
+
+When Sonos provides album artwork, the widget displays the artwork returned
+by the Sonos player.
+
+If no artwork is available, the widget displays the music placeholder.
+
+## Grouping
+
+Sonos group membership is determined from the Sonos
+`ZoneGroupTopology` service.
+
+The data service identifies the `ZoneGroup` containing the configured
+speaker and returns the members of that group.
+
+The group coordinator is also returned by the API.
+
+## Data Service
+
+```text
+services/sonos/sonos-data.js
+```
+
+The data service is responsible for:
+
+* Sonos player discovery
+* Finding a player by friendly room name
+* Playback state
+* Track metadata
+* Album artwork
+* Sonos group membership
+* Group coordinator information
+
+Player discovery currently uses Avahi / mDNS.
+
 ## Environment Considerations
 
 The Sonos widget requires access to the local Sonos API.
 
-The dashboard can run on different systems, but the API endpoint must be
-available from the machine hosting the dashboard.
+When running through VS Code Live Server on the Mac, the widget is
+configured to call the Raspberry Pi directly.
+
+When running on the Raspberry Pi, the widget uses the relative:
+
+```text
+/api/sonos
+```
+
+endpoint.
 
 VS Code Live Server by itself does not provide the `/api/sonos` endpoint.
 
-When developing locally, the dashboard may therefore need to be served
-through the dashboard application's server or configured to use the
-appropriate API host.
+The Raspberry Pi dashboard server therefore provides the local API endpoint
+used by the production dashboard.
 
-The Raspberry Pi deployment should provide the Sonos API endpoint locally.
+## Status
+
+Complete.
+
+
+# School Lunch
+
+## Widget
+
+```text
+school-lunch
+```
+
+## Purpose
+
+Displays the current and upcoming school lunch information for the family.
+
+The widget is used by the Chores + Fun screen.
+
+The widget is designed to present the lunch menu in a simple,
+family-friendly format without requiring users to open the underlying
+school menu documents.
+
+## Data Source
+
+School calendar and menu data.
+
+The school lunch data is maintained separately from the widget and is
+normalized from the school's published menu information.
+
+The source data includes school-year and monthly menu records, including
+menu PDF URLs for:
+
+* Elementary / Middle School
+* High School
+
+## Data Flow
+
+```text
+school calendar / menu source
+        |
+        v
+school lunch data
+        |
+        v
+normalized lunch data
+        |
+        v
+school-lunch widget
+```
+
+## Menu Sources
+
+The school menu data includes records such as:
+
+```text
+school-year
+menu
+```
+
+with fields including:
+
+```text
+name
+startDate
+endDate
+elementaryMiddleUrl
+highSchoolUrl
+```
+
+Monthly menu records contain the source PDF URLs published by the school.
 
 ## Status
 

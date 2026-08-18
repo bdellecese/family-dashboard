@@ -737,6 +737,12 @@ export const screens = {
              * ====================================================
              */
 
+            /*
+             * ====================================================
+             * COLUMN 3
+             * ====================================================
+             */
+
             "column-2": [
 
                 {
@@ -750,8 +756,6 @@ export const screens = {
 
                             "http://feeds.bbci.co.uk/sport/rss.xml",
 
-//                            "https://www.espn.com/espn/rss/news",
-
                             "https://www.eyefootball.com/football_news.xml"
 
                         ],
@@ -760,12 +764,26 @@ export const screens = {
                             "SPORTS NEWS",
 
                         rotationSeconds:
-                            20,
+                            30,
 
                         includeImage:
                             true
 
                     }
+
+                },
+
+                {
+
+                    name:
+                        "on-this-day-sports"
+
+                },
+
+                {
+
+                    name:
+                        "placeholder"
 
                 },
 
