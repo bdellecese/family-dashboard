@@ -254,6 +254,242 @@
                 "10× All-NBA"
             ],
             "familyScore": 2
-        }
+        },
+        {
+            "id": "albert-pujols",
+            "sport": "MLB",
+            "name": "Albert Pujols",
+            "team": "St. Louis Cardinals",
+            "years": "2001–2022",
+            "position": "First Baseman",
+            "hallOfFame": null,
+            "image": "/assets/images/sports-legends/albert-pujols.jpg",
+            "stats": [
+                "3× MVP",
+                "11× All-Star",
+                "2× World Series champion",
+                "703 career home runs"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "cy-young",
+            "sport": "MLB",
+            "name": "Cy Young",
+            "team": "Cleveland Spiders / St. Louis Cardinals / Boston Red Sox / Cleveland Naps / Boston Braves",
+            "years": "1890–1911",
+            "position": "Pitcher",
+            "hallOfFame": 1937,
+            "image": "/assets/images/sports-legends/cy-young.jpg",
+            "stats": [
+                "511 career wins",
+                "3× World Series champion",
+                "749 complete games",
+                "2× ERA leader"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "joe-dimaggio",
+            "sport": "MLB",
+            "name": "Joe DiMaggio",
+            "team": "New York Yankees",
+            "years": "1936–1951",
+            "position": "Center Fielder",
+            "hallOfFame": 1955,
+            "image": "/assets/images/sports-legends/joe-dimaggio.jpg",
+            "stats": [
+                "3× MVP",
+                "13× All-Star",
+                "9× World Series champion",
+                "56-game hitting streak"
+            ],
+            "familyScore": 2
+        },
+        {
+            "id": "mickey-mantle",
+            "sport": "MLB",
+            "name": "Mickey Mantle",
+            "team": "New York Yankees",
+            "years": "1951–1968",
+            "position": "Center Fielder",
+            "hallOfFame": 1974,
+            "image": "/assets/images/sports-legends/mickey-mantle.jpg",
+            "stats": [
+                "3× MVP",
+                "20× All-Star",
+                "7× World Series champion",
+                "536 career home runs"
+            ],
+            "familyScore": 2
+        },
+        {
+            "id": "lou-gehrig",
+            "sport": "MLB",
+            "name": "Lou Gehrig",
+            "team": "New York Yankees",
+            "years": "1923–1939",
+            "position": "First Baseman",
+            "hallOfFame": 1939,
+            "image": "/assets/images/sports-legends/lou-gehrig.jpg",
+            "stats": [
+                "2× MVP",
+                "7× All-Star",
+                "6× World Series champion",
+                ".340 career batting average"
+            ],
+            "familyScore": 2
+        },
+        {
+            "id": "kobe-bryant",
+            "sport": "NBA",
+            "name": "Kobe Bryant",
+            "team": "Los Angeles Lakers",
+            "years": "1996–2016",
+            "position": "Shooting Guard",
+            "hallOfFame": 2020,
+            "image": "/assets/images/sports-legends/kobe-bryant.jpg",
+            "stats": [
+                "5× NBA champion",
+                "1× MVP",
+                "18× All-Star",
+                "2× NBA Finals MVP"
+            ],
+            "familyScore": 2
+        },
+        {
+            "id": "david-robinson",
+            "sport": "NBA",
+            "name": "David Robinson",
+            "team": "San Antonio Spurs",
+            "years": "1989–2003",
+            "position": "Center",
+            "hallOfFame": 2009,
+            "image": "/assets/images/sports-legends/david-robinson.jpg",
+            "stats": [
+                "2× NBA champion",
+                "1× MVP",
+                "10× All-Star",
+                "1992 Defensive Player of the Year"
+            ],
+            "familyScore": 2
+        },
+        {
+            "id": "wilt-chamberlain",
+            "sport": "NBA",
+            "name": "Wilt Chamberlain",
+            "team": "Philadelphia 76ers / Los Angeles Lakers",
+            "years": "1959–1973",
+            "position": "Center",
+            "hallOfFame": 1979,
+            "image": "/assets/images/sports-legends/wilt-chamberlain.jpeg",
+            "stats": [
+                "2× NBA champion",
+                "4× MVP",
+                "13× All-Star",
+                "100-point game"
+            ],
+            "familyScore": 2
+        },
+        {
+            "id": "lionel-messi",
+            "sport": "Soccer",
+            "name": "Lionel Messi",
+            "team": "FC Barcelona / Argentina",
+            "years": "2004–present",
+            "position": "Forward",
+            "hallOfFame": null,
+            "image": "/assets/images/sports-legends/lionel-messi.jpg",
+            "stats": [
+                "8× Ballon d'Or",
+                "2022 World Cup champion",
+                "4× Champions League winner",
+                "900+ career goals"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "cristiano-ronaldo",
+            "sport": "Soccer",
+            "name": "Cristiano Ronaldo",
+            "team": "Manchester United / Real Madrid / Portugal",
+            "years": "2002–present",
+            "position": "Forward",
+            "hallOfFame": null,
+            "image": "/assets/images/sports-legends/cristiano-ronaldo.jpg",
+            "stats": [
+                "5× Ballon d'Or",
+                "5× Champions League winner",
+                "2016 European Championship",
+                "900+ career goals"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "christian-vieri",
+            "sport": "Soccer",
+            "name": "Christian Vieri",
+            "team": "Inter Milan / Italy",
+            "years": "1991–2009",
+            "position": "Striker",
+            "hallOfFame": null,
+            "image": "/assets/images/sports-legends/christian-vieri.jpg",
+            "stats": [
+                "49 Italy caps",
+                "23 Italy goals",
+                "1998 FIFA World Cup",
+                "Serie A top scorer"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "barry-sanders",
+            "sport": "NFL",
+            "name": "Barry Sanders",
+            "team": "Detroit Lions",
+            "years": "1989–1998",
+            "position": "Running Back",
+            "hallOfFame": 2004,
+            "image": "/assets/images/sports-legends/barry-sanders.jpg",
+            "stats": [
+                "NFL MVP",
+                "10× Pro Bowl",
+                "4× rushing champion",
+                "15,269 career rushing yards"
+            ]
+        },
+        {
+            "id": "joe-montana",
+            "sport": "NFL",
+            "name": "Joe Montana",
+            "team": "San Francisco 49ers",
+            "years": "1979–1994",
+            "position": "Quarterback",
+            "hallOfFame": 2000,
+            "image": "/assets/images/sports-legends/joe-montana.jpg",
+            "stats": [
+                "4× Super Bowl champion",
+                "3× Super Bowl MVP",
+                "2× NFL MVP",
+                "8× Pro Bowl"
+            ]
+        },
+        {
+            "id": "tom-brady",
+            "sport": "NFL",
+            "name": "Tom Brady",
+            "team": "New England Patriots / Tampa Bay Buccaneers",
+            "years": "2000–2022",
+            "position": "Quarterback",
+            "hallOfFame": null,
+            "image": "/assets/images/sports-legends/tom-brady.jpg",
+            "stats": [
+                "7× Super Bowl champion",
+                "5× Super Bowl MVP",
+                "3× NFL MVP",
+                "15× Pro Bowl"
+            ]
+        }        
     ]
+
 }

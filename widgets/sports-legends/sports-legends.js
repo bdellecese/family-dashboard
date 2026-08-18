@@ -31,7 +31,7 @@ const sportsLegends = {
          * ====================================================
          * CONFIGURATION
          * ====================================================
-         */
+ */
 
         const rotationSeconds =
             config.rotationSeconds ||
@@ -137,11 +137,7 @@ const sportsLegends = {
                     {
 
                         sports:
-                            config.sports,
-
-                        maxLegends:
-                            config.maxLegends ||
-                            10
+                            config.sports
 
                     }
                 );
@@ -261,11 +257,11 @@ const sportsLegends = {
         );
 
         content.appendChild(
-            image
+            name
         );
 
         content.appendChild(
-            name
+            image
         );
 
         content.appendChild(
@@ -307,7 +303,9 @@ const sportsLegends = {
 
 
             /*
-             * Remove fade classes.
+             * ==================================================
+             * REMOVE FADE CLASSES
+             * ==================================================
              */
 
             image.classList.remove(
@@ -343,7 +341,9 @@ const sportsLegends = {
 
 
             /*
+             * ==================================================
              * IMAGE
+             * ==================================================
              */
 
             if (
@@ -377,7 +377,9 @@ const sportsLegends = {
 
 
             /*
+             * ==================================================
              * SPORT
+             * ==================================================
              */
 
             sport.textContent =
@@ -385,7 +387,9 @@ const sportsLegends = {
 
 
             /*
+             * ==================================================
              * NAME
+             * ==================================================
              */
 
             name.textContent =
@@ -393,7 +397,9 @@ const sportsLegends = {
 
 
             /*
+             * ==================================================
              * TEAM
+             * ==================================================
              */
 
             team.textContent =
@@ -401,7 +407,9 @@ const sportsLegends = {
 
 
             /*
+             * ==================================================
              * DETAILS
+             * ==================================================
              */
 
             const detailParts =
@@ -448,7 +456,9 @@ const sportsLegends = {
 
 
             /*
+             * ==================================================
              * STATS
+             * ==================================================
              */
 
             stats.innerHTML =
@@ -488,7 +498,9 @@ const sportsLegends = {
 
 
             /*
+             * ==================================================
              * FADE IN
+             * ==================================================
              */
 
             image.classList.add(
@@ -517,7 +529,9 @@ const sportsLegends = {
 
 
             /*
+             * ==================================================
              * NEXT LEGEND
+             * ==================================================
              */
 
             currentIndex =

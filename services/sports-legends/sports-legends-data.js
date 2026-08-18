@@ -9,9 +9,10 @@
  * Supports:
  *
  *   - Multiple sports
- *   - Family-score weighting
- *   - Recent-player avoidance
- *   - Configurable result count
+ *   - Equal-probability random selection
+ *   - Full player pool
+ *   - No family-score weighting
+ *   - No hard-coded player limit
  *
  * ============================================================
  */
@@ -25,19 +26,6 @@
 
 const DATA_URL =
     "/services/sports-legends/sports-legends-data.json";
-
-
-const RECENT_HISTORY_SIZE =
-    6;
-
-
-/*
- * ============================================================
- * STATE
- * ============================================================
- */
-
-let recentlyShown = [];
 
 
 /*
@@ -90,240 +78,55 @@ async function loadData() {
 
 /*
  * ============================================================
- * WEIGHTED RANDOM
+ * SHUFFLE
  * ============================================================
  *
- * Higher family scores make a player more likely to appear,
- * but do not guarantee selection.
+ * Fisher-Yates shuffle.
+ *
+ * Every player has an equal probability of appearing
+ * in every position in the resulting list.
  *
  * ============================================================
  */
 
-function weightedRandom(
+function shuffle(
     legends
 ) {
 
-    if (
-        !legends ||
-        legends.length === 0
-    ) {
-
-        return null;
-
-    }
-
-
-    const totalWeight =
-        legends.reduce(
-            (
-                total,
-                legend
-            ) => {
-
-                return (
-                    total +
-                    Math.max(
-                        1,
-                        Number(
-                            legend.familyScore
-                        ) || 1
-                    )
-                );
-
-            },
-            0
-        );
-
-
-    let random =
-        Math.random() *
-        totalWeight;
+    const shuffled =
+        [
+            ...legends
+        ];
 
 
     for (
-        const legend of legends
+        let i = shuffled.length - 1;
+        i > 0;
+        i--
     ) {
 
-        random -=
-            Math.max(
-                1,
-                Number(
-                    legend.familyScore
-                ) || 1
-            );
-
-
-        if (
-            random <= 0
-        ) {
-
-            return legend;
-
-        }
-
-    }
-
-
-    return legends[
-        legends.length - 1
-    ];
-
-}
-
-
-/*
- * ============================================================
- * SELECT RANDOM LEGENDS
- * ============================================================
- */
-
-function selectRandomLegends(
-    legends,
-    maxLegends
-) {
-
-    if (
-        legends.length === 0
-    ) {
-
-        return [];
-
-    }
-
-
-    /*
-     * ========================================================
-     * REMOVE RECENTLY SHOWN
-     * ========================================================
-     */
-
-    const recentIds =
-        new Set(
-            recentlyShown
-        );
-
-
-    const eligible =
-        legends.filter(
-            legend =>
-                !recentIds.has(
-                    legend.id
+        const randomIndex =
+            Math.floor(
+                Math.random() *
+                (
+                    i + 1
                 )
-        );
-
-
-    /*
-     * If we've exhausted the eligible pool,
-     * fall back to the complete list.
-     */
-
-    const pool =
-        eligible.length > 0
-            ? [
-                ...eligible
-            ]
-            : [
-                ...legends
-            ];
-
-
-    /*
-     * ========================================================
-     * SELECT
-     * ========================================================
-     */
-
-    const selected = [];
-
-
-    while (
-        selected.length <
-            maxLegends &&
-        pool.length > 0
-    ) {
-
-        const legend =
-            weightedRandom(
-                pool
             );
 
 
-        if (
-            !legend
-        ) {
-
-            break;
-
-        }
-
-
-        selected.push(
-            legend
-        );
-
-
-        /*
-         * Remove selected legend so it cannot
-         * appear twice in the same request.
-         */
-
-        const index =
-            pool.findIndex(
-                item =>
-                    item.id ===
-                    legend.id
-            );
-
-
-        if (
-            index !== -1
-        ) {
-
-            pool.splice(
-                index,
-                1
-            );
-
-        }
+        [
+            shuffled[i],
+            shuffled[randomIndex]
+        ] =
+        [
+            shuffled[randomIndex],
+            shuffled[i]
+        ];
 
     }
 
 
-    /*
-     * ========================================================
-     * UPDATE RECENT HISTORY
-     * ========================================================
-     */
-
-    for (
-        const legend of selected
-    ) {
-
-        recentlyShown.push(
-            legend.id
-        );
-
-    }
-
-
-    /*
-     * Keep only the most recent IDs.
-     */
-
-    if (
-        recentlyShown.length >
-        RECENT_HISTORY_SIZE
-    ) {
-
-        recentlyShown =
-            recentlyShown.slice(
-                -RECENT_HISTORY_SIZE
-            );
-
-    }
-
-
-    return selected;
+    return shuffled;
 
 }
 
@@ -331,6 +134,13 @@ function selectRandomLegends(
 /*
  * ============================================================
  * GET LEGENDS
+ * ============================================================
+ *
+ * Returns the complete matching player pool in a
+ * randomized order.
+ *
+ * There is intentionally NO maxLegends limit.
+ *
  * ============================================================
  */
 
@@ -385,28 +195,27 @@ async function getLegends(
 
     /*
      * ========================================================
-     * RESULT COUNT
+     * NO LEGENDS AVAILABLE
      * ========================================================
-     */
+ */
 
-    const maxLegends =
-        Math.max(
-            1,
-            Number(
-                config.maxLegends
-            ) || 1
-        );
+    if (
+        filteredLegends.length === 0
+    ) {
+
+        return [];
+
+    }
 
 
     /*
      * ========================================================
-     * SELECT
+     * RANDOMIZE COMPLETE POOL
      * ========================================================
-     */
+ */
 
-    return selectRandomLegends(
-        filteredLegends,
-        maxLegends
+    return shuffle(
+        filteredLegends
     );
 
 }
@@ -416,11 +225,18 @@ async function getLegends(
  * ============================================================
  * RESET HISTORY
  * ============================================================
+ *
+ * Kept for compatibility with the existing service API.
+ *
+ * There is no history to reset because selection is now
+ * handled entirely through random shuffling.
+ *
+ * ============================================================
  */
 
 function resetHistory() {
 
-    recentlyShown = [];
+    // Intentionally empty.
 
 }
 
