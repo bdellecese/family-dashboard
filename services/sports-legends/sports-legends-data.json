@@ -8,11 +8,7 @@
             "years": "1939–1960",
             "position": "Left Fielder",
             "hallOfFame": 1966,
-            "images": [
-                "https://commons.wikimedia.org/wiki/Special:FilePath/Ted%20Williams.jpg",
-                "https://commons.wikimedia.org/wiki/Special:FilePath/1939%20Ted%20Williams.png",
-                "https://commons.wikimedia.org/wiki/Special:FilePath/Portrait%20of%20Boston%20Red%20Sox%20legend%20Ted%20Williams%20Sarasota%2C%20Florida.jpg"
-            ],
+            "image": "/assets/images/sports-legends/ted-williams.jpg",
             "stats": [
                 "2× MVP",
                 "6× batting champion",
@@ -29,7 +25,7 @@
             "years": "1914–1935",
             "position": "Pitcher / Outfielder",
             "hallOfFame": 1936,
-            "images": [],
+            "image": "/assets/images/sports-legends/babe-ruth.jpg",
             "stats": [
                 "7× World Series champion",
                 "714 career home runs",
@@ -46,7 +42,7 @@
             "years": "1961–1983",
             "position": "Left Fielder",
             "hallOfFame": 1989,
-            "images": [],
+            "image": "/assets/images/sports-legends/carl-yastrzemski.jpg",
             "stats": [
                 "3,419 hits",
                 "1967 Triple Crown",
@@ -63,11 +59,7 @@
             "years": "1982–1999",
             "position": "Third Baseman",
             "hallOfFame": 2005,
-            "images": [
-                "https://commons.wikimedia.org/wiki/Special:FilePath/Wade%20Boggs%201988.jpg",
-                "https://commons.wikimedia.org/wiki/Special:FilePath/Wade%20Boggs%20%2814571160328%29.jpg",
-                "https://commons.wikimedia.org/wiki/Special:FilePath/Wade%20Boggs%20%289386153908%29.jpg"
-            ],
+            "image": "/assets/images/sports-legends/wade-boggs.jpg",
             "stats": [
                 "3,010 hits",
                 "5× batting champion",
@@ -84,7 +76,7 @@
             "years": "1997–2016",
             "position": "Designated Hitter",
             "hallOfFame": 2022,
-            "images": [],
+            "image": "/assets/images/sports-legends/david-ortiz.jpg",
             "stats": [
                 "541 career home runs",
                 "10× All-Star",
@@ -101,16 +93,12 @@
             "years": "2006–2019",
             "position": "Second Baseman",
             "hallOfFame": null,
-            "images": [
-                "https://commons.wikimedia.org/wiki/Special:FilePath/DPedroia.jpg",
-                "https://commons.wikimedia.org/wiki/Special:FilePath/Dustin%20at%20the%20Plate.jpg",
-                "https://commons.wikimedia.org/wiki/Special:FilePath/2016-10-10%20Dustin%20Pedroia.jpg"
-            ],
+            "image": "/assets/images/sports-legends/dustin-pedroia.jpg",
             "stats": [
-                "2008 AL MVP",
+                "2007 World Series champion",
+                "2008 MVP",
                 "4× All-Star",
-                "4× Gold Glove",
-                "3× World Series champion"
+                "3× Gold Glove"
             ],
             "familyScore": 5
         },
@@ -122,7 +110,7 @@
             "years": "1941–1963",
             "position": "Outfielder / First Baseman",
             "hallOfFame": 1969,
-            "images": [],
+            "image": "/assets/images/sports-legends/stan-musial.jpg",
             "stats": [
                 "3× MVP",
                 "7× batting champion",
@@ -139,7 +127,7 @@
             "years": "1959–1975",
             "position": "Pitcher",
             "hallOfFame": 1981,
-            "images": [],
+            "image": "/assets/images/sports-legends/bob-gibson.jpg",
             "stats": [
                 "2× Cy Young Award",
                 "9× All-Star",
@@ -156,7 +144,7 @@
             "years": "1978–1996",
             "position": "Shortstop",
             "hallOfFame": 2002,
-            "images": [],
+            "image": "/assets/images/sports-legends/ozzie-smith.jpg",
             "stats": [
                 "15× All-Star",
                 "13× Gold Glove",
@@ -173,7 +161,7 @@
             "years": "1961–1979",
             "position": "Left Fielder",
             "hallOfFame": 1985,
-            "images": [],
+            "image": "/assets/images/sports-legends/lou-brock.jpg",
             "stats": [
                 "3,023 hits",
                 "6× All-Star",
@@ -190,7 +178,7 @@
             "years": "1984–2003",
             "position": "Shooting Guard",
             "hallOfFame": 2009,
-            "images": [],
+            "image": "/assets/images/sports-legends/michael-jordan.jpg",
             "stats": [
                 "6× NBA champion",
                 "5× MVP",
@@ -207,7 +195,7 @@
             "years": "1956–1969",
             "position": "Center",
             "hallOfFame": 1975,
-            "images": [],
+            "image": "/assets/images/sports-legends/bill-russell.jpg",
             "stats": [
                 "11× NBA champion",
                 "5× MVP",
@@ -224,10 +212,7 @@
             "years": "1979–1992",
             "position": "Small Forward",
             "hallOfFame": 1998,
-            "images": [
-                "https://commons.wikimedia.org/wiki/Special:FilePath/1981%20NBA%20Playoffs%20-%20Philadelphia%2076ers%20at%20Boston%20Celtics%2C%20April%2022%2C%201981.jpeg",
-                "https://commons.wikimedia.org/wiki/Special:FilePath/1988%20NBA%20Playoffs%20-%20New%20York%20Knicks%20vs.%20Boston%20Celtics%2C%20Games%201%20and%202.jpg"
-            ],
+            "image": "/assets/images/sports-legends/larry-bird.jpg",
             "stats": [
                 "3× NBA champion",
                 "3× MVP",
@@ -244,7 +229,7 @@
             "years": "1962–1978",
             "position": "Small Forward",
             "hallOfFame": 1984,
-            "images": [],
+            "image": "/assets/images/sports-legends/john-havlicek.jpg",
             "stats": [
                 "8× NBA champion",
                 "13× All-Star",
@@ -261,7 +246,7 @@
             "years": "1979–1991, 1996",
             "position": "Point Guard",
             "hallOfFame": 2002,
-            "images": [],
+            "image": "/assets/images/sports-legends/magic-johnson.jpg",
             "stats": [
                 "5× NBA champion",
                 "3× MVP",

@@ -9,7 +9,7 @@
  */
 
 import sportsLegendsData
-from "../../services/sports-legends/sports-legends-data.js";
+    from "../../services/sports-legends/sports-legends-data.js";
 
 
 const sportsLegends = {
@@ -57,7 +57,7 @@ const sportsLegends = {
          * ====================================================
          * HEADER
          * ====================================================
-         */
+ */
 
         const header =
             document.createElement(
@@ -94,7 +94,7 @@ const sportsLegends = {
          * ====================================================
          * CONTENT
          * ====================================================
-         */
+ */
 
         const content =
             document.createElement(
@@ -189,6 +189,24 @@ const sportsLegends = {
 
         /*
          * ====================================================
+         * IMAGE
+         * ====================================================
+ */
+
+        const image =
+            document.createElement(
+                "img"
+            );
+
+        image.className =
+            "sports-legends-widget__image";
+
+        image.alt =
+            "";
+
+
+        /*
+         * ====================================================
          * EVENT ELEMENTS
          * ====================================================
  */
@@ -243,6 +261,10 @@ const sportsLegends = {
         );
 
         content.appendChild(
+            image
+        );
+
+        content.appendChild(
             name
         );
 
@@ -285,8 +307,12 @@ const sportsLegends = {
 
 
             /*
-             * Remove fade class.
+             * Remove fade classes.
              */
+
+            image.classList.remove(
+                "sports-legends-widget__fade"
+            );
 
             sport.classList.remove(
                 "sports-legends-widget__fade"
@@ -314,6 +340,40 @@ const sportsLegends = {
              */
 
             void name.offsetWidth;
+
+
+            /*
+             * IMAGE
+             */
+
+            if (
+                legend.image
+            ) {
+
+                image.src =
+                    legend.image;
+
+                image.alt =
+                    legend.name;
+
+                image.style.display =
+                    "block";
+
+            }
+
+            else {
+
+                image.removeAttribute(
+                    "src"
+                );
+
+                image.alt =
+                    "";
+
+                image.style.display =
+                    "none";
+
+            }
 
 
             /*
@@ -430,6 +490,10 @@ const sportsLegends = {
             /*
              * FADE IN
              */
+
+            image.classList.add(
+                "sports-legends-widget__fade"
+            );
 
             sport.classList.add(
                 "sports-legends-widget__fade"
