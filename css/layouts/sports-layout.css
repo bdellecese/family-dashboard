@@ -383,3 +383,172 @@
         0;
 
 }
+
+/*
+ * ============================================================
+ * SPORTS NEWS
+ *
+ * Match the On This Day in Sports typography.
+ * Sports-only override so the Information screen is unchanged.
+ * ============================================================
+ */
+
+.sports-layout
+.news-widget {
+
+    padding:
+        14px 18px;
+
+    font-family:
+        "Roboto",
+        sans-serif;
+
+    color:
+        #F0F4F8;
+
+}
+
+
+/*
+ * NEWS HEADER
+ */
+
+.sports-layout
+.news-widget__label {
+
+    margin-bottom:
+        12px;
+
+    font-size:
+        1vw;
+
+    font-weight:
+        300;
+
+    letter-spacing:
+        normal;
+
+    opacity:
+        1;
+
+    color:
+        #F0F4F8;
+
+}
+
+
+/*
+ * NEWS HEADLINE
+ */
+
+.sports-layout
+.news-widget__headline {
+
+    font-size:
+        1vw;
+
+    font-weight:
+        400;
+
+    line-height:
+        1.3;
+
+    margin-bottom:
+        8px;
+
+}
+
+
+/*
+ * NEWS DESCRIPTION
+ */
+
+.sports-layout
+.news-widget__description {
+
+    font-size:
+        .8vw;
+
+    font-weight:
+        300;
+
+    line-height:
+        1.4;
+
+    opacity:
+        1;
+
+}
+
+
+/*
+ * NEWS METADATA
+ */
+
+.sports-layout
+.news-widget__metadata {
+
+    font-size:
+        .75vw;
+
+    font-weight:
+        300;
+
+    opacity:
+        .6;
+
+}
+
+
+/*
+ * ============================================================
+ * UPCOMING GAMES HEADER
+ *
+ * Calendar List remains unchanged globally.
+ * ============================================================
+ */
+
+.sports-layout
+.column-3
+.calendar-list-widget {
+
+    padding:
+        14px 18px;
+
+}
+
+
+/*
+ * Add a Sports-only title above Calendar List.
+ */
+
+.sports-layout
+.column-3
+.calendar-list-widget::before {
+
+    content:
+        "Upcoming Games";
+
+    display:
+        block;
+
+    margin-bottom:
+        12px;
+
+    font-family:
+        "Roboto",
+        sans-serif;
+
+    font-size:
+        1vw;
+
+    font-weight:
+        300;
+
+    line-height:
+        1.2;
+
+    color:
+        #F0F4F8;
+
+}

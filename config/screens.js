@@ -761,7 +761,7 @@ export const screens = {
                         ],
 
                         label:
-                            "SPORTS NEWS",
+                            "Sports News",
 
                         rotationSeconds:
                             30,
