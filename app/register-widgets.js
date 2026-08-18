@@ -137,4 +137,10 @@ export async function registerWidgets() {
         "on-this-day-sports",
         "../widgets/on-this-day-sports/on-this-day-sports.js"
     );
+
+    await registerWidget(
+        "sports-legends",
+        "../widgets/sports-legends/sports-legends.js"
+    );
+
 }

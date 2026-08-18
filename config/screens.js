@@ -808,7 +808,21 @@ export const screens = {
                 {
 
                     name:
-                        "placeholder"
+                        "sports-legends",
+
+                    config: {
+
+                        sports: [
+                            "MLB",
+                            "NBA"
+                        ],
+
+                        maxLegends:
+                            5,
+
+                        rotationSeconds:
+                            30
+                    }
 
                 },
 

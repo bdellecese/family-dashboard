@@ -1,0 +1,281 @@
+/*
+ * ============================================================
+ * SPORTS LEGENDS WIDGET
+ * ============================================================
+ */
+
+.sports-legends-widget {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    box-sizing:
+        border-box;
+
+    padding:
+        14px 18px;
+
+    overflow:
+        hidden;
+
+    color:
+        #F0F4F8;
+
+    font-family:
+        "Roboto",
+        sans-serif;
+
+}
+
+
+/*
+ * ============================================================
+ * HEADER
+ * ============================================================
+ */
+
+.sports-legends-widget__header {
+
+    margin-bottom:
+        12px;
+
+}
+
+
+.sports-legends-widget__title {
+
+    font-size:
+        1vw;
+
+    font-weight:
+        300;
+
+    color:
+        #F0F4F8;
+
+}
+
+
+/*
+ * ============================================================
+ * CONTENT
+ * ============================================================
+ */
+
+.sports-legends-widget__content {
+
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    box-sizing:
+        border-box;
+
+}
+
+
+/*
+ * ============================================================
+ * SPORT
+ * ============================================================
+ */
+
+.sports-legends-widget__sport {
+
+    margin-bottom:
+        8px;
+
+    font-size:
+        1vw;
+
+    font-weight:
+        400;
+
+    line-height:
+        1.2;
+
+    color:
+        #A3C1D9;
+
+}
+
+
+/*
+ * ============================================================
+ * NAME
+ * ============================================================
+ */
+
+.sports-legends-widget__name {
+
+    margin-bottom:
+        8px;
+
+    font-size:
+        2vw;
+
+    font-weight:
+        400;
+
+    line-height:
+        1.1;
+
+    color:
+        #FFFFFF;
+
+}
+
+
+/*
+ * ============================================================
+ * TEAM
+ * ============================================================
+ */
+
+.sports-legends-widget__team {
+
+    margin-bottom:
+        6px;
+
+    font-size:
+        1vw;
+
+    font-weight:
+        400;
+
+    line-height:
+        1.2;
+
+    color:
+        #F0F4F8;
+
+}
+
+
+/*
+ * ============================================================
+ * DETAILS
+ * ============================================================
+ */
+
+.sports-legends-widget__details {
+
+    margin-bottom:
+        14px;
+
+    font-size:
+        .75vw;
+
+    font-weight:
+        300;
+
+    line-height:
+        1.3;
+
+    color:
+        #A3C1D9;
+
+}
+
+
+/*
+ * ============================================================
+ * STATS
+ * ============================================================
+ */
+
+.sports-legends-widget__stats {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        5px;
+
+}
+
+
+.sports-legends-widget__stat {
+
+    font-size:
+        .8vw;
+
+    font-weight:
+        300;
+
+    line-height:
+        1.3;
+
+    color:
+        #F0F4F8;
+
+}
+
+
+/*
+ * ============================================================
+ * FADE
+ * ============================================================
+ */
+
+.sports-legends-widget__fade {
+
+    animation:
+        sports-legends-fade
+        0.8s
+        ease-in-out;
+
+}
+
+
+@keyframes sports-legends-fade {
+
+    from {
+
+        opacity:
+            0;
+
+    }
+
+    to {
+
+        opacity:
+            1;
+
+    }
+
+}
+
+
+/*
+ * ============================================================
+ * MESSAGE
+ * ============================================================
+ */
+
+.sports-legends-widget__message {
+
+    font-size:
+        1vw;
+
+    font-weight:
+        300;
+
+    color:
+        #A3C1D9;
+
+}

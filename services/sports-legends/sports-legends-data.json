@@ -1,0 +1,274 @@
+{
+    "legends": [
+        {
+            "id": "ted-williams",
+            "sport": "MLB",
+            "name": "Ted Williams",
+            "team": "Boston Red Sox",
+            "years": "1939–1960",
+            "position": "Left Fielder",
+            "hallOfFame": 1966,
+            "images": [
+                "https://commons.wikimedia.org/wiki/Special:FilePath/Ted%20Williams.jpg",
+                "https://commons.wikimedia.org/wiki/Special:FilePath/1939%20Ted%20Williams.png",
+                "https://commons.wikimedia.org/wiki/Special:FilePath/Portrait%20of%20Boston%20Red%20Sox%20legend%20Ted%20Williams%20Sarasota%2C%20Florida.jpg"
+            ],
+            "stats": [
+                "2× MVP",
+                "6× batting champion",
+                "19× All-Star",
+                ".344 career batting average"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "babe-ruth",
+            "sport": "MLB",
+            "name": "Babe Ruth",
+            "team": "Boston Red Sox / New York Yankees",
+            "years": "1914–1935",
+            "position": "Pitcher / Outfielder",
+            "hallOfFame": 1936,
+            "images": [],
+            "stats": [
+                "7× World Series champion",
+                "714 career home runs",
+                "12× home run leader",
+                "1923 MVP"
+            ],
+            "familyScore": 3
+        },
+        {
+            "id": "carl-yastrzemski",
+            "sport": "MLB",
+            "name": "Carl Yastrzemski",
+            "team": "Boston Red Sox",
+            "years": "1961–1983",
+            "position": "Left Fielder",
+            "hallOfFame": 1989,
+            "images": [],
+            "stats": [
+                "3,419 hits",
+                "1967 Triple Crown",
+                "18× All-Star",
+                "1967 MVP"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "wade-boggs",
+            "sport": "MLB",
+            "name": "Wade Boggs",
+            "team": "Boston Red Sox",
+            "years": "1982–1999",
+            "position": "Third Baseman",
+            "hallOfFame": 2005,
+            "images": [
+                "https://commons.wikimedia.org/wiki/Special:FilePath/Wade%20Boggs%201988.jpg",
+                "https://commons.wikimedia.org/wiki/Special:FilePath/Wade%20Boggs%20%2814571160328%29.jpg",
+                "https://commons.wikimedia.org/wiki/Special:FilePath/Wade%20Boggs%20%289386153908%29.jpg"
+            ],
+            "stats": [
+                "3,010 hits",
+                "5× batting champion",
+                "12× All-Star",
+                "1986 World Series champion"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "david-ortiz",
+            "sport": "MLB",
+            "name": "David Ortiz",
+            "team": "Boston Red Sox",
+            "years": "1997–2016",
+            "position": "Designated Hitter",
+            "hallOfFame": 2022,
+            "images": [],
+            "stats": [
+                "541 career home runs",
+                "10× All-Star",
+                "3× World Series champion",
+                "2013 World Series MVP"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "dustin-pedroia",
+            "sport": "MLB",
+            "name": "Dustin Pedroia",
+            "team": "Boston Red Sox",
+            "years": "2006–2019",
+            "position": "Second Baseman",
+            "hallOfFame": null,
+            "images": [
+                "https://commons.wikimedia.org/wiki/Special:FilePath/DPedroia.jpg",
+                "https://commons.wikimedia.org/wiki/Special:FilePath/Dustin%20at%20the%20Plate.jpg",
+                "https://commons.wikimedia.org/wiki/Special:FilePath/2016-10-10%20Dustin%20Pedroia.jpg"
+            ],
+            "stats": [
+                "2008 AL MVP",
+                "4× All-Star",
+                "4× Gold Glove",
+                "3× World Series champion"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "stan-musial",
+            "sport": "MLB",
+            "name": "Stan Musial",
+            "team": "St. Louis Cardinals",
+            "years": "1941–1963",
+            "position": "Outfielder / First Baseman",
+            "hallOfFame": 1969,
+            "images": [],
+            "stats": [
+                "3× MVP",
+                "7× batting champion",
+                "24× All-Star",
+                "3,630 hits"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "bob-gibson",
+            "sport": "MLB",
+            "name": "Bob Gibson",
+            "team": "St. Louis Cardinals",
+            "years": "1959–1975",
+            "position": "Pitcher",
+            "hallOfFame": 1981,
+            "images": [],
+            "stats": [
+                "2× Cy Young Award",
+                "9× All-Star",
+                "2× World Series champion",
+                "1968 NL MVP"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "ozzie-smith",
+            "sport": "MLB",
+            "name": "Ozzie Smith",
+            "team": "St. Louis Cardinals",
+            "years": "1978–1996",
+            "position": "Shortstop",
+            "hallOfFame": 2002,
+            "images": [],
+            "stats": [
+                "15× All-Star",
+                "13× Gold Glove",
+                "1982 World Series champion",
+                "2,460 career hits"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "lou-brock",
+            "sport": "MLB",
+            "name": "Lou Brock",
+            "team": "St. Louis Cardinals",
+            "years": "1961–1979",
+            "position": "Left Fielder",
+            "hallOfFame": 1985,
+            "images": [],
+            "stats": [
+                "3,023 hits",
+                "6× All-Star",
+                "2× World Series champion",
+                "938 stolen bases"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "michael-jordan",
+            "sport": "NBA",
+            "name": "Michael Jordan",
+            "team": "Chicago Bulls",
+            "years": "1984–2003",
+            "position": "Shooting Guard",
+            "hallOfFame": 2009,
+            "images": [],
+            "stats": [
+                "6× NBA champion",
+                "5× MVP",
+                "14× All-Star",
+                "10× scoring champion"
+            ],
+            "familyScore": 2
+        },
+        {
+            "id": "bill-russell",
+            "sport": "NBA",
+            "name": "Bill Russell",
+            "team": "Boston Celtics",
+            "years": "1956–1969",
+            "position": "Center",
+            "hallOfFame": 1975,
+            "images": [],
+            "stats": [
+                "11× NBA champion",
+                "5× MVP",
+                "12× All-Star",
+                "NBA career rebounding leader"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "larry-bird",
+            "sport": "NBA",
+            "name": "Larry Bird",
+            "team": "Boston Celtics",
+            "years": "1979–1992",
+            "position": "Small Forward",
+            "hallOfFame": 1998,
+            "images": [
+                "https://commons.wikimedia.org/wiki/Special:FilePath/1981%20NBA%20Playoffs%20-%20Philadelphia%2076ers%20at%20Boston%20Celtics%2C%20April%2022%2C%201981.jpeg",
+                "https://commons.wikimedia.org/wiki/Special:FilePath/1988%20NBA%20Playoffs%20-%20New%20York%20Knicks%20vs.%20Boston%20Celtics%2C%20Games%201%20and%202.jpg"
+            ],
+            "stats": [
+                "3× NBA champion",
+                "3× MVP",
+                "12× All-Star",
+                "1980 Rookie of the Year"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "john-havlicek",
+            "sport": "NBA",
+            "name": "John Havlicek",
+            "team": "Boston Celtics",
+            "years": "1962–1978",
+            "position": "Small Forward",
+            "hallOfFame": 1984,
+            "images": [],
+            "stats": [
+                "8× NBA champion",
+                "13× All-Star",
+                "26,395 career points",
+                "1974 NBA Finals MVP"
+            ],
+            "familyScore": 5
+        },
+        {
+            "id": "magic-johnson",
+            "sport": "NBA",
+            "name": "Magic Johnson",
+            "team": "Los Angeles Lakers",
+            "years": "1979–1991, 1996",
+            "position": "Point Guard",
+            "hallOfFame": 2002,
+            "images": [],
+            "stats": [
+                "5× NBA champion",
+                "3× MVP",
+                "12× All-Star",
+                "10× All-NBA"
+            ],
+            "familyScore": 2
+        }
+    ]
+}
