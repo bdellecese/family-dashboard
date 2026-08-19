@@ -10,6 +10,10 @@ import {
     startScreenRotation
 } from "./screen-manager.js";
 
+import {
+    startPerformanceTimer
+} from "./performance.js";
+
 
 initializeDashboardScaling();
 
@@ -18,9 +22,49 @@ document.addEventListener(
     "DOMContentLoaded",
     async () => {
 
-        await registerWidgets();
+        const startupTimer =
+            startPerformanceTimer(
+                "application-startup",
+                "dashboard"
+            );
 
-        await startScreenRotation();
+
+        try {
+
+            await registerWidgets();
+
+            await startScreenRotation();
+
+
+            startupTimer.end({
+
+                success:
+                    true
+
+            });
+
+        }
+
+        catch (error) {
+
+            startupTimer.end({
+
+                success:
+                    false,
+
+                error:
+                    error?.message ||
+                    String(error)
+
+            });
+
+
+            console.error(
+                "Application startup failed:",
+                error
+            );
+
+        }
 
     }
 );

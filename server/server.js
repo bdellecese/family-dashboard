@@ -27,6 +27,12 @@ import {
 import schoolLunchData
     from "../services/school-lunch/school-lunch-data.js";
 
+import {
+    getPerformanceEvents,
+    recordPerformanceEvents,
+    clearPerformanceEvents
+} from "../services/performance/performance-server.js";
+
 
 const HOST = "0.0.0.0";
 const PORT = 3000;
@@ -1784,6 +1790,275 @@ const server =
 
             }
 
+            // ============================================================
+            // PERFORMANCE DATA
+            // ============================================================
+
+            if (
+                requestUrl.pathname ===
+                    "/api/performance"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                try {
+
+                    const limit =
+                        requestUrl
+                            .searchParams
+                            .get(
+                                "limit"
+                            );
+
+
+                    const performanceEvents =
+                        getPerformanceEvents(
+                            limit
+                        );
+
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            count:
+                                performanceEvents.length,
+
+                            events:
+                                performanceEvents
+
+                        })
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Performance data request failed:",
+                        error
+                    );
+
+
+                    response.writeHead(
+                        500,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            error:
+                                error.message
+
+                        })
+                    );
+
+                }
+
+
+                return;
+
+            }
+
+
+            // ============================================================
+            // RECORD PERFORMANCE DATA
+            // ============================================================
+
+            if (
+                requestUrl.pathname ===
+                    "/api/performance"
+                &&
+                request.method ===
+                    "POST"
+            ) {
+
+                try {
+
+                    let body =
+                        "";
+
+
+                    for await (
+                        const chunk of
+                        request
+                    ) {
+
+                        body +=
+                            chunk.toString();
+
+                    }
+
+
+                    const parsed =
+                        JSON.parse(
+                            body
+                        );
+
+
+                    const incomingEvents =
+                        parsed.events;
+
+
+                    if (
+                        !Array.isArray(
+                            incomingEvents
+                        )
+                    ) {
+
+                        throw new Error(
+                            "Request must contain an events array."
+                        );
+
+                    }
+
+
+                    const count =
+                        recordPerformanceEvents(
+                            incomingEvents
+                        );
+
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            success:
+                                true,
+
+                            totalEvents:
+                                count
+
+                        })
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Performance data recording failed:",
+                        error
+                    );
+
+
+                    response.writeHead(
+                        400,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            error:
+                                error.message
+
+                        })
+                    );
+
+                }
+
+
+                return;
+
+            }
+
+
+            // ============================================================
+            // CLEAR PERFORMANCE DATA
+            // ============================================================
+
+            if (
+                requestUrl.pathname ===
+                    "/api/performance"
+                &&
+                request.method ===
+                    "DELETE"
+            ) {
+
+                try {
+
+                    clearPerformanceEvents();
+
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            success:
+                                true
+
+                        })
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Performance data clear failed:",
+                        error
+                    );
+
+
+                    response.writeHead(
+                        500,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            error:
+                                error.message
+
+                        })
+                    );
+
+                }
+
+
+                return;
+
+            }
 
             // =================================================
             // STATIC DASHBOARD FILES

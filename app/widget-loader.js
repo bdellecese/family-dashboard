@@ -1,21 +1,80 @@
+import {
+    startPerformanceTimer
+}
+from "./performance.js";
+
+
 const widgets = {};
 
 const widgetCleanups = new WeakMap();
+
+
+/*
+ * ============================================================
+ * REGISTER WIDGET
+ * ============================================================
+ */
 
 export async function registerWidget(
     name,
     path
 ) {
 
-    const module =
-        await import(path);
+    const timer =
+        startPerformanceTimer(
+            "widget-register",
+            name,
+            {
+                path
+            }
+        );
 
 
-    widgets[name] =
-        module.default;
+    try {
+
+        const module =
+            await import(path);
+
+
+        widgets[name] =
+            module.default;
+
+
+        timer.end({
+
+            success:
+                true
+
+        });
+
+    }
+
+    catch (error) {
+
+        timer.end({
+
+            success:
+                false,
+
+            error:
+                error?.message ||
+                String(error)
+
+        });
+
+
+        throw error;
+
+    }
 
 }
 
+
+/*
+ * ============================================================
+ * LOAD WIDGET
+ * ============================================================
+ */
 
 export async function loadWidget(
     name,
@@ -49,48 +108,112 @@ export async function loadWidget(
     );
 
 
-    const cleanup =
-        await widget.render(
-            container,
-            config
-        );
-
-
     /*
-     * Widgets may return a cleanup function
-     * from render().
+     * ========================================================
+     * INSTRUMENT WIDGET RENDER
      *
-     * Store it so destroyWidget() can call it
-     * when the screen changes.
+     * Measures the complete widget.render() operation,
+     * including any asynchronous data/API work performed
+     * by the widget.
+     * ========================================================
      */
 
-    if (
-        typeof cleanup ===
-        "function"
-    ) {
-
-        widgetCleanups.set(
-            container,
-            cleanup
+    const timer =
+        startPerformanceTimer(
+            "widget-render",
+            name
         );
+
+
+    try {
+
+        const cleanup =
+            await widget.render(
+                container,
+                config
+            );
+
+
+        /*
+         * Widgets may return a cleanup function
+         * from render().
+         */
+
+        if (
+            typeof cleanup ===
+            "function"
+        ) {
+
+            widgetCleanups.set(
+                container,
+                cleanup
+            );
+
+        }
+
+
+        timer.end({
+
+            success:
+                true
+
+        });
+
+    }
+
+    catch (error) {
+
+        timer.end({
+
+            success:
+                false,
+
+            error:
+                error?.message ||
+                String(error)
+
+        });
+
+
+        console.error(
+            `Widget render failed for ${name}:`,
+            error
+        );
+
+
+        throw error;
 
     }
 
 }
 
 
+/*
+ * ============================================================
+ * DESTROY WIDGET
+ * ============================================================
+ */
+
 export async function destroyWidget(
     name,
     container
 ) {
 
-    const widget =
-        widgets[name];
+    const timer =
+        startPerformanceTimer(
+            "widget-destroy",
+            name
+        );
+
+
+    let success =
+        true;
 
 
     /*
-     * First run the cleanup function returned
-     * by render(), if one exists.
+     * ========================================================
+     * CLEANUP FUNCTION
+     * ========================================================
      */
 
     const cleanup =
@@ -112,6 +235,10 @@ export async function destroyWidget(
 
         catch (error) {
 
+            success =
+                false;
+
+
             console.error(
                 `Widget cleanup failed for ${name}:`,
                 error
@@ -128,26 +255,55 @@ export async function destroyWidget(
 
 
     /*
-     * Keep support for widgets that implement
-     * a traditional widget.destroy() method.
+     * ========================================================
+     * TRADITIONAL DESTROY METHOD
+     * ========================================================
      */
 
-    if (!widget) {
-
-        return;
-
-    }
+    const widget =
+        widgets[name];
 
 
     if (
+        widget &&
         typeof widget.destroy ===
         "function"
     ) {
 
-        await widget.destroy(
-            container
-        );
+        try {
+
+            await widget.destroy(
+                container
+            );
+
+        }
+
+        catch (error) {
+
+            success =
+                false;
+
+
+            console.error(
+                `Widget destroy failed for ${name}:`,
+                error
+            );
+
+        }
 
     }
+
+
+    /*
+     * ========================================================
+     * PERFORMANCE RECORD
+     * ========================================================
+     */
+
+    timer.end({
+
+        success
+
+    });
 
 }

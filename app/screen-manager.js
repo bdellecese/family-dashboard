@@ -1,12 +1,19 @@
 import {
+    startPerformanceTimer
+}
+from "./performance.js";
+
+import {
     screens,
     screenOrder
-} from "../config/screens.js";
+}
+from "../config/screens.js";
 
 import {
     loadWidget,
     destroyWidget
-} from "./widget-loader.js";
+}
+from "./widget-loader.js";
 
 
 let activeWidgets = [];
@@ -19,13 +26,20 @@ let rotationTimer = null;
 
 
 /*
+ * ============================================================
  * BUILD REGION
+ * ============================================================
  *
  * Builds a region into a detached DOM element.
  *
  * The generation number allows us to determine whether
  * the screen is still current while asynchronous widgets
  * are loading.
+ *
+ * widgetsForScreen tracks widgets created by this specific
+ * screen load so they can be cleaned up if the load becomes
+ * stale.
+ * ============================================================
  */
 
 async function buildRegion(
@@ -36,7 +50,9 @@ async function buildRegion(
 ) {
 
     const region =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     region.className =
@@ -44,7 +60,9 @@ async function buildRegion(
 
 
     /*
-     * Array = widgets
+     * ========================================================
+     * ARRAY = WIDGETS
+     * ========================================================
      */
 
     if (
@@ -73,7 +91,9 @@ async function buildRegion(
 
 
             const container =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
 
             container.className =
@@ -89,11 +109,32 @@ async function buildRegion(
             );
 
 
-            await loadWidget(
-                widget.name,
-                container,
-                widget.config
-            );
+            try {
+
+                await loadWidget(
+                    widget.name,
+                    container,
+                    widget.config
+                );
+
+            }
+
+            catch (error) {
+
+                /*
+                 * A widget failure should not leave a
+                 * partially-created widget behind.
+                 */
+
+                await destroyWidget(
+                    widget.name,
+                    container
+                );
+
+
+                throw error;
+
+            }
 
 
             /*
@@ -124,11 +165,13 @@ async function buildRegion(
 
 
             widgetsForScreen.push({
+
                 name:
                     widget.name,
 
                 container:
                     container
+
             });
 
         }
@@ -137,10 +180,16 @@ async function buildRegion(
 
 
     /*
-     * Object = nested regions
+     * ========================================================
+     * OBJECT = NESTED REGIONS
+     * ========================================================
      */
 
-    else {
+    else if (
+        contents &&
+        typeof contents ===
+            "object"
+    ) {
 
         for (
             const [
@@ -195,21 +244,17 @@ async function buildRegion(
 
 
 /*
- * DESTROY CURRENT SCREEN
+ * ============================================================
+ * DESTROY WIDGET LIST
+ * ============================================================
  */
 
-async function destroyCurrentScreen() {
-
-    const widgetsToDestroy =
-        activeWidgets;
-
-
-    activeWidgets = [];
-
+async function destroyWidgetList(
+    widgets
+) {
 
     for (
-        const widget of
-        widgetsToDestroy
+        const widget of widgets
     ) {
 
         await destroyWidget(
@@ -223,12 +268,43 @@ async function destroyCurrentScreen() {
 
 
 /*
+ * ============================================================
+ * DESTROY CURRENT SCREEN
+ * ============================================================
+ */
+
+async function destroyCurrentScreen() {
+
+    const widgetsToDestroy =
+        activeWidgets;
+
+
+    activeWidgets = [];
+
+
+    await destroyWidgetList(
+        widgetsToDestroy
+    );
+
+}
+
+
+/*
+ * ============================================================
  * LOAD SCREEN
+ * ============================================================
  */
 
 export async function loadScreen(
     screenName
 ) {
+
+    const screenTimer =
+        startPerformanceTimer(
+            "screen-load",
+            screenName
+        );
+
 
     /*
      * Every load gets a new generation.
@@ -251,7 +327,19 @@ export async function loadScreen(
             screenName
         );
 
-        return;
+
+        screenTimer.end({
+
+            success:
+                false,
+
+            error:
+                "Screen not found"
+
+        });
+
+
+        return false;
 
     }
 
@@ -273,7 +361,18 @@ export async function loadScreen(
         screenLoadGeneration
     ) {
 
-        return;
+        screenTimer.end({
+
+            success:
+                false,
+
+            stale:
+                true
+
+        });
+
+
+        return false;
 
     }
 
@@ -290,195 +389,279 @@ export async function loadScreen(
             "Dashboard element not found."
         );
 
-        return;
+
+        screenTimer.end({
+
+            success:
+                false,
+
+            error:
+                "Dashboard element not found"
+
+        });
+
+
+        return false;
 
     }
 
 
     /*
-     * Clear the dashboard BEFORE building the new screen.
+     * ========================================================
+     * BUILD THE SCREEN DETACHED FROM THE DASHBOARD
+     * ========================================================
      *
-     * This ensures every screen starts with a clean DOM.
-     */
-
-    dashboard.innerHTML =
-        "";
-
-
-    dashboard.className =
-        screen.layout;
-
-
-    dashboard.dataset.theme =
-        screen.theme || "dark";
-
-
-    /*
-     * Keep widgets created by this particular
-     * screen load separate from the global list.
+     * Do not clear or modify the visible dashboard yet.
+     *
+     * This prevents a slow-loading screen from leaving the
+     * TV blank while widgets are loading.
      */
 
     const widgetsForScreen =
         [];
 
 
-    /*
-     * Build the entire screen while it is detached
-     * from the dashboard.
-     *
-     * Nothing gets displayed until all widgets have
-     * finished loading.
-     */
-
     const screenRegions =
         [];
 
 
-    for (
-        const [
-            regionName,
-            contents
-        ]
-        of Object.entries(
-            screen.regions
-        )
-    ) {
+    try {
+
+        for (
+            const [
+                regionName,
+                contents
+            ]
+            of Object.entries(
+                screen.regions
+            )
+        ) {
+
+            if (
+                generation !==
+                screenLoadGeneration
+            ) {
+
+                await destroyWidgetList(
+                    widgetsForScreen
+                );
+
+
+                screenTimer.end({
+
+                    success:
+                        false,
+
+                    stale:
+                        true
+
+                });
+
+
+                return false;
+
+            }
+
+
+            const region =
+                await buildRegion(
+                    regionName,
+                    contents,
+                    generation,
+                    widgetsForScreen
+                );
+
+
+            if (
+                !region
+            ) {
+
+                /*
+                 * Another screen took over.
+                 *
+                 * Clean up widgets belonging to this
+                 * abandoned screen.
+                 */
+
+                await destroyWidgetList(
+                    widgetsForScreen
+                );
+
+
+                screenTimer.end({
+
+                    success:
+                        false,
+
+                    stale:
+                        true
+
+                });
+
+
+                return false;
+
+            }
+
+
+            screenRegions.push(
+                region
+            );
+
+        }
+
+
+        /*
+         * ====================================================
+         * FINAL GENERATION CHECK
+         * ====================================================
+         *
+         * This is the last opportunity to prevent a stale
+         * screen from being committed.
+         */
 
         if (
             generation !==
             screenLoadGeneration
         ) {
 
-            /*
-             * Clean up anything this stale screen
-             * managed to create.
-             */
-
-            for (
-                const widget of
-                widgetsForScreen
-            ) {
-
-                await destroyWidget(
-                    widget.name,
-                    widget.container
-                );
-
-            }
-
-
-            return;
-
-        }
-
-
-        const region =
-            await buildRegion(
-                regionName,
-                contents,
-                generation,
+            await destroyWidgetList(
                 widgetsForScreen
             );
 
 
-        if (
-            !region
-        ) {
+            screenTimer.end({
 
-            /*
-             * Another screen took over.
-             *
-             * Clean up widgets belonging to this
-             * abandoned screen.
-             */
+                success:
+                    false,
 
-            for (
-                const widget of
-                widgetsForScreen
-            ) {
+                stale:
+                    true
 
-                await destroyWidget(
-                    widget.name,
-                    widget.container
-                );
-
-            }
+            });
 
 
-            return;
+            return false;
 
         }
 
 
-        screenRegions.push(
-            region
-        );
+        /*
+         * ====================================================
+         * COMMIT SCREEN
+         * ====================================================
+         *
+         * Everything has loaded successfully.
+         * The screen is still current.
+         *
+         * Now replace the dashboard contents in one operation.
+         */
 
-    }
+        dashboard.innerHTML =
+            "";
 
 
-    /*
-     * Final generation check immediately before
-     * committing the new screen to the dashboard.
-     */
+        dashboard.className =
+            screen.layout;
 
-    if (
-        generation !==
-        screenLoadGeneration
-    ) {
+
+        dashboard.dataset.theme =
+            screen.theme ||
+            "dark";
+
 
         for (
-            const widget of
-            widgetsForScreen
+            const region of screenRegions
         ) {
 
-            await destroyWidget(
-                widget.name,
-                widget.container
+            dashboard.appendChild(
+                region
             );
 
         }
 
 
-        return;
+        /*
+         * Only now does this screen become the
+         * active screen.
+         */
+
+        activeWidgets =
+            widgetsForScreen;
+
+
+        screenTimer.end({
+
+            success:
+                true,
+
+            widgetCount:
+                widgetsForScreen.length
+
+        });
+
+
+        return true;
 
     }
 
+    catch (error) {
 
-    /*
-     * The screen is fully built and still current.
-     *
-     * Now attach it to the dashboard in one operation.
-     */
+        /*
+         * Something failed while building the screen.
+         *
+         * Clean up anything created by this load so we
+         * don't leave timers, listeners, or other resources
+         * running in the background.
+         */
 
-    for (
-        const region of
-        screenRegions
-    ) {
-
-        dashboard.appendChild(
-            region
+        await destroyWidgetList(
+            widgetsForScreen
         );
 
+
+        screenTimer.end({
+
+            success:
+                false,
+
+            error:
+                error?.message ||
+                String(error)
+
+        });
+
+
+        console.error(
+            `Screen load failed for ${screenName}:`,
+            error
+        );
+
+
+        return false;
+
     }
-
-
-    /*
-     * Only now does this screen become the
-     * active screen.
-     */
-
-    activeWidgets =
-        widgetsForScreen;
 
 }
 
 
 /*
+ * ============================================================
  * SHOW CURRENT SCREEN
+ * ============================================================
  */
 
 async function showCurrentScreen() {
+
+    if (
+        !screenOrder ||
+        screenOrder.length === 0
+    ) {
+
+        return;
+
+    }
+
 
     const screenName =
         screenOrder[
@@ -497,6 +680,7 @@ async function showCurrentScreen() {
             screenName
         );
 
+
         return;
 
     }
@@ -512,39 +696,56 @@ async function showCurrentScreen() {
             rotationTimer
         );
 
+
         rotationTimer =
             null;
 
     }
 
 
-    await loadScreen(
-        screenName
-    );
+    /*
+     * Capture the generation BEFORE starting the load.
+     *
+     * This is important. loadScreen() increments the
+     * generation internally, so checking it afterward
+     * would not tell us whether another navigation action
+     * occurred while the load was running.
+     */
+
+    const loadGeneration =
+        screenLoadGeneration +
+        1;
+
+
+    const loaded =
+        await loadScreen(
+            screenName
+        );
 
 
     /*
-     * loadScreen() may have become stale because
-     * another navigation action occurred while it
-     * was loading.
+     * Do not schedule rotation if:
      *
-     * Only schedule rotation if this screen is still
-     * the current one.
+     * 1. The load failed.
+     * 2. Another navigation action started a newer load.
      */
 
-    const expectedGeneration =
-        screenLoadGeneration;
-
-
     if (
-        expectedGeneration !==
-        screenLoadGeneration
+        !loaded ||
+        loadGeneration !==
+            screenLoadGeneration
     ) {
 
         return;
 
     }
 
+
+    /*
+     * ========================================================
+     * DETERMINE SCREEN DURATION
+     * ========================================================
+     */
 
     const durationConfig =
         screen.duration ||
@@ -562,11 +763,15 @@ async function showCurrentScreen() {
         "number"
     ) {
 
+        /*
+         * Numeric durations are interpreted as seconds.
+         */
+
         duration =
-            durationConfig;
+            durationConfig *
+            1000;
 
     }
-
 
     else if (
         durationConfig.minutes
@@ -579,7 +784,6 @@ async function showCurrentScreen() {
 
     }
 
-
     else if (
         durationConfig.seconds
     ) {
@@ -590,7 +794,6 @@ async function showCurrentScreen() {
 
     }
 
-
     else {
 
         duration =
@@ -598,6 +801,29 @@ async function showCurrentScreen() {
 
     }
 
+
+    /*
+     * Prevent invalid or zero-length timers.
+     */
+
+    if (
+        !Number.isFinite(
+            duration
+        ) ||
+        duration <= 0
+    ) {
+
+        duration =
+            15000;
+
+    }
+
+
+    /*
+     * ========================================================
+     * SCHEDULE NEXT SCREEN
+     * ========================================================
+     */
 
     rotationTimer =
         setTimeout(
@@ -609,7 +835,7 @@ async function showCurrentScreen() {
                  */
 
                 if (
-                    expectedGeneration !==
+                    loadGeneration !==
                     screenLoadGeneration
                 ) {
 
@@ -637,7 +863,9 @@ async function showCurrentScreen() {
 
 
 /*
+ * ============================================================
  * PREVIOUS SCREEN
+ * ============================================================
  */
 
 export async function previousScreen() {
@@ -655,8 +883,8 @@ export async function previousScreen() {
     /*
      * Invalidate the current screen load immediately.
      *
-     * This is important because the user may click
-     * Previous while a widget is still loading.
+     * This is important because the user may click Previous
+     * while a widget is still loading.
      */
 
     ++screenLoadGeneration;
@@ -667,6 +895,7 @@ export async function previousScreen() {
         clearTimeout(
             rotationTimer
         );
+
 
         rotationTimer =
             null;
@@ -690,7 +919,9 @@ export async function previousScreen() {
 
 
 /*
+ * ============================================================
  * NEXT SCREEN
+ * ============================================================
  */
 
 export async function nextScreen() {
@@ -718,6 +949,7 @@ export async function nextScreen() {
             rotationTimer
         );
 
+
         rotationTimer =
             null;
 
@@ -739,7 +971,9 @@ export async function nextScreen() {
 
 
 /*
+ * ============================================================
  * SCREEN NAVIGATION UI
+ * ============================================================
  */
 
 function initializeScreenNavigation() {
@@ -772,9 +1006,29 @@ function initializeScreenNavigation() {
             "Screen navigation controls not found."
         );
 
+
         return;
 
     }
+
+
+    /*
+     * Prevent duplicate event listeners if
+     * startScreenRotation() is called more than once.
+     */
+
+    if (
+        dashboardScale.dataset.navigationInitialized ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    dashboardScale.dataset.navigationInitialized =
+        "true";
 
 
     let hideTimer =
@@ -872,7 +1126,9 @@ function initializeScreenNavigation() {
 
 
 /*
+ * ============================================================
  * START SCREEN ROTATION
+ * ============================================================
  */
 
 export async function startScreenRotation() {
@@ -886,6 +1142,7 @@ export async function startScreenRotation() {
             "No screens configured."
         );
 
+
         return;
 
     }
@@ -896,6 +1153,19 @@ export async function startScreenRotation() {
      */
 
     ++screenLoadGeneration;
+
+
+    if (rotationTimer) {
+
+        clearTimeout(
+            rotationTimer
+        );
+
+
+        rotationTimer =
+            null;
+
+    }
 
 
     currentScreenIndex =

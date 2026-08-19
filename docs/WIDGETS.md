@@ -2,8 +2,7 @@
 
 This document is a living inventory of the widgets used by the dashboard.
 
-Each widget is responsible for rendering a specific piece of dashboard
-functionality.
+Each widget is responsible for rendering a specific piece of dashboard functionality.
 
 Widgets should follow the common widget contract:
 
@@ -13,8 +12,11 @@ const widget = {
     name: "widget-name",
 
     async render(
+
         container,
+
         config = {}
+
     ) {
 
         // Render widget
@@ -45,17 +47,29 @@ The normal rendering flow is:
 
 ```text
 screen configuration
+
       |
+
       v
+
 widget-loader
+
       |
+
       v
+
    widget
+
       |
+
       v
+
 data service
+
       |
+
       v
+
 external API
 ```
 
@@ -80,7 +94,11 @@ external API
 | sonos-status | Current Sonos playback status | Yes | Sonos API | Complete |
 | sports-scoreboard | Live / recent sports scores | Yes | Sports data service | Complete |
 | sports-standings | League standings | Yes | Sports data service | Complete |
-| upcoming-games | Upcoming games and schedules | Yes | Sports data service | Complete |
+| calendar-list | Upcoming games / schedules on Sports screen | Yes | Google Calendar | Complete |
+| sports-news | Sports news headlines | Yes | RSS | Complete |
+| on-this-day-sports | Historical sports events | TBD | Configuration / data | Complete |
+| sports-trivia | Rotating sports trivia questions | TBD | Local data | Complete |
+| sports-legends | Randomized legendary athletes | Yes | Local data | Complete |
 | kids-chores | Kids' daily chores | TBD | Configuration / data | Complete |
 | household-chores | Household chores | TBD | Configuration / data | Complete |
 | school-lunch | School lunch information | TBD | Configuration / data | Complete |
@@ -125,11 +143,14 @@ Example:
 
         time: {
 
-            format: "12h",
+            format:
+                "12h",
 
-            size: 72,
+            size:
+                72,
 
-            weight: "normal"
+            weight:
+                "normal"
 
         },
 
@@ -138,9 +159,11 @@ Example:
             format:
                 "weekday-month-day",
 
-            size: 48,
+            size:
+                48,
 
-            weight: "normal"
+            weight:
+                "normal"
 
         },
 
@@ -148,7 +171,6 @@ Example:
             "left"
 
     }
-
 }
 ```
 
@@ -190,7 +212,6 @@ Example:
             "Holden, MA"
 
     }
-
 }
 ```
 
@@ -200,8 +221,7 @@ Open-Meteo.
 
 ## Notes
 
-The weather widget is designed to operate directly from the browser without
-a local proxy.
+The weather widget is designed to operate directly from the browser without a local proxy.
 
 Weather presentation includes:
 
@@ -229,8 +249,7 @@ weather-alerts
 
 ## Purpose
 
-Displays active National Weather Service weather alerts for the configured
-location.
+Displays active National Weather Service weather alerts for the configured location.
 
 The widget highlights alert severity using:
 
@@ -257,35 +276,53 @@ Example:
 
 The configurable location is also useful for testing.
 
-For example, a location with an active Red Flag Warning can be used to
-validate the red severity styling.
+For example, a location with an active Red Flag Warning can be used to validate the red severity styling.
 
 ## Data Flow
 
-The alert service performs:
-
 ```text
 configured location
+
         |
+
         v
+
 Open-Meteo geocoding
+
         |
+
         v
+
 latitude / longitude
+
         |
+
         v
+
 NWS points API
+
         |
+
         v
+
 forecast zone
+
         |
+
         v
+
 NWS active alerts API
+
         |
+
         v
+
 normalized alert data
+
         |
+
         v
+
 weather-alerts widget
 ```
 
@@ -318,8 +355,7 @@ Uses the NWS `effective` and `expires` fields.
 
 ### IMPACTS
 
-The NWS description is parsed to identify the explicit `IMPACTS...`
-section when available.
+The NWS description is parsed to identify the explicit `IMPACTS...` section when available.
 
 This is preferable to simply displaying the entire NWS description.
 
@@ -401,8 +437,7 @@ The widget uses configured Google Calendar data.
 
 Calendar configuration is maintained separately from the widget itself.
 
-The calendar widget should not require an interactive "Connect Google
-Calendar" button.
+The calendar widget should not require an interactive "Connect Google Calendar" button.
 
 ## Data Source
 
@@ -424,14 +459,11 @@ large-calendar
 
 ## Purpose
 
-Displays a four-week calendar view with seven columns representing
-Sunday through Saturday.
+Displays a four-week calendar view with seven columns representing Sunday through Saturday.
 
-The widget combines calendar events with a compact five-day weather
-forecast displayed directly beneath each date.
+The widget combines calendar events with a compact five-day weather forecast displayed directly beneath each date.
 
-The large calendar is intended for the primary calendar/dashboard screen
-and is optimized for a large touchscreen display.
+The large calendar is intended for the primary calendar/dashboard screen and is optimized for a large touchscreen display.
 
 ## Configuration
 
@@ -446,8 +478,11 @@ Example:
         calendars: [
 
             "barry.dellecese@gmail.com",
+
             "family01156229611257150686",
+
             "natalie.dellecese@gmail.com",
+
             "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com"
 
         ]
@@ -456,8 +491,7 @@ Example:
 }
 ```
 
-Calendar IDs are supplied through configuration rather than being
-hard-coded in the widget.
+Calendar IDs are supplied through configuration rather than being hard-coded in the widget.
 
 The weather location is currently hard-coded to:
 
@@ -481,8 +515,7 @@ The widget displays:
 * Timed events
 * Event locations when available
 
-The widget supports vertical scrolling when the calendar content exceeds
-the available screen height.
+The widget supports vertical scrolling when the calendar content exceeds the available screen height.
 
 ## Date Formatting
 
@@ -490,8 +523,7 @@ The current day is highlighted using a red circle around the date number.
 
 Past dates are visually muted.
 
-The date-number area has a fixed height so the current-day circle does not
-change the vertical alignment of the calendar rows.
+The date-number area has a fixed height so the current-day circle does not change the vertical alignment of the calendar rows.
 
 ## Weather
 
@@ -511,9 +543,7 @@ Example:
 
 Weather information is displayed only when forecast data is available.
 
-The weather area maintains its reserved vertical space even when there is
-no forecast available. This prevents the event lists from shifting vertically
-between days.
+The weather area maintains its reserved vertical space even when there is no forecast available. This prevents the event lists from shifting vertically between days.
 
 Forecasts are currently available for five days.
 
@@ -562,6 +592,7 @@ If a location exists, it is displayed beneath the title:
 
 ```text
 Event Title
+
 at Location
 ```
 
@@ -571,8 +602,7 @@ The location is smaller and muted relative to the event title.
 
 Past dates are muted.
 
-Timed events and all-day events belonging to past dates are also visually
-muted.
+Timed events and all-day events belonging to past dates are also visually muted.
 
 ## Legend
 
@@ -596,31 +626,45 @@ Weather:
 services/weather/weather-data.js
 ```
 
-The large calendar should reuse the existing Google Calendar data service
-rather than implementing an independent Google Calendar API integration.
+The large calendar should reuse the existing Google Calendar data service rather than implementing an independent Google Calendar API integration.
 
-The weather forecast should reuse the existing weather data service rather
-than making Open-Meteo requests directly from the widget.
+The weather forecast should reuse the existing weather data service rather than making Open-Meteo requests directly from the widget.
 
 ## Data Flow
 
 ```text
 screen configuration
+
         |
+
         v
+
 large-calendar widget
+
         |
+
         +--------------------------+
+
         |                          |
+
         v                          v
+
 calendar-data.js             weather-data.js
+
         |                          |
+
         v                          v
+
 Google Calendar              Open-Meteo
+
         |                          |
+
         +------------+-------------+
+
                      |
+
                      v
+
               large-calendar
 ```
 
@@ -642,8 +686,7 @@ calendar-list
 
 Displays upcoming events from multiple configured calendars.
 
-This widget is currently used in the Information screen and can also be
-used by other screens that require a compact event list.
+This widget is currently used in the Information screen and is also used by the Sports screen to display upcoming sports games from a dedicated sports calendar.
 
 ## Configuration
 
@@ -658,19 +701,34 @@ Example:
         calendars: [
 
             "barry.dellecese@gmail.com",
+
             "family01156229611257150686",
+
             "natalie.dellecese@gmail.com",
+
             "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com"
 
         ],
 
-        days: 7,
+        days:
+            7,
 
-        showCalendarName: false
+        showCalendarName:
+            false
 
     }
 }
 ```
+
+## Sports Screen Usage
+
+On the Sports screen, the shared `calendar-list` widget is configured with a dedicated sports calendar and is displayed as:
+
+```text
+Upcoming Games
+```
+
+This allows the Sports screen to reuse the existing calendar infrastructure rather than maintaining a separate sports scheduling implementation.
 
 ## Data Source
 
@@ -694,8 +752,7 @@ countdown
 
 Displays countdowns to configured events.
 
-The widget is intended to provide a quick visual indication of upcoming
-important dates.
+The widget is intended to provide a quick visual indication of upcoming important dates.
 
 ## Data Source
 
@@ -719,8 +776,7 @@ news
 
 Displays rotating news headlines.
 
-The same news widget can be used for general news or sports news by
-providing different RSS feeds through configuration.
+The same news widget can be used for general news or sports news by providing different RSS feeds through configuration.
 
 ## Configuration
 
@@ -752,8 +808,7 @@ RSS feed.
 
 The feed URL and rotation interval are configurable.
 
-The sports screen uses the same shared `news` widget with sports-specific
-RSS feeds.
+The Sports screen uses the same shared `news` widget with sports-specific RSS feeds and a Sports News label.
 
 ## Status
 
@@ -815,8 +870,7 @@ wifi
 
 ## Purpose
 
-Displays Wi-Fi information, including a QR code or other connection
-information for guests.
+Displays Wi-Fi information, including a QR code or other connection information for guests.
 
 ## Configuration
 
@@ -874,15 +928,13 @@ iCloud shared album.
 
 ## Current Development Considerations
 
-Direct browser access to iCloud shared album APIs may encounter CORS
-restrictions.
+Direct browser access to iCloud shared album APIs may encounter CORS restrictions.
 
 Development is currently performed through VS Code Live Server.
 
 The eventual target is a Raspberry Pi.
 
-The photo architecture should avoid introducing a laptop-only proxy
-dependency if possible.
+The photo architecture should avoid introducing a laptop-only proxy dependency if possible.
 
 ## Status
 
@@ -900,9 +952,7 @@ sonos-status
 
 ## Purpose
 
-Displays the current playback status of a configured Sonos speaker and,
-when that speaker is grouped with other Sonos speakers, displays the full
-group.
+Displays the current playback status of a configured Sonos speaker and, when that speaker is grouped with other Sonos speakers, displays the full group.
 
 The widget provides a compact view of:
 
@@ -935,16 +985,13 @@ Example:
 }
 ```
 
-`speaker` identifies the Sonos room used as the starting point for the
-query.
+`speaker` identifies the Sonos room used as the starting point for the query.
 
-If the configured speaker is currently grouped with other Sonos speakers,
-the widget displays all members of that group.
+If the configured speaker is currently grouped with other Sonos speakers, the widget displays all members of that group.
 
 The configured speaker is displayed first in the group name.
 
-`refreshInterval` controls how frequently the widget refreshes its data,
-in milliseconds.
+`refreshInterval` controls how frequently the widget refreshes its data, in milliseconds.
 
 The current defaults are:
 
@@ -960,8 +1007,7 @@ or 10 seconds.
 
 ## Group Display
 
-When the configured speaker is not grouped, the widget displays only that
-speaker:
+When the configured speaker is not grouped, the widget displays only that speaker:
 
 ```text
 Kitchen
@@ -979,8 +1025,7 @@ When the configured speaker is grouped with multiple speakers:
 Kitchen, Family Room & Bedroom
 ```
 
-The configured speaker is always placed first, regardless of the order in
-which Sonos reports the group members.
+The configured speaker is always placed first, regardless of the order in which Sonos reports the group members.
 
 For example, if the API returns:
 
@@ -1011,15 +1056,17 @@ The widget retrieves Sonos data through the dashboard's local API:
 /api/sonos?speaker=<speaker>
 ```
 
-The API communicates with Sonos players on the local network and returns
-normalized playback and group information.
+The API communicates with Sonos players on the local network and returns normalized playback and group information.
 
 The API response includes:
 
 ```text
 speaker
+
 state
+
 track
+
 group
 ```
 
@@ -1027,7 +1074,9 @@ The `group` object includes:
 
 ```text
 grouped
+
 coordinator
+
 members
 ```
 
@@ -1035,6 +1084,7 @@ Each group member includes:
 
 ```text
 uuid
+
 name
 ```
 
@@ -1042,27 +1092,49 @@ name
 
 ```text
 screen configuration
+
         |
+
         v
+
 sonos-status widget
+
         |
+
         v
+
 /api/sonos?speaker=<speaker>
+
         |
+
         v
+
 Sonos data service
+
         |
+
         +----------------------+
+
         |                      |
+
         v                      v
+
 Sonos player             Zone Group State
+
         |                      |
+
         +----------+-----------+
+
                    |
+
                    v
+
           normalized Sonos data
+
                    |
+
                    v
+
             sonos-status
 ```
 
@@ -1080,7 +1152,9 @@ Playback states include:
 
 ```text
 PLAYING
+
 PAUSED_PLAYBACK
+
 STOPPED
 ```
 
@@ -1088,7 +1162,9 @@ These are translated into user-friendly labels:
 
 ```text
 Playing
+
 Paused
+
 Stopped
 ```
 
@@ -1096,18 +1172,15 @@ The widget uses different visual treatments for playing and paused states.
 
 ## Album Artwork
 
-When Sonos provides album artwork, the widget displays the artwork returned
-by the Sonos player.
+When Sonos provides album artwork, the widget displays the artwork returned by the Sonos player.
 
 If no artwork is available, the widget displays the music placeholder.
 
 ## Grouping
 
-Sonos group membership is determined from the Sonos
-`ZoneGroupTopology` service.
+Sonos group membership is determined from the Sonos `ZoneGroupTopology` service.
 
-The data service identifies the `ZoneGroup` containing the configured
-speaker and returns the members of that group.
+The data service identifies the `ZoneGroup` containing the configured speaker and returns the members of that group.
 
 The group coordinator is also returned by the API.
 
@@ -1133,8 +1206,7 @@ Player discovery currently uses Avahi / mDNS.
 
 The Sonos widget requires access to the local Sonos API.
 
-When running through VS Code Live Server on the Mac, the widget is
-configured to call the Raspberry Pi directly.
+When running through VS Code Live Server on the Mac, the widget is configured to call the Raspberry Pi directly.
 
 When running on the Raspberry Pi, the widget uses the relative:
 
@@ -1146,13 +1218,13 @@ endpoint.
 
 VS Code Live Server by itself does not provide the `/api/sonos` endpoint.
 
-The Raspberry Pi dashboard server therefore provides the local API endpoint
-used by the production dashboard.
+The Raspberry Pi dashboard server therefore provides the local API endpoint used by the production dashboard.
 
 ## Status
 
 Complete.
 
+---
 
 # School Lunch
 
@@ -1168,19 +1240,15 @@ Displays the current and upcoming school lunch information for the family.
 
 The widget is used by the Chores + Fun screen.
 
-The widget is designed to present the lunch menu in a simple,
-family-friendly format without requiring users to open the underlying
-school menu documents.
+The widget is designed to present the lunch menu in a simple, family-friendly format without requiring users to open the underlying school menu documents.
 
 ## Data Source
 
 School calendar and menu data.
 
-The school lunch data is maintained separately from the widget and is
-normalized from the school's published menu information.
+The school lunch data is maintained separately from the widget and is normalized from the school's published menu information.
 
-The source data includes school-year and monthly menu records, including
-menu PDF URLs for:
+The source data includes school-year and monthly menu records, including menu PDF URLs for:
 
 * Elementary / Middle School
 * High School
@@ -1189,14 +1257,23 @@ menu PDF URLs for:
 
 ```text
 school calendar / menu source
+
         |
+
         v
+
 school lunch data
+
         |
+
         v
+
 normalized lunch data
+
         |
+
         v
+
 school-lunch widget
 ```
 
@@ -1206,6 +1283,7 @@ The school menu data includes records such as:
 
 ```text
 school-year
+
 menu
 ```
 
@@ -1213,9 +1291,13 @@ with fields including:
 
 ```text
 name
+
 startDate
+
 endDate
+
 elementaryMiddleUrl
+
 highSchoolUrl
 ```
 
@@ -1239,8 +1321,7 @@ sports-scoreboard
 
 Displays sports scores for configured teams and leagues.
 
-The scoreboard is designed for the Sports screen and provides a quick
-visual summary of current, recent, and relevant games.
+The scoreboard is designed for the Sports screen and provides a quick visual summary of current, recent, and relevant games.
 
 ## Configuration
 
@@ -1286,8 +1367,7 @@ Example:
 }
 ```
 
-Sports and teams are supplied through configuration rather than being
-hard-coded into the widget.
+Sports and teams are supplied through configuration rather than being hard-coded into the widget.
 
 The current Sports screen is configured for the Boston Red Sox.
 
@@ -1306,8 +1386,7 @@ The scoreboard is intended to display:
 * Game date / time
 * Relevant game state
 
-The widget supports rotating scoreboard content when multiple sports or
-teams are configured.
+The widget supports rotating scoreboard content when multiple sports or teams are configured.
 
 ## Status
 
@@ -1327,8 +1406,7 @@ sports-standings
 
 Displays league standings for configured sports.
 
-The widget provides a quick view of team position within the relevant
-division or league.
+The widget provides a quick view of team position within the relevant division or league.
 
 ## Configuration
 
@@ -1375,67 +1453,191 @@ Complete.
 
 ---
 
-# Upcoming Games
+# Sports Trivia
 
 ## Widget
 
 ```text
-upcoming-games
+sports-trivia
 ```
 
 ## Purpose
 
-Displays upcoming games for configured teams and sports.
+Displays rotating sports trivia questions on the Sports screen.
 
-The widget is intended to complement the scoreboard by focusing on future
-games rather than current or recently completed games.
+The widget is designed as a timed trivia experience where the viewer has an opportunity to answer the question before the correct answer and explanation are revealed.
 
-## Configuration
+## Presentation
 
-The widget should support configuration for the relevant sports and teams,
-including the number of upcoming games to display when applicable.
+The current trivia sequence is:
+
+```text
+0–30 seconds
+
+Question and multiple-choice answers
+```
+
+```text
+30–40 seconds
+
+"Think you know it?"
+```
+
+```text
+40–60 seconds
+
+Correct answer and explanation
+```
+
+This creates a 60-second trivia experience that matches the duration of the Sports screen.
+
+## Data Source
+
+Local Sports Trivia data.
+
+The question data is maintained separately from the widget.
+
+The data includes:
+
+* Question ID
+* Sport
+* Difficulty
+* Question
+* Multiple-choice answers
+* Correct answer
+* Explanation
 
 Example:
 
 ```text
 {
-    name: "upcoming-games",
+    "id": "mlb-006",
+    "sport": "MLB",
+    "difficulty": "medium",
+    "question": "Who was the first pitcher to record 20 strikeouts in a regulation 9-inning game?",
+    "answers": [
+        "Roger Clemens",
+        "Jon Lester",
+        "Kerry Wood",
+        "Felix Hernandez"
+    ],
+    "correctAnswer": "Roger Clemens",
+    "explanation": "Roger Clemens first achieved the historic feat on April 29, 1986 against the Seattle Mariners, and did it again on September 18, 1996, against the Detroit Tigers."
+}
+```
+
+## Question Selection
+
+Questions are selected from the available data.
+
+Question selection should be random rather than weighted.
+
+The widget should not impose an artificial limit on the number of questions available.
+
+## Configuration
+
+The widget currently requires minimal configuration.
+
+Example:
+
+```text
+{
+    name:
+        "sports-trivia"
+}
+```
+
+## Status
+
+Complete.
+
+---
+
+# Sports Legends
+
+## Widget
+
+```text
+sports-legends
+```
+
+## Purpose
+
+Displays rotating profiles of legendary sports players.
+
+The widget combines player photography, career information, and notable statistics.
+
+The widget is designed for the Sports screen.
+
+## Configuration
+
+Example:
+
+```text
+{
+    name:
+        "sports-legends",
 
     config: {
 
         sports: [
 
-            {
+            "MLB",
+            "NBA"
 
-                sport:
-                    "mlb",
+        ],
 
-                team:
-                    "boston-red-sox"
-
-            }
-
-        ]
+        rotationSeconds:
+            30
 
     }
 }
 ```
 
+The `sports` configuration limits the available player pool to the specified sports.
+
+The `rotationSeconds` value controls how frequently the displayed legend changes.
+
 ## Data Source
 
-Sports data service / external sports API.
+Local Sports Legends data:
+
+```text
+services/sports-legends/sports-legends-data.json
+```
+
+Player images are stored under:
+
+```text
+assets/images/sports-legends/
+```
+
+## Selection
+
+Sports Legends uses equal-probability random selection.
+
+There is no family-score weighting.
+
+Every eligible player has the same probability of being selected.
+
+The widget avoids immediately displaying the same player twice in succession.
+
+The selection algorithm does not impose an additional hard-coded limit on the player pool.
 
 ## Display
 
 The widget may display:
 
-* Opponent
-* Game date
-* Game time
-* Home / away status
-* Venue when available
-* Team logos when available
-* Game status when applicable
+* Sport
+* Player name
+* Team
+* Career years
+* Position
+* Hall of Fame information
+* Notable statistics
+* Player photograph
+
+The widget returns one legend at a time while maintaining compatibility with the existing widget architecture.
 
 ## Status
 
@@ -1491,30 +1693,6 @@ Complete.
 
 ---
 
-# School Lunch
-
-## Widget
-
-```text
-school-lunch
-```
-
-## Purpose
-
-Displays school lunch information.
-
-The widget is used by the Chores + Fun screen.
-
-## Data Source
-
-Configuration / dashboard data.
-
-## Status
-
-Complete.
-
----
-
 # Playing Time
 
 ## Widget
@@ -1551,12 +1729,45 @@ on-this-day
 
 Displays historical information associated with the current date.
 
-The widget is used by the Chores + Fun screen as a rotating informational
-element.
+The widget is used by the Chores + Fun screen as a rotating informational element.
 
 ## Data Source
 
 Configuration / dashboard data.
+
+## Status
+
+Complete.
+
+---
+
+# On This Day in Sports
+
+## Widget
+
+```text
+on-this-day-sports
+```
+
+## Purpose
+
+Displays historical sports events associated with the current date.
+
+The widget is designed specifically for the Sports screen and provides a compact historical sports fact or event.
+
+## Data Source
+
+Local sports history data.
+
+## Display
+
+The widget displays:
+
+* Year
+* Sport
+* Historical event
+
+The presentation is optimized for the Sports screen and follows the same visual language as the other informational sports widgets.
 
 ## Status
 
@@ -1682,11 +1893,17 @@ Prefer:
 
 ```text
 screen configuration
+
       |
+
       v
+
    widget
+
       |
+
       v
+
   data service
 ```
 
@@ -1694,11 +1911,17 @@ over:
 
 ```text
 widget
+
    |
+
    +-- hard-coded user settings
+
    |
+
    +-- API access
+
    |
+
    +-- application logic
 ```
 
@@ -1715,9 +1938,7 @@ Configuration should be used for values such as:
 * Sonos speaker names
 * Refresh intervals
 
-When a value is temporarily hard-coded during development, it should
-eventually be moved into configuration when the widget architecture is
-stable.
+When a value is temporarily hard-coded during development, it should eventually be moved into configuration when the widget architecture is stable.
 
 ---
 
@@ -1752,20 +1973,21 @@ CORS errors
 500 Internal Server Error
 ```
 
-For widgets that depend on local services, also verify that the required
-API or data service is reachable from the machine running the dashboard.
+For widgets that depend on local services, also verify that the required API or data service is reachable from the machine running the dashboard.
 
 ---
 
 # Screens
 
-The dashboard currently contains four screens built from the shared widget
-architecture:
+The dashboard currently contains four screens built from the shared widget architecture:
 
 ```text
 information
+
 calendar
+
 chores-fun
+
 sports
 ```
 
@@ -1787,8 +2009,7 @@ The Information screen combines:
 
 ## Calendar
 
-The Calendar screen is centered around the large-calendar widget and
-provides a four-week calendar view with integrated weather information.
+The Calendar screen is centered around the large-calendar widget and provides a four-week calendar view with integrated weather information.
 
 ## Chores + Fun
 
@@ -1811,11 +2032,40 @@ The Sports screen combines:
 * Sports scoreboard
 * Sports standings
 * Sports news
+* On This Day in Sports
+* Sports trivia
+* Sports legends
 * Upcoming games
-* Calendar information
 
-Completed screens should continue to reuse existing widgets and data services
-where practical rather than creating screen-specific implementations.
+The current Sports screen layout is:
+
+```text
+Column 1
+    Sports Scoreboard
+    Sports Standings
+
+Column 2
+    Sports News
+    On This Day in Sports
+    Sports Trivia
+
+Column 3
+    Sports Legends
+    Upcoming Games
+```
+
+The Upcoming Games area currently uses the shared `calendar-list` widget with a dedicated sports calendar.
+
+The Sports screen is intended to provide a mixture of:
+
+* Live / recent sports information
+* Upcoming games
+* Historical sports information
+* Sports news
+* Interactive trivia
+* Sports legends
+
+Completed screens should continue to reuse existing widgets and data services where practical rather than creating screen-specific implementations.
 
 ---
 
@@ -1823,12 +2073,13 @@ where practical rather than creating screen-specific implementations.
 
 Additional widgets and screens can be added as dashboard requirements evolve.
 
-When adding new functionality, prefer extending the shared widget and data
-service architecture rather than creating screen-specific implementations.
+When adding new functionality, prefer extending the shared widget and data service architecture rather than creating screen-specific implementations.
 
 Potential future areas include:
 
 * Additional sports and teams
+* Expanded Sports Trivia content
+* Additional sports
 * Expanded Sonos support
 * Additional music services
 * Improved photo integration
