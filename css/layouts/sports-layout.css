@@ -51,9 +51,6 @@
 /*
  * ============================================================
  * SCOREBOARD
- *
- * Column 1
- * Top half
  * ============================================================
  */
 
@@ -89,11 +86,10 @@
 
 /*
  * ============================================================
- * BOTTOM LEFT
+ * STANDINGS
  *
  * Column 1
  * Bottom half
- *
  * ============================================================
  */
 
@@ -104,7 +100,7 @@
         1;
 
     grid-row:
-        2 / 4;
+        2;
 
     min-width:
         0;
@@ -128,10 +124,14 @@
  * ============================================================
  * COLUMN 2
  *
- * 25% width
- * Full height
+ * Full height.
  *
- * Designed for 2–4 stacked widgets.
+ * Top:
+ *   News
+ *   On This Day
+ *
+ * Bottom:
+ *   Sports Trivia
  * ============================================================
  */
 
@@ -151,10 +151,14 @@
         0;
 
     display:
-        flex;
+        grid;
 
-    flex-direction:
-        column;
+    grid-template-columns:
+        1fr;
+
+    grid-template-rows:
+        1fr
+        1fr;
 
     gap:
         12px;
@@ -167,16 +171,101 @@
 
 /*
  * ============================================================
+ * COLUMN 2 TOP
+ *
+ * News + On This Day share the top half.
+ * ============================================================
+ */
+
+.sports-layout
+.column-2
+.widget:nth-child(1) {
+
+    grid-column:
+        1;
+
+    grid-row:
+        1;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * COLUMN 2 SECOND WIDGET
+ *
+ * On This Day sits directly below News.
+ * ============================================================
+ */
+
+.sports-layout
+.column-2
+.widget:nth-child(2) {
+
+    grid-column:
+        1;
+
+    grid-row:
+        2;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * COLUMN 2 TRIVIA
+ *
+ * Trivia occupies the bottom half.
+ *
+ * This is achieved by making the three widgets a
+ * two-row layout where the first two widgets share
+ * the top half and Trivia occupies the bottom half.
+ * ============================================================
+ */
+
+.sports-layout
+.column-2
+.widget:nth-child(3) {
+
+    grid-column:
+        1;
+
+    grid-row:
+        3;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
  * COLUMN 3
- *
- * 25% width
- * Full height
- *
- * Four stacked widgets:
- *   1. News
- *   2. On This Day in Sports
- *   3. Placeholder
- *   4. Placeholder
  * ============================================================
  */
 
@@ -214,7 +303,10 @@
  * ============================================================
  * COLUMN 3 WIDGETS
  *
- * Four widgets share the available height equally.
+ * Sports Legends
+ * Upcoming Games
+ *
+ * Both share the full height 50/50.
  * ============================================================
  */
 
@@ -241,6 +333,7 @@
         16px;
 
 }
+
 
 /*
  * ============================================================
@@ -265,49 +358,6 @@
 
     border-radius:
         16px;
-
-}
-
-
-/*
- * ============================================================
- * BOTTOM LEFT WIDGETS
- *
- * Default behavior:
- * Two widgets share the space 50/50.
- *
- * If only one widget exists, it occupies 100%.
- * ============================================================
- */
-
-.sports-layout
-.bottom-left
-.widget {
-
-    flex:
-        1 1 0;
-
-}
-
-
-/*
- * ============================================================
- * COLUMN 2 + COLUMN 3 WIDGETS
- *
- * Widgets automatically divide the available vertical space.
- * ============================================================
- */
-
-.sports-layout
-.column-2
-.widget,
-
-.sports-layout
-.column-3
-.widget {
-
-    flex:
-        1 1 0;
 
 }
 
@@ -384,12 +434,10 @@
 
 }
 
+
 /*
  * ============================================================
  * SPORTS NEWS
- *
- * Match the On This Day in Sports typography.
- * Sports-only override so the Information screen is unchanged.
  * ============================================================
  */
 
@@ -502,9 +550,7 @@
 
 /*
  * ============================================================
- * UPCOMING GAMES HEADER
- *
- * Calendar List remains unchanged globally.
+ * UPCOMING GAMES
  * ============================================================
  */
 
@@ -519,7 +565,7 @@
 
 
 /*
- * Add a Sports-only title above Calendar List.
+ * SPORTS-ONLY TITLE
  */
 
 .sports-layout

@@ -1,0 +1,567 @@
+{
+    "questions": [
+        {
+            "id": "mlb-001",
+            "sport": "MLB",
+            "difficulty": "easy",
+            "question": "Which player holds the MLB record for most career hits?",
+            "answers": [
+                "Ty Cobb",
+                "Pete Rose",
+                "Hank Aaron",
+                "Stan Musial"
+            ],
+            "correctAnswer": "Pete Rose",
+            "explanation": "Pete Rose finished his career with 4,256 hits, the most in MLB history."
+        },
+        {
+            "id": "mlb-002",
+            "sport": "MLB",
+            "difficulty": "easy",
+            "question": "Which team has won the most World Series championships?",
+            "answers": [
+                "Boston Red Sox",
+                "St. Louis Cardinals",
+                "New York Yankees",
+                "Los Angeles Dodgers"
+            ],
+            "correctAnswer": "New York Yankees",
+            "explanation": "The Yankees have won 27 World Series championships."
+        },
+        {
+            "id": "mlb-003",
+            "sport": "MLB",
+            "difficulty": "easy",
+            "question": "Who was known as the Splendid Splinter?",
+            "answers": [
+                "Ted Williams",
+                "Joe DiMaggio",
+                "Mickey Mantle",
+                "Lou Gehrig"
+            ],
+            "correctAnswer": "Ted Williams",
+            "explanation": "Red Sox legend Ted Williams was famously known as the Splendid Splinter."
+        },
+        {
+            "id": "mlb-004",
+            "sport": "MLB",
+            "difficulty": "medium",
+            "question": "Who was the first player to hit 500 career home runs?",
+            "answers": [
+                "Babe Ruth",
+                "Jimmie Foxx",
+                "Ted Williams",
+                "Hank Aaron"
+            ],
+            "correctAnswer": "Babe Ruth",
+            "explanation": "Babe Ruth became the first player in MLB history to reach 500 career home runs in 1929."
+        },
+        {
+            "id": "mlb-005",
+            "sport": "MLB",
+            "difficulty": "medium",
+            "question": "Which Red Sox player won the 2008 American League MVP award?",
+            "answers": [
+                "David Ortiz",
+                "Dustin Pedroia",
+                "Manny Ramirez",
+                "Kevin Youkilis"
+            ],
+            "correctAnswer": "Dustin Pedroia",
+            "explanation": "Dustin Pedroia won the American League MVP award in 2008."
+        },
+        {
+            "id": "mlb-006",
+            "sport": "MLB",
+            "difficulty": "medium",
+            "question": "Who was the first pitcher to record 20 strikeouts in a regulation 9-inning game?",
+            "answers": [
+                "Roger Clemens",
+                "Jon Lester",
+                "Kerry Wood",
+                "Felix Hernandez"
+            ],
+            "correctAnswer": "Roger Clemens",
+            "explanation": "Roger Clemens first achieved the historic feat on April 29, 1986 against the Seattle Mariners, and did it again on September 18, 1996, against the Detroit Tigers."
+        },
+        {
+            "id": "mlb-007",
+            "sport": "MLB",
+            "difficulty": "easy",
+            "question": "How many strikes result in a strikeout?",
+            "answers": [
+                "2",
+                "3",
+                "4",
+                "5"
+            ],
+            "correctAnswer": "3",
+            "explanation": "A batter normally strikes out after three strikes."
+        },
+        {
+            "id": "mlb-008",
+            "sport": "MLB",
+            "difficulty": "medium",
+            "question": "Which player won the Triple Crown in 1967?",
+            "answers": [
+                "Carl Yastrzemski",
+                "Hank Aaron",
+                "Roberto Clemente",
+                "Frank Robinson"
+            ],
+            "correctAnswer": "Carl Yastrzemski",
+            "explanation": "Carl Yastrzemski won the 1967 American League Triple Crown with the Red Sox."
+        },
+        {
+            "id": "mlb-009",
+            "sport": "MLB",
+            "difficulty": "easy",
+            "question": "How many players are on the field for one defensive team in baseball?",
+            "answers": [
+                "8",
+                "9",
+                "10",
+                "11"
+            ],
+            "correctAnswer": "9",
+            "explanation": "A baseball team has nine defensive players on the field."
+        },
+        {
+            "id": "mlb-010",
+            "sport": "MLB",
+            "difficulty": "medium",
+            "question": "Which pitcher is the only player to have his name used for the pitching Triple Crown award?",
+            "answers": [
+                "Cy Young",
+                "Walter Johnson",
+                "Sandy Koufax",
+                "Nolan Ryan"
+            ],
+            "correctAnswer": "Cy Young",
+            "explanation": "The Cy Young Award is presented annually to the best pitcher in each league."
+        },
+
+        {
+            "id": "nba-001",
+            "sport": "NBA",
+            "difficulty": "easy",
+            "question": "Which player has won the most NBA championships?",
+            "answers": [
+                "Michael Jordan",
+                "Bill Russell",
+                "Magic Johnson",
+                "Kareem Abdul-Jabbar"
+            ],
+            "correctAnswer": "Bill Russell",
+            "explanation": "Bill Russell won 11 NBA championships with the Boston Celtics."
+        },
+        {
+            "id": "nba-002",
+            "sport": "NBA",
+            "difficulty": "easy",
+            "question": "Which team did Larry Bird play for?",
+            "answers": [
+                "Los Angeles Lakers",
+                "Chicago Bulls",
+                "Boston Celtics",
+                "Detroit Pistons"
+            ],
+            "correctAnswer": "Boston Celtics",
+            "explanation": "Larry Bird spent his entire NBA career with the Boston Celtics."
+        },
+        {
+            "id": "nba-003",
+            "sport": "NBA",
+            "difficulty": "easy",
+            "question": "Who is known as His Airness?",
+            "answers": [
+                "LeBron James",
+                "Michael Jordan",
+                "Kobe Bryant",
+                "Julius Erving"
+            ],
+            "correctAnswer": "Michael Jordan",
+            "explanation": "Michael Jordan earned the nickname His Airness because of his extraordinary leaping ability."
+        },
+        {
+            "id": "nba-004",
+            "sport": "NBA",
+            "difficulty": "medium",
+            "question": "Who was the first NBA player to average a triple-double for an entire season?",
+            "answers": [
+                "Magic Johnson",
+                "Oscar Robertson",
+                "Russell Westbrook",
+                "Jason Kidd"
+            ],
+            "correctAnswer": "Oscar Robertson",
+            "explanation": "Oscar Robertson averaged a triple-double during the 1961–62 season."
+        },
+        {
+            "id": "nba-005",
+            "sport": "NBA",
+            "difficulty": "easy",
+            "question": "How many points is a free throw worth?",
+            "answers": [
+                "1",
+                "2",
+                "3",
+                "4"
+            ],
+            "correctAnswer": "1",
+            "explanation": "A successful free throw is worth one point."
+        },
+        {
+            "id": "nba-006",
+            "sport": "NBA",
+            "difficulty": "medium",
+            "question": "Which player scored 100 points in a single NBA game?",
+            "answers": [
+                "Wilt Chamberlain",
+                "Kobe Bryant",
+                "Michael Jordan",
+                "Kareem Abdul-Jabbar"
+            ],
+            "correctAnswer": "Wilt Chamberlain",
+            "explanation": "Wilt Chamberlain scored 100 points for the Philadelphia Warriors in 1962."
+        },
+        {
+            "id": "nba-007",
+            "sport": "NBA",
+            "difficulty": "easy",
+            "question": "Which NBA team plays at TD Garden?",
+            "answers": [
+                "New York Knicks",
+                "Boston Celtics",
+                "Brooklyn Nets",
+                "Philadelphia 76ers"
+            ],
+            "correctAnswer": "Boston Celtics",
+            "explanation": "The Boston Celtics play their home games at TD Garden."
+        },
+        {
+            "id": "nba-008",
+            "sport": "NBA",
+            "difficulty": "medium",
+            "question": "Who won three consecutive NBA MVP awards from 1983–84 through 1985–86?",
+            "answers": [
+                "Magic Johnson",
+                "Larry Bird",
+                "Michael Jordan",
+                "Kareem Abdul-Jabbar"
+            ],
+            "correctAnswer": "Larry Bird",
+            "explanation": "Larry Bird won three straight NBA MVP awards from 1984 through 1986."
+        },
+        {
+            "id": "nba-009",
+            "sport": "NBA",
+            "difficulty": "easy",
+            "question": "How many players from each team are on the court during normal NBA play?",
+            "answers": [
+                "4",
+                "5",
+                "6",
+                "7"
+            ],
+            "correctAnswer": "5",
+            "explanation": "Each NBA team has five players on the court at a time."
+        },
+        {
+            "id": "nba-010",
+            "sport": "NBA",
+            "difficulty": "medium",
+            "question": "Which player was nicknamed the Big Fundamental?",
+            "answers": [
+                "Shaquille O'Neal",
+                "Tim Duncan",
+                "David Robinson",
+                "Hakeem Olajuwon"
+            ],
+            "correctAnswer": "Tim Duncan",
+            "explanation": "Tim Duncan was famously nicknamed the Big Fundamental."
+        },
+
+        {
+            "id": "nfl-001",
+            "sport": "NFL",
+            "difficulty": "easy",
+            "question": "Which quarterback has won the most Super Bowls?",
+            "answers": [
+                "Joe Montana",
+                "Tom Brady",
+                "Terry Bradshaw",
+                "Peyton Manning"
+            ],
+            "correctAnswer": "Tom Brady",
+            "explanation": "Tom Brady won seven Super Bowls during his career."
+        },
+        {
+            "id": "nfl-002",
+            "sport": "NFL",
+            "difficulty": "easy",
+            "question": "Which team did Tom Brady win six Super Bowls with?",
+            "answers": [
+                "New England Patriots",
+                "Tampa Bay Buccaneers",
+                "New York Giants",
+                "Green Bay Packers"
+            ],
+            "correctAnswer": "New England Patriots",
+            "explanation": "Brady won six Super Bowls with the New England Patriots and one with Tampa Bay."
+        },
+        {
+            "id": "nfl-003",
+            "sport": "NFL",
+            "difficulty": "easy",
+            "question": "How many points is a touchdown worth before any extra point attempt?",
+            "answers": [
+                "3",
+                "6",
+                "7",
+                "8"
+            ],
+            "correctAnswer": "6",
+            "explanation": "A touchdown is worth six points, followed by an extra-point or two-point attempt."
+        },
+        {
+            "id": "nfl-004",
+            "sport": "NFL",
+            "difficulty": "medium",
+            "question": "Which running back was known as the greatest running back in NFL history by many fans?",
+            "answers": [
+                "Barry Sanders",
+                "Walter Payton",
+                "Emmitt Smith",
+                "Jim Brown"
+            ],
+            "correctAnswer": "Jim Brown",
+            "explanation": "Jim Brown is widely regarded as one of the greatest football players ever."
+        },
+        {
+            "id": "nfl-005",
+            "sport": "NFL",
+            "difficulty": "medium",
+            "question": "Which team did Joe Montana lead to four Super Bowl victories?",
+            "answers": [
+                "Dallas Cowboys",
+                "Pittsburgh Steelers",
+                "San Francisco 49ers",
+                "Miami Dolphins"
+            ],
+            "correctAnswer": "San Francisco 49ers",
+            "explanation": "Joe Montana won four Super Bowls with the San Francisco 49ers."
+        },
+        {
+            "id": "nfl-006",
+            "sport": "NFL",
+            "difficulty": "easy",
+            "question": "How many quarters are in an NFL game?",
+            "answers": [
+                "2",
+                "3",
+                "4",
+                "5"
+            ],
+            "correctAnswer": "4",
+            "explanation": "An NFL game consists of four 15-minute quarters."
+        },
+        {
+            "id": "nfl-007",
+            "sport": "NFL",
+            "difficulty": "medium",
+            "question": "Which Patriots coach led the team to six Super Bowl championships?",
+            "answers": [
+                "Bill Parcells",
+                "Bill Belichick",
+                "Pete Carroll",
+                "Nick Saban"
+            ],
+            "correctAnswer": "Bill Belichick",
+            "explanation": "Bill Belichick coached the Patriots to six Super Bowl championships."
+        },
+        {
+            "id": "nfl-008",
+            "sport": "NFL",
+            "difficulty": "medium",
+            "question": "Who holds the NFL career rushing yards record?",
+            "answers": [
+                "Barry Sanders",
+                "Walter Payton",
+                "Emmitt Smith",
+                "Frank Gore"
+            ],
+            "correctAnswer": "Emmitt Smith",
+            "explanation": "Emmitt Smith finished his career with 18,355 rushing yards."
+        },
+        {
+            "id": "nfl-009",
+            "sport": "NFL",
+            "difficulty": "easy",
+            "question": "What is the nickname of the New England Patriots' home stadium?",
+            "answers": [
+                "Gillette Stadium",
+                "Foxborough Stadium",
+                "Patriot Park",
+                "New England Stadium"
+            ],
+            "correctAnswer": "Gillette Stadium",
+            "explanation": "The Patriots have played at Gillette Stadium in Foxborough since 2002."
+        },
+        {
+            "id": "nfl-010",
+            "sport": "NFL",
+            "difficulty": "medium",
+            "question": "Which player is known as Sweetness?",
+            "answers": [
+                "Barry Sanders",
+                "Walter Payton",
+                "Jim Brown",
+                "Tony Dorsett"
+            ],
+            "correctAnswer": "Walter Payton",
+            "explanation": "Walter Payton was famously known by the nickname Sweetness."
+        },
+
+        {
+            "id": "soccer-001",
+            "sport": "Soccer",
+            "difficulty": "easy",
+            "question": "Which country has won the most FIFA World Cup championships?",
+            "answers": [
+                "Germany",
+                "Argentina",
+                "Brazil",
+                "Italy"
+            ],
+            "correctAnswer": "Brazil",
+            "explanation": "Brazil has won the FIFA World Cup five times."
+        },
+        {
+            "id": "soccer-002",
+            "sport": "Soccer",
+            "difficulty": "easy",
+            "question": "Which player is known as the world's most famous footballer from Argentina?",
+            "answers": [
+                "Lionel Messi",
+                "Cristiano Ronaldo",
+                "Diego Maradona",
+                "Pelé"
+            ],
+            "correctAnswer": "Lionel Messi",
+            "explanation": "Lionel Messi is one of Argentina's greatest footballers and led Argentina to the 2022 World Cup."
+        },
+        {
+            "id": "soccer-003",
+            "sport": "Soccer",
+            "difficulty": "easy",
+            "question": "How many players does each soccer team normally have on the field?",
+            "answers": [
+                "9",
+                "10",
+                "11",
+                "12"
+            ],
+            "correctAnswer": "11",
+            "explanation": "A soccer team normally has 11 players on the field, including the goalkeeper."
+        },
+        {
+            "id": "soccer-004",
+            "sport": "Soccer",
+            "difficulty": "medium",
+            "question": "Which player has won the most Ballon d'Or awards?",
+            "answers": [
+                "Cristiano Ronaldo",
+                "Lionel Messi",
+                "Pelé",
+                "Zinedine Zidane"
+            ],
+            "correctAnswer": "Lionel Messi",
+            "explanation": "Lionel Messi has won the Ballon d'Or more times than any other player."
+        },
+        {
+            "id": "soccer-005",
+            "sport": "Soccer",
+            "difficulty": "easy",
+            "question": "How long is a regulation soccer match, excluding stoppage time?",
+            "answers": [
+                "60 minutes",
+                "75 minutes",
+                "90 minutes",
+                "120 minutes"
+            ],
+            "correctAnswer": "90 minutes",
+            "explanation": "A regulation soccer match consists of two 45-minute halves."
+        },
+        {
+            "id": "soccer-006",
+            "sport": "Soccer",
+            "difficulty": "medium",
+            "question": "Which country won the 2022 FIFA World Cup?",
+            "answers": [
+                "France",
+                "Brazil",
+                "Argentina",
+                "Spain"
+            ],
+            "correctAnswer": "Argentina",
+            "explanation": "Argentina defeated France on penalties in the 2022 World Cup final."
+        },
+        {
+            "id": "soccer-007",
+            "sport": "Soccer",
+            "difficulty": "easy",
+            "question": "What color card sends a player off the field?",
+            "answers": [
+                "Yellow",
+                "Red",
+                "Blue",
+                "Green"
+            ],
+            "correctAnswer": "Red",
+            "explanation": "A red card means the player is sent off and cannot be replaced."
+        },
+        {
+            "id": "soccer-008",
+            "sport": "Soccer",
+            "difficulty": "medium",
+            "question": "Which player is known as CR7?",
+            "answers": [
+                "Cristiano Ronaldo",
+                "Carlos Tevez",
+                "Cesc Fàbregas",
+                "Robert Lewandowski"
+            ],
+            "correctAnswer": "Cristiano Ronaldo",
+            "explanation": "CR7 refers to Cristiano Ronaldo, combining his initials with his famous shirt number."
+        },
+        {
+            "id": "soccer-009",
+            "sport": "Soccer",
+            "difficulty": "medium",
+            "question": "Which legendary Brazilian player won three World Cups?",
+            "answers": [
+                "Pelé",
+                "Ronaldo",
+                "Ronaldinho",
+                "Kaká"
+            ],
+            "correctAnswer": "Pelé",
+            "explanation": "Pelé won the World Cup with Brazil in 1958, 1962, and 1970."
+        },
+        {
+            "id": "soccer-010",
+            "sport": "Soccer",
+            "difficulty": "medium",
+            "question": "Which club has won the most UEFA Champions League titles?",
+            "answers": [
+                "Barcelona",
+                "Liverpool",
+                "Real Madrid",
+                "Bayern Munich"
+            ],
+            "correctAnswer": "Real Madrid",
+            "explanation": "Real Madrid has won the European Cup/UEFA Champions League more times than any other club."
+        }
+    ]
+}

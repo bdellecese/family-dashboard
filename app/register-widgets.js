@@ -143,4 +143,8 @@ export async function registerWidgets() {
         "../widgets/sports-legends/sports-legends.js"
     );
 
+    await registerWidget(
+        "sports-trivia",
+        "../widgets/sports-trivia/sports-trivia.js"
+    );
 }

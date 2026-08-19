@@ -1,10 +1,10 @@
 /*
  * ============================================================
- * ON THIS DAY IN SPORTS WIDGET
+ * SPORTS TRIVIA WIDGET
  * ============================================================
  */
 
-.on-this-day-sports-widget {
+.sports-trivia-widget {
 
     width:
         100%;
@@ -43,7 +43,7 @@
  * ============================================================
  */
 
-.on-this-day-sports-widget__header {
+.sports-trivia-widget__header {
 
     margin-bottom:
         12px;
@@ -51,7 +51,7 @@
 }
 
 
-.on-this-day-sports-widget__title {
+.sports-trivia-widget__title {
 
     font-size:
         1vw;
@@ -71,7 +71,7 @@
  * ============================================================
  */
 
-.on-this-day-sports-widget__content {
+.sports-trivia-widget__content {
 
     width:
         100%;
@@ -87,37 +87,11 @@
 
 /*
  * ============================================================
- * YEAR
- * ============================================================
- */
-
-.on-this-day-sports-widget__year {
-
-    margin-bottom:
-        8px;
-
-    font-size:
-        2vw;
-
-    font-weight:
-        400;
-
-    line-height:
-        1.1;
-
-    color:
-        #FFFFFF;
-
-}
-
-
-/*
- * ============================================================
  * SPORT
  * ============================================================
  */
 
-.on-this-day-sports-widget__sport {
+.sports-trivia-widget__sport {
 
     margin-bottom:
         8px;
@@ -139,14 +113,144 @@
 
 /*
  * ============================================================
- * EVENT
+ * QUESTION
  * ============================================================
  */
 
-.on-this-day-sports-widget__event {
+.sports-trivia-widget__question {
+
+    margin-bottom:
+        16px;
 
     font-size:
         1vw;
+
+    font-weight:
+        400;
+
+    line-height:
+        1.3;
+
+    color:
+        #FFFFFF;
+
+    word-break:
+        break-word;
+
+}
+
+
+/*
+ * ============================================================
+ * ANSWERS
+ * ============================================================
+ */
+
+.sports-trivia-widget__answers {
+
+    width:
+        100%;
+
+    box-sizing:
+        border-box;
+
+}
+
+
+/*
+ * ============================================================
+ * ANSWER OPTION
+ * ============================================================
+ */
+
+.sports-trivia-widget__answer-option {
+
+    margin-bottom:
+        8px;
+
+    font-size:
+        .8vw;
+
+    font-weight:
+        300;
+
+    line-height:
+        1.35;
+
+    color:
+        #F0F4F8;
+
+    word-break:
+        break-word;
+
+}
+
+
+/*
+ * ============================================================
+ * STATUS
+ * ============================================================
+ */
+
+.sports-trivia-widget__status {
+
+    margin-top:
+        14px;
+
+    font-size:
+        .8vw;
+
+    font-weight:
+        400;
+
+    line-height:
+        1.2;
+
+    color:
+        #A3C1D9;
+
+}
+
+
+/*
+ * ============================================================
+ * ANSWER
+ * ============================================================
+ */
+
+.sports-trivia-widget__answer {
+
+    margin-top:
+        12px;
+
+    font-size:
+        1vw;
+
+    font-weight:
+        500;
+
+    line-height:
+        1.25;
+
+    color:
+        #FFFFFF;
+
+}
+
+
+/*
+ * ============================================================
+ * EXPLANATION
+ * ============================================================
+ */
+
+.sports-trivia-widget__explanation {
+
+    margin-top:
+        8px;
+
+    font-size:
+        0.95vw;
 
     font-weight:
         300;
@@ -155,7 +259,7 @@
         1.4;
 
     color:
-        #F0F4F8;
+        #A3C1D9;
 
     word-break:
         break-word;
@@ -169,15 +273,15 @@
  * ============================================================
  */
 
-.on-this-day-sports-widget__fade {
+.sports-trivia-widget__fade {
 
     animation:
-        on-this-day-sports-fade 0.8s ease-in-out;
+        sports-trivia-fade 0.8s ease-in-out;
 
 }
 
 
-@keyframes on-this-day-sports-fade {
+@keyframes sports-trivia-fade {
 
     from {
 
@@ -202,7 +306,7 @@
  * ============================================================
  */
 
-.on-this-day-sports-widget__message {
+.sports-trivia-widget__message {
 
     font-size:
         1vw;
