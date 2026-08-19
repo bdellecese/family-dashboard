@@ -51,44 +51,6 @@ let serverSyncTimer = null;
 
 let serverSyncInProgress = false;
 
-/*
- * ============================================================
- * PERFORMANCE SESSION
- * ============================================================
- *
- * One session represents one browser/dashboard runtime.
- *
- * This allows us to correlate events from the same dashboard
- * session without relying only on timestamps.
- * ============================================================
- */
-
-const performanceSessionId =
-    `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-
-
-/*
- * Generate a unique ID for a widget lifecycle.
- *
- * Example:
- *
- *     photo render
- *       ↓
- *     photo rotations
- *       ↓
- *     photo destroy
- *
- * All of those events can share the same widgetInstanceId.
- */
-
-export function createPerformanceId(
-    prefix = "perf"
-) {
-
-    return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-
-}
-
 
 /*
  * ============================================================
@@ -363,13 +325,14 @@ export function recordPerformanceEvent(
         timestamp:
             new Date().toISOString(),
 
-        sessionId:
-            performanceSessionId,
-
         ...event
 
     };
 
+
+    /*
+     * Store locally.
+     */
 
     events.push(
         entry
@@ -379,6 +342,10 @@ export function recordPerformanceEvent(
     saveEvents();
 
 
+    /*
+     * Queue for server synchronization.
+     */
+
     pendingServerEvents.push(
         entry
     );
@@ -387,14 +354,17 @@ export function recordPerformanceEvent(
     scheduleServerSync();
 
 
+    /*
+     * Console output is intentionally compact.
+     */
+
     if (
         event.durationMs !==
         undefined
     ) {
 
         console.log(
-            `[PERF] ${event.type} ${event.name || ""} ${Math.round(event.durationMs)}ms`,
-            event
+            `[PERF] ${event.type} ${event.name || ""} ${Math.round(event.durationMs)}ms`
         );
 
     }
@@ -402,8 +372,7 @@ export function recordPerformanceEvent(
     else {
 
         console.log(
-            `[PERF] ${event.type} ${event.name || ""}`,
-            event
+            `[PERF] ${event.type} ${event.name || ""}`
         );
 
     }
@@ -412,6 +381,7 @@ export function recordPerformanceEvent(
     return entry;
 
 }
+
 
 /*
  * ============================================================

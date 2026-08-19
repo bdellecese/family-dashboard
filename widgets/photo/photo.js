@@ -1,9 +1,3 @@
-import {
-    startPerformanceTimer,
-    recordPerformanceEvent
-} from "../../performance.js";
-
-
 const DEFAULT_ALBUM_URL =
     "https://www.icloud.com/sharedalbum/#B0k5yeZFhGG13uA";
 
@@ -28,787 +22,384 @@ const photo = {
         config = {}
     ) {
 
-        const sessionId =
-            createPerformanceId("photo");
+        container.innerHTML = "";
 
 
-        const renderTimer =
-            startPerformanceTimer(
-                "photo-render",
-                "photo",
-                {
-                    sessionId
-                }
+        // ====================================================
+        // CONFIGURATION
+        // ====================================================
+
+        const albumUrl =
+            config.albumUrl ||
+            DEFAULT_ALBUM_URL;
+
+
+        const interval =
+            Number(
+                config.interval ||
+                DEFAULT_ROTATION_INTERVAL
             );
 
 
-        let rotationTimer =
-            null;
+        const batchCount =
+            Number(
+                config.batchCount ||
+                DEFAULT_BATCH_COUNT
+            );
 
 
-        let destroyed =
-            false;
+        // ====================================================
+        // WRAPPER
+        // ====================================================
 
+        const wrapper =
+            document.createElement("div");
+
+        wrapper.className =
+            "photo-widget";
+
+        container.appendChild(
+            wrapper
+        );
+
+
+        // ====================================================
+        // LOAD INITIAL PHOTO BATCH
+        // ====================================================
+
+        let photos;
 
         try {
 
-            container.innerHTML = "";
-
-
-            // ====================================================
-            // CONFIGURATION
-            // ====================================================
-
-            const albumUrl =
-                config.albumUrl ||
-                DEFAULT_ALBUM_URL;
-
-
-            const interval =
-                Number(
-                    config.interval ||
-                    DEFAULT_ROTATION_INTERVAL
+            photos =
+                await loadPhotos(
+                    albumUrl,
+                    batchCount
                 );
-
-
-            const batchCount =
-                Number(
-                    config.batchCount ||
-                    DEFAULT_BATCH_COUNT
-                );
-
-
-            recordPerformanceEvent({
-
-                type:
-                    "photo-config",
-
-                name:
-                    "photo",
-
-                sessionId,
-
-                interval,
-
-                batchCount
-
-            });
-
-
-            // ====================================================
-            // WRAPPER
-            // ====================================================
-
-            const wrapper =
-                document.createElement("div");
-
-            wrapper.className =
-                "photo-widget";
-
-            container.appendChild(
-                wrapper
-            );
-
-
-            // ====================================================
-            // LOAD INITIAL PHOTO BATCH
-            // ====================================================
-
-            const initialBatchTimer =
-                startPerformanceTimer(
-                    "photo-batch",
-                    "initial",
-                    {
-                        sessionId,
-                        batchCount
-                    }
-                );
-
-
-            let photos;
-
-            try {
-
-                photos =
-                    await loadPhotos(
-                        albumUrl,
-                        batchCount,
-                        sessionId
-                    );
-
-
-                initialBatchTimer.end({
-
-                    success:
-                        true,
-
-                    photoCount:
-                        photos.length
-
-                });
-
-            }
-
-            catch (error) {
-
-                initialBatchTimer.end({
-
-                    success:
-                        false,
-
-                    error:
-                        error?.message ||
-                        String(error)
-
-                });
-
-
-                console.error(
-                    "iCloud photo error:",
-                    error
-                );
-
-
-                showError(
-                    wrapper,
-                    "Unable to load photos"
-                );
-
-
-                renderTimer.end({
-
-                    success:
-                        false,
-
-                    error:
-                        error?.message ||
-                        String(error)
-
-                });
-
-
-                return;
-
-            }
-
-
-            // ====================================================
-            // NO PHOTOS
-            // ====================================================
-
-            if (
-                !photos ||
-                photos.length === 0
-            ) {
-
-                recordPerformanceEvent({
-
-                    type:
-                        "photo-empty",
-
-                    name:
-                        "photo",
-
-                    sessionId
-
-                });
-
-
-                showError(
-                    wrapper,
-                    "No photos found"
-                );
-
-
-                renderTimer.end({
-
-                    success:
-                        false,
-
-                    reason:
-                        "no-photos"
-
-                });
-
-
-                return;
-
-            }
-
-
-            // ====================================================
-            // RANDOMIZE BATCH
-            // ====================================================
-
-            shuffle(
-                photos
-            );
-
-
-            // ====================================================
-            // CREATE IMAGE LAYERS
-            // ====================================================
-
-            const imageA =
-                createImageLayer();
-
-
-            const imageB =
-                createImageLayer();
-
-
-            imageA.wrapper.classList.add(
-                "photo-widget__image-layer",
-                "photo-widget__image-layer--active"
-            );
-
-
-            imageB.wrapper.classList.add(
-                "photo-widget__image-layer"
-            );
-
-
-            wrapper.appendChild(
-                imageA.wrapper
-            );
-
-            wrapper.appendChild(
-                imageB.wrapper
-            );
-
-
-            // ====================================================
-            // CAPTION / PHOTO METADATA
-            // ====================================================
-
-            const caption =
-                document.createElement("div");
-
-            caption.className =
-                "photo-widget__caption";
-
-
-            wrapper.appendChild(
-                caption
-            );
-
-
-            // ====================================================
-            // LOAD FIRST VALID PHOTO
-            // ====================================================
-
-            let currentIndex =
-                -1;
-
-
-            const initialPhotoTimer =
-                startPerformanceTimer(
-                    "photo-find",
-                    "initial",
-                    {
-                        sessionId,
-                        photoCount:
-                            photos.length
-                    }
-                );
-
-
-            const initialPhoto =
-                await findLoadablePhoto(
-                    photos,
-                    0,
-                    sessionId
-                );
-
-
-            if (!initialPhoto) {
-
-                initialPhotoTimer.end({
-
-                    success:
-                        false,
-
-                    reason:
-                        "no-loadable-photo"
-
-                });
-
-
-                showError(
-                    wrapper,
-                    "Unable to load photos"
-                );
-
-
-                renderTimer.end({
-
-                    success:
-                        false,
-
-                    reason:
-                        "no-loadable-photo"
-
-                });
-
-
-                return;
-
-            }
-
-
-            initialPhotoTimer.end({
-
-                success:
-                    true,
-
-                index:
-                    initialPhoto.index
-
-            });
-
-
-            currentIndex =
-                initialPhoto.index;
-
-
-            setImage(
-                imageA,
-                initialPhoto.photo.url
-            );
-
-
-            caption.textContent =
-                formatPhotoMetadata(
-                    initialPhoto.photo
-                );
-
-
-            recordPerformanceEvent({
-
-                type:
-                    "photo-initial-display",
-
-                name:
-                    "photo",
-
-                sessionId,
-
-                photoId:
-                    initialPhoto.photo.id,
-
-                index:
-                    initialPhoto.index
-
-            });
-
-
-            // ====================================================
-            // ROTATION STATE
-            // ====================================================
-
-            let activeImage =
-                imageA;
-
-            let inactiveImage =
-                imageB;
-
-
-            // ====================================================
-            // LOAD NEXT BATCH
-            // ====================================================
-
-            const loadNextBatch =
-                async () => {
-
-                    const batchTimer =
-                        startPerformanceTimer(
-                            "photo-batch",
-                            "refresh",
-                            {
-                                sessionId,
-                                batchCount
-                            }
-                        );
-
-
-                    try {
-
-                        const nextPhotos =
-                            await loadPhotos(
-                                albumUrl,
-                                batchCount,
-                                sessionId
-                            );
-
-
-                        if (
-                            nextPhotos &&
-                            nextPhotos.length > 0
-                        ) {
-
-                            shuffle(
-                                nextPhotos
-                            );
-
-
-                            photos =
-                                nextPhotos;
-
-
-                            currentIndex =
-                                -1;
-
-
-                            batchTimer.end({
-
-                                success:
-                                    true,
-
-                                photoCount:
-                                    nextPhotos.length
-
-                            });
-
-
-                            return true;
-
-                        }
-
-
-                        batchTimer.end({
-
-                            success:
-                                false,
-
-                            reason:
-                                "empty-batch"
-
-                        });
-
-                    }
-
-                    catch (error) {
-
-                        batchTimer.end({
-
-                            success:
-                                false,
-
-                            error:
-                                error?.message ||
-                                String(error)
-
-                        });
-
-
-                        console.error(
-                            "iCloud photo batch refresh error:",
-                            error
-                        );
-
-                    }
-
-
-                    return false;
-
-                };
-
-
-            // ====================================================
-            // ROTATE PHOTO
-            // ====================================================
-
-            const rotate =
-                async () => {
-
-                    if (
-                        destroyed
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    const rotationTimer =
-                        startPerformanceTimer(
-                            "photo-rotation",
-                            "rotate",
-                            {
-                                sessionId
-                            }
-                        );
-
-
-                    let refreshedBatch =
-                        false;
-
-
-                    try {
-
-                        // ====================================================
-                        // REFRESH BATCH IF NECESSARY
-                        // ====================================================
-
-                        if (
-                            currentIndex >=
-                            photos.length - 1
-                        ) {
-
-                            refreshedBatch =
-                                await loadNextBatch();
-
-
-                            if (!refreshedBatch) {
-
-                                /*
-                                 * If refresh failed, restart from
-                                 * the current batch.
-                                 */
-
-                                currentIndex =
-                                    -1;
-
-                            }
-
-                        }
-
-
-                        // ====================================================
-                        // FIND NEXT LOADABLE PHOTO
-                        // ====================================================
-
-                        const nextPhoto =
-                            await findLoadablePhoto(
-                                photos,
-                                currentIndex + 1,
-                                sessionId
-                            );
-
-
-                        if (!nextPhoto) {
-
-                            rotationTimer.end({
-
-                                success:
-                                    false,
-
-                                reason:
-                                    "no-loadable-photo",
-
-                                refreshedBatch
-
-                            });
-
-
-                            return;
-
-                        }
-
-
-                        currentIndex =
-                            nextPhoto.index;
-
-
-                        // ====================================================
-                        // UPDATE IMAGE
-                        // ====================================================
-
-                        setImage(
-                            inactiveImage,
-                            nextPhoto.photo.url
-                        );
-
-
-                        // ====================================================
-                        // CROSSFADE
-                        // ====================================================
-
-                        activeImage.wrapper.classList.remove(
-                            "photo-widget__image-layer--active"
-                        );
-
-
-                        inactiveImage.wrapper.classList.add(
-                            "photo-widget__image-layer--active"
-                        );
-
-
-                        caption.textContent =
-                            formatPhotoMetadata(
-                                nextPhoto.photo
-                            );
-
-
-                        // ====================================================
-                        // SWAP LAYERS
-                        // ====================================================
-
-                        const temp =
-                            activeImage;
-
-
-                        activeImage =
-                            inactiveImage;
-
-
-                        inactiveImage =
-                            temp;
-
-
-                        rotationTimer.end({
-
-                            success:
-                                true,
-
-                            photoId:
-                                nextPhoto.photo.id,
-
-                            index:
-                                nextPhoto.index,
-
-                            refreshedBatch
-
-                        });
-
-                    }
-
-                    catch (error) {
-
-                        rotationTimer.end({
-
-                            success:
-                                false,
-
-                            error:
-                                error?.message ||
-                                String(error),
-
-                            refreshedBatch
-
-                        });
-
-
-                        console.error(
-                            "Photo rotation error:",
-                            error
-                        );
-
-                    }
-
-                };
-
-
-            // ====================================================
-            // START ROTATION TIMER
-            // ====================================================
-
-            if (
-                photos.length > 1
-            ) {
-
-                rotationTimer =
-                    setInterval(
-                        rotate,
-                        interval * 1000
-                    );
-
-
-                recordPerformanceEvent({
-
-                    type:
-                        "photo-rotation-start",
-
-                    name:
-                        "photo",
-
-                    sessionId,
-
-                    interval,
-
-                    photoCount:
-                        photos.length
-
-                });
-
-            }
-
-
-            // ====================================================
-            // RENDER COMPLETE
-            // ====================================================
-
-            renderTimer.end({
-
-                success:
-                    true,
-
-                photoCount:
-                    photos.length,
-
-                interval,
-
-                batchCount
-
-            });
-
-
-            // ====================================================
-            // CLEANUP
-            // ====================================================
-
-            return async () => {
-
-                destroyed =
-                    true;
-
-
-                if (
-                    rotationTimer
-                ) {
-
-                    clearInterval(
-                        rotationTimer
-                    );
-
-
-                    rotationTimer =
-                        null;
-
-                }
-
-
-                recordPerformanceEvent({
-
-                    type:
-                        "photo-cleanup",
-
-                    name:
-                        "photo",
-
-                    sessionId
-
-                });
-
-            };
 
         }
 
         catch (error) {
 
-            renderTimer.end({
-
-                success:
-                    false,
-
-                error:
-                    error?.message ||
-                    String(error)
-
-            });
+            console.error(
+                "iCloud photo error:",
+                error
+            );
 
 
-            throw error;
+            showError(
+                wrapper,
+                "Unable to load photos"
+            );
+
+            return;
+
+        }
+
+
+        // ====================================================
+        // NO PHOTOS
+        // ====================================================
+
+        if (
+            !photos ||
+            photos.length === 0
+        ) {
+
+            showError(
+                wrapper,
+                "No photos found"
+            );
+
+            return;
+
+        }
+
+
+        // ====================================================
+        // RANDOMIZE BATCH
+        // ====================================================
+
+        shuffle(
+            photos
+        );
+
+
+        // ====================================================
+        // CREATE IMAGE LAYERS
+        // ====================================================
+
+        const imageA =
+            createImageLayer();
+
+
+        const imageB =
+            createImageLayer();
+
+
+        imageA.wrapper.classList.add(
+            "photo-widget__image-layer",
+            "photo-widget__image-layer--active"
+        );
+
+
+        imageB.wrapper.classList.add(
+            "photo-widget__image-layer"
+        );
+
+
+        wrapper.appendChild(
+            imageA.wrapper
+        );
+
+        wrapper.appendChild(
+            imageB.wrapper
+        );
+
+
+        // ====================================================
+        // CAPTION / PHOTO METADATA
+        // ====================================================
+
+        const caption =
+            document.createElement("div");
+
+        caption.className =
+            "photo-widget__caption";
+
+
+        wrapper.appendChild(
+            caption
+        );
+
+
+        // ====================================================
+        // LOAD FIRST VALID PHOTO
+        // ====================================================
+
+        let currentIndex =
+            -1;
+
+        const initialPhoto =
+            await findLoadablePhoto(
+                photos,
+                0
+            );
+
+
+        if (!initialPhoto) {
+
+            showError(
+                wrapper,
+                "Unable to load photos"
+            );
+
+            return;
+
+        }
+
+
+        currentIndex =
+            initialPhoto.index;
+
+
+        setImage(
+            imageA,
+            initialPhoto.photo.url
+        );
+
+
+        caption.textContent =
+            formatPhotoMetadata(
+                initialPhoto.photo
+            );
+
+
+        // ====================================================
+        // ROTATION STATE
+        // ====================================================
+
+        let activeImage =
+            imageA;
+
+        let inactiveImage =
+            imageB;
+
+
+        // ====================================================
+        // LOAD NEXT BATCH
+        // ====================================================
+
+        const loadNextBatch =
+            async () => {
+
+                try {
+
+                    const nextPhotos =
+                        await loadPhotos(
+                            albumUrl,
+                            batchCount
+                        );
+
+
+                    if (
+                        nextPhotos &&
+                        nextPhotos.length > 0
+                    ) {
+
+                        shuffle(
+                            nextPhotos
+                        );
+
+                        photos =
+                            nextPhotos;
+
+                        currentIndex =
+                            -1;
+
+                        return true;
+
+                    }
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "iCloud photo batch refresh error:",
+                        error
+                    );
+
+                }
+
+
+                return false;
+
+            };
+
+
+        // ====================================================
+        // ROTATE PHOTO
+        // ====================================================
+
+        const rotate =
+            async () => {
+
+                /*
+                 * If we have reached the end of the
+                 * current batch, get another random batch.
+                 */
+
+                if (
+                    currentIndex >=
+                    photos.length - 1
+                ) {
+
+                    const loaded =
+                        await loadNextBatch();
+
+
+                    if (!loaded) {
+
+                        /*
+                         * If the refresh failed, start again
+                         * from the current batch.
+                         */
+
+                        currentIndex =
+                            -1;
+
+                    }
+
+                }
+
+
+                /*
+                 * Find the next photo that actually loads.
+                 */
+
+                const nextPhoto =
+                    await findLoadablePhoto(
+                        photos,
+                        currentIndex + 1
+                    );
+
+
+                if (!nextPhoto) {
+
+                    return;
+
+                }
+
+
+                currentIndex =
+                    nextPhoto.index;
+
+
+                /*
+                 * The image has already been successfully
+                 * preloaded.
+                 *
+                 * Load it into the inactive layer before
+                 * making that layer visible.
+                 */
+
+                setImage(
+                    inactiveImage,
+                    nextPhoto.photo.url
+                );
+
+
+                /*
+                 * Crossfade to the new image.
+                 */
+
+                activeImage.wrapper.classList.remove(
+                    "photo-widget__image-layer--active"
+                );
+
+
+                inactiveImage.wrapper.classList.add(
+                    "photo-widget__image-layer--active"
+                );
+
+
+                caption.textContent =
+                    formatPhotoMetadata(
+                        nextPhoto.photo
+                    );
+
+
+                /*
+                 * Swap active/inactive layers.
+                 */
+
+                const temp =
+                    activeImage;
+
+
+                activeImage =
+                    inactiveImage;
+
+
+                inactiveImage =
+                    temp;
+
+            };
+
+
+        // ====================================================
+        // START TIMER
+        // ====================================================
+
+        if (
+            photos.length > 1
+        ) {
+
+            setInterval(
+                rotate,
+                interval * 1000
+            );
 
         }
 
@@ -823,20 +414,8 @@ const photo = {
 
 async function loadPhotos(
     albumUrl,
-    batchCount,
-    sessionId
+    batchCount
 ) {
-
-    const timer =
-        startPerformanceTimer(
-            "photo-api",
-            "photos",
-            {
-                sessionId,
-                batchCount
-            }
-        );
-
 
     const params =
         new URLSearchParams();
@@ -851,6 +430,11 @@ async function loadPhotos(
 
     }
 
+
+    /*
+     * Request the configured batch size from the
+     * dashboard server.
+     */
 
     if (
         Number.isFinite(
@@ -871,168 +455,53 @@ async function loadPhotos(
     }
 
 
-    const url =
-        `/api/photos?${params.toString()}`;
+    const response =
+        await fetch(
+            `/api/photos?${params.toString()}`,
+            {
+                method: "GET",
+                cache: "no-store"
+            }
+        );
 
 
-    const requestStart =
-        performance.now();
+    if (
+        !response.ok
+    ) {
+
+        throw new Error(
+            `Photo API returned ${response.status}`
+        );
+
+    }
 
 
-    try {
-
-        const response =
-            await fetch(
-                url,
-                {
-                    method:
-                        "GET",
-
-                    cache:
-                        "no-store"
-                }
-            );
+    const data =
+        await response.json();
 
 
-        const responseMs =
-            performance.now() -
-            requestStart;
+    if (
+        data &&
+        data.error
+    ) {
 
-
-        if (
-            !response.ok
-        ) {
-
-            const error =
-                new Error(
-                    `Photo API returned ${response.status}`
-                );
-
-
-            timer.end({
-
-                success:
-                    false,
-
-                status:
-                    response.status,
-
-                responseMs,
-
-                error:
-                    error.message
-
-            });
-
-
-            throw error;
-
-        }
-
-
-        const jsonStart =
-            performance.now();
-
-
-        const data =
-            await response.json();
-
-
-        const jsonMs =
-            performance.now() -
-            jsonStart;
-
-
-        if (
-            data &&
+        throw new Error(
             data.error
-        ) {
-
-            const error =
-                new Error(
-                    data.error
-                );
-
-
-            timer.end({
-
-                success:
-                    false,
-
-                responseMs,
-
-                jsonMs,
-
-                error:
-                    error.message
-
-            });
-
-
-            throw error;
-
-        }
-
-
-        const photos =
-            data &&
-            Array.isArray(
-                data.photos
-            )
-
-                ? data.photos
-
-                : [];
-
-
-        timer.end({
-
-            success:
-                true,
-
-            responseMs,
-
-            jsonMs,
-
-            photoCount:
-                photos.length
-
-        });
-
-
-        return photos;
+        );
 
     }
 
-    catch (error) {
 
-        /*
-         * Avoid double-counting errors that were already
-         * recorded above.
-         */
+    return (
+        data &&
+        Array.isArray(
+            data.photos
+        )
 
-        if (
-            error &&
-            !error.__photoPerformanceRecorded
-        ) {
+            ? data.photos
 
-            timer.end({
-
-                success:
-                    false,
-
-                error:
-                    error?.message ||
-                    String(error)
-
-            });
-
-        }
-
-
-        throw error;
-
-    }
+            : []
+    );
 
 }
 
@@ -1043,8 +512,7 @@ async function loadPhotos(
 
 async function findLoadablePhoto(
     photos,
-    startIndex,
-    sessionId
+    startIndex
 ) {
 
     if (
@@ -1057,147 +525,66 @@ async function findLoadablePhoto(
     }
 
 
-    const timer =
-        startPerformanceTimer(
-            "photo-find",
-            "loadable",
-            {
-                sessionId,
-                photoCount:
-                    photos.length
-            }
-        );
+    /*
+     * Try each photo once, wrapping around to the beginning
+     * if necessary.
+     */
+
+    for (
+        let offset = 0;
+        offset < photos.length;
+        offset++
+    ) {
+
+        const index =
+            (
+                startIndex +
+                offset
+            ) % photos.length;
 
 
-    let attempts =
-        0;
-
-    let failures =
-        0;
+        const photo =
+            photos[index];
 
 
-    try {
-
-        /*
-         * Try each photo once, wrapping around to the beginning.
-         */
-
-        for (
-            let offset = 0;
-            offset < photos.length;
-            offset++
+        if (
+            !photo ||
+            !photo.url
         ) {
 
-            const index =
-                (
-                    startIndex +
-                    offset
-                ) % photos.length;
-
-
-            const photo =
-                photos[index];
-
-
-            if (
-                !photo ||
-                !photo.url
-            ) {
-
-                continue;
-
-            }
-
-
-            attempts++;
-
-
-            try {
-
-                await preloadImage(
-                    photo.url,
-                    sessionId,
-                    photo.id
-                );
-
-
-                timer.end({
-
-                    success:
-                        true,
-
-                    attempts,
-
-                    failures,
-
-                    index
-
-                });
-
-
-                return {
-                    photo,
-                    index
-                };
-
-            }
-
-            catch (error) {
-
-                failures++;
-
-
-                console.warn(
-                    "Photo failed to load, skipping:",
-                    photo.url,
-                    error
-                );
-
-            }
+            continue;
 
         }
 
 
-        timer.end({
+        try {
 
-            success:
-                false,
-
-            attempts,
-
-            failures,
-
-            reason:
-                "all-photos-failed"
-
-        });
+            await preloadImage(
+                photo.url
+            );
 
 
-        return null;
+            return {
+                photo,
+                index
+            };
 
-    }
+        }
 
-    catch (error) {
+        catch (error) {
 
-        timer.end({
+            console.warn(
+                "Photo failed to load, skipping:",
+                photo.url,
+                error
+            );
 
-            success:
-                false,
-
-            attempts,
-
-            failures,
-
-            error:
-                error?.message ||
-                String(error)
-
-        });
-
-
-        throw error;
+        }
 
     }
+
+
+    return null;
 
 }
 
@@ -1207,21 +594,8 @@ async function findLoadablePhoto(
 // ============================================================
 
 function preloadImage(
-    url,
-    sessionId,
-    photoId
+    url
 ) {
-
-    const timer =
-        startPerformanceTimer(
-            "photo-preload",
-            "image",
-            {
-                sessionId,
-                photoId
-            }
-        );
-
 
     return new Promise(
         (
@@ -1233,122 +607,10 @@ function preloadImage(
                 new Image();
 
 
-            const startedAt =
-                performance.now();
-
-
-            let settled =
-                false;
-
-
-            const finish =
-                (
-                    success,
-                    error
-                ) => {
-
-                    if (
-                        settled
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    settled =
-                        true;
-
-
-                    const durationMs =
-                        performance.now() -
-                        startedAt;
-
-
-                    timer.end({
-
-                        success,
-
-                        durationMs,
-
-                        error:
-                            error?.message ||
-                            undefined
-
-                    });
-
-
-                    if (
-                        success
-                    ) {
-
-                        resolve();
-
-                    }
-
-                    else {
-
-                        reject(
-                            error ||
-                            new Error(
-                                "Image failed to load"
-                            )
-                        );
-
-                    }
-
-                };
-
-
             image.onload =
                 () => {
 
-                    /*
-                     * Decode gives us a better indication that
-                     * the browser has actually processed the image,
-                     * rather than merely receiving the bytes.
-                     */
-
-                    if (
-                        typeof image.decode ===
-                        "function"
-                    ) {
-
-                        image.decode()
-                            .then(
-                                () => {
-
-                                    finish(
-                                        true
-                                    );
-
-                                }
-                            )
-                            .catch(
-                                () => {
-
-                                    /*
-                                     * The image successfully loaded
-                                     * even if decode() isn't available
-                                     * or fails on this browser.
-                                     */
-
-                                    finish(
-                                        true
-                                    );
-
-                                }
-                            );
-
-                    }
-
-                    else {
-
-                        finish(
-                            true
-                        );
-
-                    }
+                    resolve();
 
                 };
 
@@ -1356,8 +618,7 @@ function preloadImage(
             image.onerror =
                 () => {
 
-                    finish(
-                        false,
+                    reject(
                         new Error(
                             "Image failed to load"
                         )
@@ -1419,9 +680,6 @@ function createImageLayer() {
     image.loading =
         "eager";
 
-    image.decoding =
-        "async";
-
     image.draggable =
         false;
 
@@ -1472,7 +730,6 @@ function setImage(
 
 }
 
-
 // ============================================================
 // CAPTION
 // ============================================================
@@ -1482,9 +739,7 @@ function formatPhotoMetadata(
 ) {
 
     if (!photo) {
-
         return "";
-
     }
 
 
@@ -1502,13 +757,10 @@ function formatPhotoMetadata(
                 {
                     month:
                         "short",
-
                     day:
                         "numeric",
-
                     year:
                         "numeric",
-
                     timeZone:
                         "UTC"
                 }
@@ -1569,23 +821,6 @@ function shuffle(
 
 
     return array;
-
-}
-
-
-// ============================================================
-// PERFORMANCE ID
-// ============================================================
-
-function createPerformanceId(
-    prefix
-) {
-
-    return (
-        `${prefix}-${Date.now()}-${Math.random()
-            .toString(36)
-            .substring(2, 8)}`
-    );
 
 }
 
