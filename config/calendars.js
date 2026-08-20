@@ -81,6 +81,14 @@ export const CALENDARS = {
         color: "rgb(63, 81, 181)"
     },
 
+    /* WU Softball - GC */
+    "snu45s689m3sm81dga137mebkmuraoq0@import.calendar.google.com": {
+        name: "WU Softball (GC)",
+        icon: "fa-fw fas fa-baseball",
+        color: "rgb(228, 196, 65)"
+    },
+
+    /* WU Softball - Energy Athletics */
     "gvco5trj7a8eip611tr883v8jsbftad6@import.calendar.google.com": {
         name: "WU Softball",
         icon: "fa-fw fas fa-baseball",
