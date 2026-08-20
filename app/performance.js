@@ -320,65 +320,7 @@ export function recordPerformanceEvent(
     event
 ) {
 
-    const entry = {
-
-        timestamp:
-            new Date().toISOString(),
-
-        ...event
-
-    };
-
-
-    /*
-     * Store locally.
-     */
-
-    events.push(
-        entry
-    );
-
-
-    saveEvents();
-
-
-    /*
-     * Queue for server synchronization.
-     */
-
-    pendingServerEvents.push(
-        entry
-    );
-
-
-    scheduleServerSync();
-
-
-    /*
-     * Console output is intentionally compact.
-     */
-
-    if (
-        event.durationMs !==
-        undefined
-    ) {
-
-        console.log(
-            `[PERF] ${event.type} ${event.name || ""} ${Math.round(event.durationMs)}ms`
-        );
-
-    }
-
-    else {
-
-        console.log(
-            `[PERF] ${event.type} ${event.name || ""}`
-        );
-
-    }
-
-
-    return entry;
+    return null;
 
 }
 
