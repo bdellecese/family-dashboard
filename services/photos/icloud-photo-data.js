@@ -21,11 +21,6 @@ const ICLOUD_STREAM_CACHE_MAX_AGE =
     6 * 60 * 60 * 1000; // 6 hours
 
 
-// How long we reuse an already-resolved random photo batch.
-const ICLOUD_PHOTO_BATCH_CACHE_MAX_AGE =
-    60 * 60 * 1000; // 1 hour
-
-
 // ============================================================
 // ICLOUD PHOTO DATA
 // ============================================================
@@ -73,47 +68,6 @@ const icloudPhotoData = {
                 )
 
                 : DEFAULT_PHOTO_COUNT;
-
-
-        // ====================================================
-        // PHOTO BATCH CACHE
-        // ====================================================
-
-        /*
-         * This is the most important cache for dashboard
-         * performance.
-         *
-         * If the widget requests photos again within the
-         * cache period, we don't need to contact iCloud at
-         * all.
-         */
-
-        const photoBatchCacheKey =
-            `icloud-photo-batch:${albumId}:${selectedPhotoCount}`;
-
-
-        const cachedPhotoBatch =
-            getCached(
-                photoBatchCacheKey,
-                ICLOUD_PHOTO_BATCH_CACHE_MAX_AGE
-            );
-
-
-        if (cachedPhotoBatch) {
-
-            console.log(
-                "iCloud photo batch cache HIT"
-            );
-
-
-            return cachedPhotoBatch;
-
-        }
-
-
-        console.log(
-            "iCloud photo batch cache MISS"
-        );
 
 
         // ====================================================
@@ -468,21 +422,6 @@ const icloudPhotoData = {
                     }
                 )
                 .filter(Boolean);
-
-
-        // ====================================================
-        // CACHE RESOLVED PHOTO BATCH
-        // ====================================================
-
-        setCached(
-            photoBatchCacheKey,
-            photos
-        );
-
-
-        console.log(
-            `iCloud photo batch cached: ${photos.length} photos`
-        );
 
 
         return photos;
