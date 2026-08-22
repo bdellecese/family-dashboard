@@ -1,3 +1,9 @@
+import {
+    getCached,
+    setCached
+} from "../cache/cache.js";
+
+
 const DEFAULT_ALBUM_URL =
     "https://www.icloud.com/sharedalbum/#B0k5yeZFhGG13uA";
 
@@ -8,6 +14,16 @@ const DEFAULT_ALBUM_URL =
 
 const DEFAULT_PHOTO_COUNT =
     100;
+
+
+// How often we check iCloud for album changes.
+const ICLOUD_STREAM_CACHE_MAX_AGE =
+    6 * 60 * 60 * 1000; // 6 hours
+
+
+// How long we reuse an already-resolved random photo batch.
+const ICLOUD_PHOTO_BATCH_CACHE_MAX_AGE =
+    60 * 60 * 1000; // 1 hour
 
 
 // ============================================================
@@ -26,6 +42,7 @@ const icloudPhotoData = {
                 albumUrl
             );
 
+
         if (!albumId) {
 
             throw new Error(
@@ -36,53 +53,119 @@ const icloudPhotoData = {
 
 
         // ====================================================
-        // GET PHOTO STREAM
+        // DETERMINE REQUESTED PHOTO COUNT
         // ====================================================
 
-        let apiBase =
-            `https://sharedstreams.icloud.com/${albumId}/sharedstreams`;
-
-        let streamResponse =
-            await fetch(
-                `${apiBase}/webstream`,
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body:
-                        JSON.stringify({
-                            streamCtag:
-                                null
-                        })
-                }
+        const requestedPhotoCount =
+            Number(
+                photoCount
             );
 
 
-        let stream =
-            await streamResponse.json();
+        const selectedPhotoCount =
+            Number.isFinite(
+                requestedPhotoCount
+            ) &&
+            requestedPhotoCount > 0
+
+                ? Math.floor(
+                    requestedPhotoCount
+                )
+
+                : DEFAULT_PHOTO_COUNT;
 
 
         // ====================================================
-        // USE APPLE'S CURRENT STREAM HOST IF PROVIDED
+        // PHOTO BATCH CACHE
         // ====================================================
 
-        const appleHost =
-            stream[
-                "X-Apple-MMe-Host"
-            ];
+        /*
+         * This is the most important cache for dashboard
+         * performance.
+         *
+         * If the widget requests photos again within the
+         * cache period, we don't need to contact iCloud at
+         * all.
+         */
+
+        const photoBatchCacheKey =
+            `icloud-photo-batch:${albumId}:${selectedPhotoCount}`;
 
 
-        if (appleHost) {
+        const cachedPhotoBatch =
+            getCached(
+                photoBatchCacheKey,
+                ICLOUD_PHOTO_BATCH_CACHE_MAX_AGE
+            );
+
+
+        if (cachedPhotoBatch) {
+
+            console.log(
+                "iCloud photo batch cache HIT"
+            );
+
+
+            return cachedPhotoBatch;
+
+        }
+
+
+        console.log(
+            "iCloud photo batch cache MISS"
+        );
+
+
+        // ====================================================
+        // GET PHOTO STREAM
+        // ====================================================
+
+        const streamCacheKey =
+            `icloud-stream:${albumId}`;
+
+
+        const cachedStream =
+            getCached(
+                streamCacheKey,
+                ICLOUD_STREAM_CACHE_MAX_AGE
+            );
+
+
+        let stream;
+        let apiBase;
+
+
+        if (cachedStream) {
+
+            console.log(
+                "iCloud stream cache HIT"
+            );
+
+
+            stream =
+                cachedStream.stream;
 
             apiBase =
-                `https://${appleHost}/${albumId}/sharedstreams`;
+                cachedStream.apiBase;
+
+        }
+
+        else {
+
+            console.log(
+                "iCloud stream cache MISS - fetching from iCloud"
+            );
 
 
-            streamResponse =
+            // ------------------------------------------------
+            // Initial request
+            // ------------------------------------------------
+
+            apiBase =
+                `https://sharedstreams.icloud.com/${albumId}/sharedstreams`;
+
+
+            let streamResponse =
                 await fetch(
                     `${apiBase}/webstream`,
                     {
@@ -102,8 +185,74 @@ const icloudPhotoData = {
                 );
 
 
+            /*
+             * iCloud can return HTTP 330 here.
+             *
+             * The response body contains:
+             *
+             *     X-Apple-MMe-Host
+             *
+             * which tells us which sharedstreams host
+             * should actually be used.
+             */
+
             stream =
                 await streamResponse.json();
+
+
+            // ------------------------------------------------
+            // Use Apple's current stream host if provided
+            // ------------------------------------------------
+
+            const appleHost =
+                stream[
+                    "X-Apple-MMe-Host"
+                ];
+
+
+            if (appleHost) {
+
+                apiBase =
+                    `https://${appleHost}/${albumId}/sharedstreams`;
+
+
+                streamResponse =
+                    await fetch(
+                        `${apiBase}/webstream`,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    streamCtag:
+                                        null
+                                })
+                        }
+                    );
+
+
+                stream =
+                    await streamResponse.json();
+
+            }
+
+
+            // ------------------------------------------------
+            // Cache the final stream and resolved API host.
+            // ------------------------------------------------
+
+            setCached(
+                streamCacheKey,
+                {
+                    stream,
+                    apiBase
+                }
+            );
 
         }
 
@@ -127,16 +276,35 @@ const icloudPhotoData = {
 
 
         // ====================================================
-        // FILTER PHOTOS WITH VALID GUIDS
+        // FILTER PHOTOS
         // ====================================================
+
+        /*
+         * iCloud Shared Albums contain both photos and videos.
+         *
+         * Videos have:
+         *
+         *     mediaAssetType === "video"
+         *
+         * Filter them out here so they never reach the
+         * browser and never cause Image() load failures.
+         */
 
         const availablePhotos =
             stream.photos
                 .filter(
                     photo =>
                         photo &&
-                        photo.photoGuid
+                        photo.photoGuid &&
+                        photo.mediaAssetType !== "video"
                 );
+
+
+        console.log(
+            `iCloud album: ${stream.photos.length} total, ` +
+            `${availablePhotos.length} photos, ` +
+            `${stream.photos.length - availablePhotos.length} videos`
+        );
 
 
         if (
@@ -149,33 +317,7 @@ const icloudPhotoData = {
 
 
         // ====================================================
-        // DETERMINE BATCH SIZE
-        // ====================================================
-
-        const requestedPhotoCount =
-            Number(
-                photoCount
-            );
-
-
-        const selectedPhotoCount =
-            Number.isFinite(
-                requestedPhotoCount
-            ) &&
-            requestedPhotoCount > 0
-
-                ? Math.floor(
-                    requestedPhotoCount
-                )
-
-                : DEFAULT_PHOTO_COUNT;
-
-
-        // ====================================================
-        // RANDOMIZE PHOTOS
-        //
-        // Work on a copy so the original iCloud response
-        // remains untouched.
+        // RANDOMIZE PHOTO COLLECTION
         // ====================================================
 
         const shuffledPhotos =
@@ -226,6 +368,11 @@ const icloudPhotoData = {
         // ====================================================
         // GET ASSET URLS
         // ====================================================
+
+        console.log(
+            `iCloud fetching asset URLs for ${photoGuids.length} photos`
+        );
+
 
         const assetsResponse =
             await fetch(
@@ -300,16 +447,43 @@ const icloudPhotoData = {
 
 
                         return {
-                            id: photo.photoGuid,
+                            id:
+                                photo.photoGuid,
+
                             url,
-                            caption: photo.caption || "",
-                            date: photo.dateCreated || null,
-                            postedBy: photo.contributorFullName || ""
+
+                            caption:
+                                photo.caption ||
+                                "",
+
+                            date:
+                                photo.dateCreated ||
+                                null,
+
+                            postedBy:
+                                photo.contributorFullName ||
+                                ""
                         };
 
                     }
                 )
                 .filter(Boolean);
+
+
+        // ====================================================
+        // CACHE RESOLVED PHOTO BATCH
+        // ====================================================
+
+        setCached(
+            photoBatchCacheKey,
+            photos
+        );
+
+
+        console.log(
+            `iCloud photo batch cached: ${photos.length} photos`
+        );
+
 
         return photos;
 
@@ -380,7 +554,9 @@ function getLargestDerivativeChecksum(
         typeof photo.derivatives !== "object" ||
         Array.isArray(photo.derivatives)
     ) {
+
         return null;
+
     }
 
 
@@ -413,11 +589,13 @@ function getLargestDerivativeChecksum(
                     0
                 );
 
+
             const bSize =
                 Number(
                     b.fileSize ||
                     0
                 );
+
 
             return bSize - aSize;
 
