@@ -21,6 +21,20 @@
  *     Monday  8/31  -> August PDF
  *     Tuesday 9/1   -> September PDF
  *
+ * ------------------------------------------------------------
+ * CACHE
+ * ------------------------------------------------------------
+ *
+ * We DO NOT cache the raw PDF.
+ *
+ * The PDF is downloaded, parsed, and the resulting menu data
+ * is cached under:
+ *
+ *     data/school-lunch/
+ *
+ * This means subsequent requests can use the parsed JSON
+ * without downloading or parsing the PDF again.
+ *
  * ============================================================
  */
 
@@ -32,11 +46,14 @@ import {
     getDocument
 } from "pdfjs-dist/legacy/build/pdf.mjs";
 
+import fs from "node:fs/promises";
+
 import path from "node:path";
 
 import {
     fileURLToPath
 } from "node:url";
+
 
 const __filename =
     fileURLToPath(
@@ -51,9 +68,9 @@ const __dirname =
 
 
 const STANDARD_FONT_DATA_URL =
-    path.resolve(
-        __dirname,
-        "../../node_modules/pdfjs-dist/standard_fonts/"
+    path.join(
+        process.cwd(),
+        "node_modules/pdfjs-dist/standard_fonts/"
     );
 
 const SCHOOL_LUNCH_SHEET =
@@ -62,6 +79,19 @@ const SCHOOL_LUNCH_SHEET =
 
 const DEFAULT_NO_SCHOOL =
     "NO SCHOOL";
+
+
+/*
+ * ============================================================
+ * CACHE
+ * ============================================================
+ */
+
+const CACHE_DIR =
+    path.resolve(
+        __dirname,
+        "../../data/school-lunch"
+    );
 
 
 /*
@@ -79,14 +109,12 @@ const MENU_END_Y =
 
 
 const WEEKDAY_COLUMNS = [
-
     {
         day:
             "Monday",
 
         centerX:
             116
-
     },
 
     {
@@ -95,7 +123,6 @@ const WEEKDAY_COLUMNS = [
 
         centerX:
             251
-
     },
 
     {
@@ -104,7 +131,6 @@ const WEEKDAY_COLUMNS = [
 
         centerX:
             394
-
     },
 
     {
@@ -113,7 +139,6 @@ const WEEKDAY_COLUMNS = [
 
         centerX:
             531
-
     },
 
     {
@@ -122,9 +147,7 @@ const WEEKDAY_COLUMNS = [
 
         centerX:
             672
-
     }
-
 ];
 
 
@@ -141,17 +164,11 @@ const Y_TOLERANCE =
  * below the previous line.
  *
  * A new menu block is separated by a much larger gap.
- *
- * September 2026 example:
- *
- *     312 -> 228  = new menu block
- *     228 -> 142  = new menu block
- *
- * Therefore we use a large gap to separate menu blocks.
  */
 
 const CALENDAR_ROW_GAP =
     15;
+
 
 /*
  * ============================================================
@@ -338,6 +355,12 @@ const schoolLunchData = {
                 menu.start.getMonth() + 1;
 
 
+            /*
+             * ------------------------------------------------
+             * ELEMENTARY / MIDDLE
+             * ------------------------------------------------
+             */
+
             if (
                 menu.elementaryMiddleUrl
             ) {
@@ -347,7 +370,8 @@ const schoolLunchData = {
                         menu.elementaryMiddleUrl,
                         menu,
                         pdfYear,
-                        pdfMonth
+                        pdfMonth,
+                        "elementary-middle"
                     );
 
 
@@ -359,6 +383,12 @@ const schoolLunchData = {
             }
 
 
+            /*
+             * ------------------------------------------------
+             * HIGH SCHOOL
+             * ------------------------------------------------
+             */
+
             if (
                 menu.highSchoolUrl
             ) {
@@ -368,7 +398,8 @@ const schoolLunchData = {
                         menu.highSchoolUrl,
                         menu,
                         pdfYear,
-                        pdfMonth
+                        pdfMonth,
+                        "high-school"
                     );
 
 
@@ -380,6 +411,7 @@ const schoolLunchData = {
             }
 
         }
+
 
         console.log(
             `School lunch parsed: ${elementaryMenus.size} elementary dates, ` +
@@ -429,6 +461,7 @@ const schoolLunchData = {
             const inSchoolYear =
                 date >=
                     sheet.schoolYear.start &&
+
                 date <=
                     sheet.schoolYear.end;
 
@@ -580,6 +613,428 @@ export default schoolLunchData;
 
 /*
  * ============================================================
+ * PDF CACHE
+ * ============================================================
+ *
+ * Cache key:
+ *
+ *     school-type / year-month / hash(url)
+ *
+ * We use a hash rather than putting the entire URL into the
+ * filename because URLs can contain characters that are not
+ * appropriate for filenames.
+ *
+ * ============================================================
+ */
+
+async function getPdfMenu(
+    url,
+    menu,
+    year,
+    month,
+    schoolType
+) {
+
+    const cacheFile =
+        getCacheFilePath(
+            url,
+            year,
+            month,
+            schoolType
+        );
+
+
+    /*
+     * --------------------------------------------------------
+     * TRY CACHE FIRST
+     * --------------------------------------------------------
+     */
+
+    const cached =
+        await readCachedMenu(
+            cacheFile
+        );
+
+
+    if (
+        cached
+    ) {
+
+        console.log(
+            `School lunch cache hit: ${path.relative(process.cwd(), cacheFile)}`
+        );
+
+        return cached;
+
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * CACHE MISS
+     * --------------------------------------------------------
+     */
+
+    console.log(
+        `School lunch cache miss: ${path.relative(process.cwd(), cacheFile)}`
+    );
+
+
+    const response =
+        await fetch(
+            url
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        throw new Error(
+            `Failed to download school lunch PDF: ${response.status} ${response.statusText}`
+        );
+
+    }
+
+
+    const buffer =
+        Buffer.from(
+            await response.arrayBuffer()
+        );
+
+
+    const loadingTask =
+        getDocument({
+            data:
+                new Uint8Array(
+                    buffer
+                ),
+
+            standardFontDataUrl:
+                STANDARD_FONT_DATA_URL
+        });
+
+    const pdf =
+        await loadingTask.promise;
+
+
+    const pages = [];
+
+
+    try {
+
+        for (
+            let pageNumber = 1;
+            pageNumber <= pdf.numPages;
+            pageNumber++
+        ) {
+
+            const page =
+                await pdf.getPage(
+                    pageNumber
+                );
+
+
+            const content =
+                await page.getTextContent();
+
+
+            const items =
+                content.items
+
+                    .filter(
+                        item =>
+                            typeof item.str ===
+                                "string" &&
+
+                            item.str.trim()
+                    )
+
+                    .map(
+                        item => {
+
+                            const x =
+                                item.transform?.[4] ??
+                                0;
+
+
+                            const y =
+                                item.transform?.[5] ??
+                                0;
+
+
+                            const width =
+                                item.width ??
+                                0;
+
+
+                            const height =
+                                item.height ??
+                                0;
+
+
+                            return {
+
+                                text:
+                                    item.str.trim(),
+
+                                x,
+
+                                y,
+
+                                width,
+
+                                height,
+
+                                centerX:
+                                    x +
+                                    width / 2
+
+                            };
+
+                        }
+                    );
+
+
+            pages.push(
+                items
+            );
+
+        }
+
+    }
+
+    finally {
+
+        await pdf.destroy();
+
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * PARSE PDF
+     * --------------------------------------------------------
+     */
+
+    const parsed =
+        parsePdfMenu(
+            pages,
+            menu,
+            year,
+            month
+        );
+
+
+    /*
+     * --------------------------------------------------------
+     * WRITE CACHE
+     * --------------------------------------------------------
+     */
+
+    await writeCachedMenu(
+        cacheFile,
+        parsed,
+        {
+            url,
+            schoolType,
+            year,
+            month,
+            menuName:
+                menu.name,
+            cachedAt:
+                new Date().toISOString()
+        }
+    );
+
+
+    return parsed;
+
+}
+
+
+/*
+ * ============================================================
+ * CACHE FILE PATH
+ * ============================================================
+ *
+ * Cache structure:
+ *
+ *     data/
+ *     └── school-lunch/
+ *         └── YYYY-MM/
+ *             ├── elementary-middle.json
+ *             └── high-school.json
+ *
+ * We intentionally do NOT cache the raw PDF.
+ *
+ * The cache contains only the parsed menu data.
+ *
+ * ============================================================
+ */
+
+function getCacheFilePath(
+    url,
+    year,
+    month,
+    schoolType
+) {
+
+    const monthDirectory =
+        path.join(
+            CACHE_DIR,
+            `${year}-${String(month).padStart(2, "0")}`
+        );
+
+
+    const filename =
+        `${schoolType}.json`;
+
+
+    return path.join(
+        monthDirectory,
+        filename
+    );
+
+}
+
+
+/*
+ * ============================================================
+ * READ CACHED MENU
+ * ============================================================
+ */
+
+async function readCachedMenu(
+    cacheFile
+) {
+
+    try {
+
+        const contents =
+            await fs.readFile(
+                cacheFile,
+                "utf8"
+            );
+
+
+        const cached =
+            JSON.parse(
+                contents
+            );
+
+
+        /*
+         * Cache files contain:
+         *
+         * {
+         *     metadata: {...},
+         *     data: [...]
+         * }
+         */
+
+        if (
+            !cached ||
+            !Array.isArray(
+                cached.data
+            )
+        ) {
+
+            return null;
+
+        }
+
+
+        return cached.data;
+
+    }
+
+    catch (
+        error
+    ) {
+
+        /*
+         * ENOENT is normal on a cache miss.
+         *
+         * Other errors are also treated as cache misses so
+         * that a corrupt cache cannot prevent the PDF from
+         * being downloaded and reparsed.
+         */
+
+        return null;
+
+    }
+
+}
+
+
+/*
+ * ============================================================
+ * WRITE CACHED MENU
+ * ============================================================
+ */
+
+async function writeCachedMenu(
+    cacheFile,
+    data,
+    metadata
+) {
+
+    try {
+
+        await fs.mkdir(
+            path.dirname(cacheFile),
+            {
+                recursive: true
+            }
+        );
+
+
+        const payload = {
+
+            metadata,
+
+            data
+
+        };
+
+
+        await fs.writeFile(
+            cacheFile,
+            JSON.stringify(
+                payload,
+                null,
+                2
+            ),
+            "utf8"
+        );
+
+
+        console.log(
+            `School lunch cache written: ${path.relative(
+                process.cwd(),
+                cacheFile
+            )}`
+        );
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.warn(
+            "Unable to write school lunch cache:",
+            error.message
+        );
+
+    }
+
+}
+
+
+/*
+ * ============================================================
  * LOAD GOOGLE SHEET
  * ============================================================
  */
@@ -590,6 +1045,7 @@ async function loadSchoolLunchSheet() {
         await getSheetRows(
             SCHOOL_LUNCH_SHEET
         );
+
 
     if (
         !rows ||
@@ -716,6 +1172,7 @@ async function loadSchoolLunchSheet() {
                 today >= item.start &&
                 today <= item.end
         ) ||
+
         validSchoolYears
             .sort(
                 (
@@ -725,6 +1182,7 @@ async function loadSchoolLunchSheet() {
                     b.start -
                     a.start
             )[0] ||
+
         null;
 
 
@@ -838,161 +1296,6 @@ function parseMenuRow(
 
 /*
  * ============================================================
- * PDF MENU
- * ============================================================
- */
-
-async function getPdfMenu(
-    url,
-    menu,
-    year,
-    month
-) {
-
-    const response =
-        await fetch(
-            url
-        );
-
-
-    if (
-        !response.ok
-    ) {
-
-        throw new Error(
-            `Failed to download school lunch PDF: ${response.status} ${response.statusText}`
-        );
-
-    }
-
-
-    const buffer =
-        Buffer.from(
-            await response.arrayBuffer()
-        );
-
-
-    const loadingTask =
-        getDocument({
-
-            data:
-                new Uint8Array(
-                    buffer
-                ),
-
-            standardFontDataUrl:
-                path.join(
-                    process.cwd(),
-                    "node_modules/pdfjs-dist/standard_fonts"
-                ) + "/"
-
-        });
-
-    const pdf =
-        await loadingTask.promise;
-
-
-    const pages = [];
-
-
-    try {
-
-        for (
-            let pageNumber = 1;
-            pageNumber <= pdf.numPages;
-            pageNumber++
-        ) {
-
-            const page =
-                await pdf.getPage(
-                    pageNumber
-                );
-
-
-            const content =
-                await page.getTextContent();
-
-
-            const items =
-                content.items
-
-                    .filter(
-                        item =>
-                            typeof item.str ===
-                            "string" &&
-                            item.str.trim()
-                    )
-
-                    .map(
-                        item => {
-
-                            const x =
-                                item.transform?.[4] ??
-                                0;
-
-                            const y =
-                                item.transform?.[5] ??
-                                0;
-
-                            const width =
-                                item.width ??
-                                0;
-
-                            const height =
-                                item.height ??
-                                0;
-
-
-                            return {
-
-                                text:
-                                    item.str.trim(),
-
-                                x,
-
-                                y,
-
-                                width,
-
-                                height,
-
-                                centerX:
-                                    x +
-                                    width / 2
-
-                            };
-
-                        }
-                    );
-
-
-            pages.push(
-                items
-            );
-
-        }
-
-    }
-
-    finally {
-
-        await pdf.destroy();
-
-    }
-
-
-    return parsePdfMenu(
-        pages,
-        menu,
-        year,
-        month
-    );
-
-}
-
-
-/*
- * ============================================================
  * PARSE PDF MENU
  * ============================================================
  */
@@ -1083,16 +1386,6 @@ function parsePdfMenu(
          * ----------------------------------------------------
          * IDENTIFY MENU BLOCKS
          * ----------------------------------------------------
-         *
-         * Each weekday column contains one or more complete
-         * menu blocks.
-         *
-         * A block consists of consecutive lines separated by
-         * normal line spacing.
-         *
-         * A large vertical gap means a new menu/week.
-         *
-         * ----------------------------------------------------
          */
 
         const columnBlocks =
@@ -1116,18 +1409,9 @@ function parsePdfMenu(
 
         /*
          * ----------------------------------------------------
-         * ASSIGN BLOCKS TO CALENDAR ROWS
+         * BUILD GRID
          * ----------------------------------------------------
-         *
-        * Each calendar cell occupies a known vertical region.
-        *
-        * We use the block's actual Y position to determine which
-        * calendar week it belongs to.
-        *
-        * This is important because individual weekday columns may
-        * have missing days, holidays, or empty cells. We must NOT
-        * infer the week solely from the number of blocks in a column.
-        */
+         */
 
         const grid =
             Array.from(
@@ -1138,6 +1422,7 @@ function parsePdfMenu(
                 () =>
                     WEEKDAY_COLUMNS.map(
                         weekday => ({
+
                             day:
                                 weekday.day,
 
@@ -1160,14 +1445,6 @@ function parsePdfMenu(
                         columnIndex
                     ];
 
-
-                /*
-                 * Blocks are already top-to-bottom.
-                 *
-                 * The calendar can have empty rows at the top
-                 * or bottom. We therefore map the block positions
-                 * proportionally to the available calendar rows.
-                 */
 
                 blocks.forEach(
                     block => {
@@ -1237,6 +1514,7 @@ function parsePdfMenu(
                 if (
                     date <
                         menu.start ||
+
                     date >
                         menu.end
                 ) {
@@ -1332,6 +1610,7 @@ function splitIntoCalendarRows(
 
         if (
             previousY !== null &&
+
             Math.abs(
                 previousY -
                 item.y
@@ -1388,21 +1667,21 @@ function splitIntoCalendarRows(
                 groupIntoYLines(
                     row
                 )
-                    .map(
-                        line =>
-                            normalizeMenuText(
-                                line.text
-                            )
-                    )
-                    .filter(
-                        Boolean
-                    )
-                    .filter(
-                        line =>
-                            !isAdministrativeLine(
-                                line
-                            )
-                    );
+                .map(
+                    line =>
+                        normalizeMenuText(
+                            line.text
+                        )
+                )
+                .filter(
+                    Boolean
+                )
+                .filter(
+                    line =>
+                        !isAdministrativeLine(
+                            line
+                        )
+                );
 
 
             return (
@@ -1413,6 +1692,7 @@ function splitIntoCalendarRows(
     );
 
 }
+
 
 /*
  * ============================================================
@@ -1441,30 +1721,6 @@ function determineBlockWeek(
         ) /
         block.length;
 
-
-    /*
-     * --------------------------------------------------------
-     * MAP THE BLOCK USING ITS ACTUAL VERTICAL POSITION
-     * --------------------------------------------------------
-     *
-     * Do NOT align blocks to the bottom based on how many
-     * blocks happened to be detected in a column.
-     *
-     * September 2026 exposes why this is important:
-     *
-     *   Tue 9/1
-     *   Wed 9/2
-     *   Thu 9/3
-     *   Fri 9/4
-     *
-     * The first calendar row is a legitimate row even when
-     * a particular weekday has fewer detected menu blocks.
-     *
-     * The PDF's menu area runs approximately from MENU_START_Y
-     * down to MENU_END_Y. Map the block's actual Y position
-     * into that calendar grid.
-     * --------------------------------------------------------
-     */
 
     const menuRange =
         MENU_START_Y -
@@ -1566,14 +1822,6 @@ function findLikelyCalendarRow(
     month,
     rowCount
 ) {
-
-    /*
-     * For a single block, use its position relative to the
-     * complete menu region.
-     *
-     * This is primarily a fallback. Multi-block columns use
-     * the much more reliable block ordering above.
-     */
 
     const top =
         Math.max(
@@ -1932,32 +2180,32 @@ function normalizeMenuText(
     const replacements = [
 
         [
-            /B\s*a\s*gel/gi,
+            /B\s\*a\s\*gel/gi,
             "Bagel"
         ],
 
         [
-            /Bag\s*el/gi,
+            /Bag\s\*el/gi,
             "Bagel"
         ],
 
         [
-            /Min\s*i\s+Waffles/gi,
+            /Min\s\*i\s+Waffles/gi,
             "Mini Waffles"
         ],
 
         [
-            /Chic\s*k\s+Pea/gi,
+            /Chic\s\*k\s+Pea/gi,
             "Chick Pea"
         ],
 
         [
-            /Buffal\s*o\s+Chicken/gi,
+            /Buffal\s\*o\s+Chicken/gi,
             "Buffalo Chicken"
         ],
 
         [
-            /Chic\s*ken/gi,
+            /Chic\s\*ken/gi,
             "Chicken"
         ],
 
@@ -1972,27 +2220,27 @@ function normalizeMenuText(
         ],
 
         [
-            /B\s*e\s*nto\s+Box/gi,
+            /B\s\*e\s\*nto\s+Box/gi,
             "Bento Box"
         ],
 
         [
-            /B\s*a\s*ked/gi,
+            /B\s\*a\s\*ked/gi,
             "Baked"
         ],
 
         [
-            /Chop\s+Sue\s*y/gi,
+            /Chop\s+Sue\s\*y/gi,
             "Chop Suey"
         ],
 
         [
-            /Americ\s*an/gi,
+            /Americ\s\*an/gi,
             "American"
         ],
 
         [
-            /Cheese\s+Bread\s+S\s*t\s*ick/gi,
+            /Cheese\s+Bread\s+S\s\*t\s\*ick/gi,
             "Cheese Bread Stick"
         ],
 
@@ -2002,42 +2250,42 @@ function normalizeMenuText(
         ],
 
         [
-            /Egg,\s*Ham\s*&\s*Cheese/gi,
+            /Egg,\s\*Ham\s\*&\s\*Cheese/gi,
             "Egg, Ham & Cheese"
         ],
 
         [
-            /Pan\s*cakes/gi,
+            /Pan\s\*cakes/gi,
             "Pancakes"
         ],
 
         [
-            /Mac\s*n\s*[’']?\s*Cheese/gi,
+            /Mac\s\*n\s\*[’']?\s\*Cheese/gi,
             "Mac n’ Cheese"
         ],
 
         [
-            /D\s*inner\s+Roll/gi,
+            /D\s\*inner\s+Roll/gi,
             "Dinner Roll"
         ],
 
         [
-            /Sloppy\s+Joe\s+o\s*n\s+a\s+Roll/gi,
+            /Sloppy\s+Joe\s+o\s\*n\s+a\s+Roll/gi,
             "Sloppy Joe on a Roll"
         ],
 
         [
-            /Gar\s*den\s+Salad/gi,
+            /Gar\s\*den\s+Salad/gi,
             "Garden Salad"
         ],
 
         [
-            /Hummus\s*&\s*V\s*e\s*ggies/gi,
+            /Hummus\s*&\s*V\s\*e\s\*ggies/gi,
             "Hummus & Veggies"
         ],
 
         [
-            /Chicken\s+Ca\s*e\s*sar\s+W\s*r\s*ap/gi,
+            /Chicken\s+Ca\s\*e\s\*sar\s+W\s\*r\s\*ap/gi,
             "Chicken Caesar Wrap"
         ],
 
@@ -2057,19 +2305,15 @@ function normalizeMenuText(
         ],
 
         [
-            /Garlic\s+Bread\s+S\s*t\s*ick/gi,
+            /Garlic\s+Bread\s+S\s\*t\s\*ick/gi,
             "Garlic Bread Stick"
         ],
 
         [
             /Milk\s*-\s*(?:White\s*\/\s*Chocolate|Chocolate\s*\/\s*White)/gi,
             "Milk - Chocolate/White"
-        ],
+        ]
 
-        [
-            /Mac\s*n\s*[’']?\s*Cheese/gi,
-            "Mac n’ Cheese"
-        ],
     ];
 
 
@@ -2359,9 +2603,11 @@ function mergeMenuData(
             target.has(
                 entry.date
             ) &&
+
             target.get(
                 entry.date
             ).length > 0 &&
+
             entry.items.length === 0
         ) {
 
@@ -2554,14 +2800,18 @@ function formatDate(
     return (
 
         date.getFullYear() +
+
         "-" +
+
         String(
             date.getMonth() + 1
         ).padStart(
             2,
             "0"
         ) +
+
         "-" +
+
         String(
             date.getDate()
         ).padStart(
@@ -2626,9 +2876,11 @@ function parseSheetDate(
                 Number(
                     googleDateMatch[1]
                 ),
+
                 Number(
                     googleDateMatch[2]
                 ),
+
                 Number(
                     googleDateMatch[3]
                 )
@@ -2682,9 +2934,11 @@ function parseSheetDate(
                 Number(
                     slashMatch[3]
                 ),
+
                 Number(
                     slashMatch[1]
                 ) - 1,
+
                 Number(
                     slashMatch[2]
                 )
