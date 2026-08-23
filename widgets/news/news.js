@@ -360,18 +360,14 @@ const news = {
                 !stories ||
                 stories.length === 0
             ) {
-
                 return;
-
             }
 
 
             if (
                 currentIndex >= stories.length
             ) {
-
                 currentIndex = 0;
-
             }
 
 
@@ -380,15 +376,15 @@ const news = {
 
 
             if (!story) {
-
                 return;
-
             }
 
 
             /*
-             * Remove fade classes
-             */
+            * --------------------------------------------------------
+            * Remove fade classes
+            * --------------------------------------------------------
+            */
 
             headline.classList.remove(
                 "news-widget__fade"
@@ -402,28 +398,20 @@ const news = {
                 "news-widget__fade"
             );
 
-
             if (
                 image
             ) {
-
                 image.classList.remove(
                     "news-widget__fade"
                 );
-
             }
 
 
             /*
-             * Force animation restart
-             */
-
-            void headline.offsetWidth;
-
-
-            /*
-             * IMAGE
-             */
+            * --------------------------------------------------------
+            * IMAGE
+            * --------------------------------------------------------
+            */
 
             if (
                 image
@@ -444,7 +432,6 @@ const news = {
                     );
 
                 }
-
                 else {
 
                     image.removeAttribute(
@@ -459,21 +446,24 @@ const news = {
                     );
 
                 }
-
             }
 
 
             /*
-             * HEADLINE
-             */
+            * --------------------------------------------------------
+            * HEADLINE
+            * --------------------------------------------------------
+            */
 
             headline.textContent =
                 story.title;
 
 
             /*
-             * DESCRIPTION
-             */
+            * --------------------------------------------------------
+            * DESCRIPTION
+            * --------------------------------------------------------
+            */
 
             description.textContent =
                 cleanDescription(
@@ -482,60 +472,74 @@ const news = {
 
 
             /*
-             * METADATA
-             */
+            * --------------------------------------------------------
+            * METADATA
+            * --------------------------------------------------------
+            */
 
             metadata.textContent =
-                `${story.source}  •  ${formatAge(
+                `${story.source} • ${formatAge(
                     story.published
                 )}`;
 
 
             /*
-             * FADE IN
-             */
+            * --------------------------------------------------------
+            * Start animations on the next frame.
+            *
+            * This replaces the old offsetWidth layout reads,
+            * which were forcing synchronous browser reflow.
+            * --------------------------------------------------------
+            */
 
-            headline.classList.add(
-                "news-widget__fade"
-            );
+            requestAnimationFrame(() => {
 
-            description.classList.add(
-                "news-widget__fade"
-            );
-
-            metadata.classList.add(
-                "news-widget__fade"
-            );
-
-
-            if (
-                image &&
-                story.image
-            ) {
-
-                image.classList.add(
+                headline.classList.add(
                     "news-widget__fade"
                 );
 
-            }
+                description.classList.add(
+                    "news-widget__fade"
+                );
+
+                metadata.classList.add(
+                    "news-widget__fade"
+                );
+
+                if (
+                    image &&
+                    story.image
+                ) {
+                    image.classList.add(
+                        "news-widget__fade"
+                    );
+                }
+
+
+                /*
+                * ----------------------------------------------------
+                * RESET PROGRESS BAR
+                * ----------------------------------------------------
+                */
+
+                progressBar.style.animation =
+                    "none";
+
+                requestAnimationFrame(() => {
+
+                    progressBar.style.animation =
+                        `news-progress ${rotationSeconds}s linear`;
+
+                });
+
+            });
 
 
             /*
-             * RESET PROGRESS BAR
-             */
-
-            progressBar.style.animation =
-                "none";
-
-            void progressBar.offsetWidth;
-
-            progressBar.style.animation =
-                `news-progress ${rotationSeconds}s linear`;
-
-
-            /*
-             * NEXT STORY
-             */
+            * --------------------------------------------------------
+            * NEXT STORY
+            * --------------------------------------------------------
+            */
 
             currentIndex =
                 (

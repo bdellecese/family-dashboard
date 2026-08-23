@@ -28,6 +28,15 @@ import schoolLunchData
     from "../services/school-lunch/school-lunch-data.js";
 
 import {
+    getYesterday,
+    getSchedule,
+    getGameFeed,
+    getPitcherRecord,
+    getStandings,
+    getWildCardStandings
+} from "../services/sports/mlb-data.js";
+
+import {
     getPerformanceEvents,
     recordPerformanceEvents,
     clearPerformanceEvents
@@ -871,6 +880,178 @@ const server =
 
             }
 
+
+            // =================================================
+            // MLB SCOREBOARD
+            // =================================================
+            if (
+                requestUrl.pathname ===
+                    "/api/sports/mlb/scoreboard"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+                try {
+                    const apiDate =
+                        getYesterday();
+
+                    const games =
+                        await getSchedule(
+                            apiDate
+                        );
+
+                    const featured = {};
+
+                    const configuredTeams = [
+                        {
+                            key: "left",
+                            teamId:
+                                Number(
+                                    requestUrl.searchParams.get(
+                                        "leftTeamId"
+                                    )
+                                )
+                        },
+                        {
+                            key: "right",
+                            teamId:
+                                Number(
+                                    requestUrl.searchParams.get(
+                                        "rightTeamId"
+                                    )
+                                )
+                        }
+                    ];
+                    for (
+                        const item of configuredTeams
+                    ) {
+                        if (
+                            !item.teamId
+                        ) {
+                            continue;
+                        }
+
+                        const game =
+                            games.find(
+                                game =>
+                                    game.teams.home.team.id ===
+                                        item.teamId
+                                    ||
+                                    game.teams.away.team.id ===
+                                        item.teamId
+                            );
+
+                        if (
+                            !game
+                        ) {
+                            featured[item.key] =
+                                null;
+
+                            continue;
+                        }
+
+                        const feed =
+                            await getGameFeed(
+                                game.gamePk
+                            );
+
+                        const decisions =
+                            feed.liveData?.decisions;
+
+                        const season =
+                            new Date().getFullYear();
+
+                        const pitcherRecords =
+                            {};
+
+                        if (
+                            decisions?.winner?.id
+                        ) {
+                            pitcherRecords[
+                                decisions.winner.id
+                            ] =
+                                await getPitcherRecord(
+                                    decisions.winner.id,
+                                    season
+                                );
+                        }
+
+                        if (
+                            decisions?.loser?.id
+                        ) {
+                            pitcherRecords[
+                                decisions.loser.id
+                            ] =
+                                await getPitcherRecord(
+                                    decisions.loser.id,
+                                    season
+                                );
+                        }
+
+                        if (
+                            decisions?.save?.id
+                        ) {
+                            pitcherRecords[
+                                decisions.save.id
+                            ] =
+                                await getPitcherRecord(
+                                    decisions.save.id,
+                                    season
+                                );
+                        }
+
+                        featured[item.key] = {
+                            game,
+                            feed,
+                            pitcherRecords
+                        };
+                    }
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "application/json",
+                            "Access-Control-Allow-Origin":
+                                "*"
+                        }
+                    );
+
+                    response.end(
+                        JSON.stringify({
+                            date:
+                                apiDate,
+                            games,
+                            featured
+                        })
+                    );
+                }
+                catch (error) {
+                    console.error(
+                        "MLB scoreboard error:",
+                        error
+                    );
+
+                    response.writeHead(
+                        500,
+                        {
+                            "Content-Type":
+                                "application/json",
+                            "Access-Control-Allow-Origin":
+                                "*"
+                        }
+                    );
+
+                    response.end(
+                        JSON.stringify({
+                            error:
+                                error.message
+                        })
+                    );
+                }
+
+                return;
+            }
 
             // =================================================
             // SCHOOL LUNCH
