@@ -845,6 +845,30 @@ This architecture eliminates the need for the dashboard user to repeatedly authe
 
 ---
 
+# Google Calendar OAuth Routes
+
+The production server provides two routes for Google Calendar OAuth:
+
+    GET /api/google-calendar/auth
+    GET /api/google-calendar/callback
+
+The `/api/google-calendar/auth` route starts the Google OAuth authorization flow.
+
+The `/api/google-calendar/callback` route receives the authorization code from Google, exchanges it for Google OAuth credentials, and stores the resulting refresh token for future server-side use.
+
+The dashboard does not need to be restarted after successful reauthorization. The Google Calendar service updates its in-memory authentication state immediately after the OAuth exchange succeeds.
+
+When the stored refresh token becomes invalid, the Google Calendar service detects Google's `invalid_grant` response and enters an authorization-required state.
+
+Once authorization is required:
+
+- Further refresh attempts are suppressed.
+- Calendar API requests return an authorization-required response.
+- Calendar widgets display a recovery message.
+- The user can start the OAuth flow using the Reauthorize Google Calendar action.
+- Successful reauthorization clears the authorization-required state.
+- Calendar access resumes without restarting Node.js.
+
 # Google Calendar Token Security
 
 The Google Calendar refresh token is sensitive information.
@@ -1240,31 +1264,100 @@ Startup, shutdown, process supervision, and display scheduling should be handled
 
 # Current Development Status
 
-At the time this document was updated:
+The dashboard currently operates as a four-screen rotating information system.
 
-- Information screen is operational
-- Weather widget is operational
-- Weather alerts widget is operational
-- Calendar widgets are operational
-- Google Calendar server-side authentication is operational
-- Google Calendar refresh token persistence is operational
-- Node.js production server is operational
-- Node.js server starts automatically through systemd
-- Chromium kiosk display is operational
-- Chromium uses Wayland on the Raspberry Pi
-- Chromium uses the basic password store
-- Display scheduling is operational
-- Weekday display schedule is configured
-- Weekend display schedule is configured
-- News widget is operational
-- Countdown widget is operational
-- Prayer widget is operational
-- Family menu widget is operational
-- Wi-Fi widget is operational
-- Photo widget is under development
-- Large Calendar screen is the next major screen
-- Screen rotation is being expanded
-- Touchscreen navigation is planned
+## Operational Screens
+
+The configured screen rotation is:
+
+    1. Information — 60 seconds
+    2. Large Calendar — 60 seconds
+    3. Chores + Fun — 60 seconds
+    4. Sports — 60 seconds
+
+Screen order and duration are controlled by `config/screens.js`.
+
+The following screens are operational:
+
+- Information screen
+- Large Calendar screen
+- Chores + Fun screen
+- Sports screen
+
+Screen rotation is operational.
+
+## Operational Widgets and Services
+
+The following dashboard functionality is operational:
+
+- Date and time
+- Weather
+- Weather alerts
+- Google Calendar
+- Calendar List
+- News
+- Countdown
+- Prayer
+- Family Menu
+- Wi-Fi
+- Photos
+- School Lunch
+- Household Chores
+- Kids Chores
+- Playing Time
+- On This Day
+- Did You Know
+- Word of the Day
+- Quote of the Day
+- Dad Wisdom
+- Sports Scoreboard
+- Sports Standings
+- Sports News
+- Sports Legends
+- Sports Trivia
+- On This Day Sports
+- Sonos status
+
+## Google Calendar Authorization
+
+Google Calendar uses server-side OAuth authentication.
+
+The system detects Google's `invalid_grant` response when a refresh token is no longer valid.
+
+After `invalid_grant` is detected:
+
+- Repeated refresh attempts are suppressed.
+- The server enters an authorization-required state.
+- Calendar API requests return an authorization-required response.
+- Calendar widgets display a recovery message.
+- The user can initiate Google Calendar reauthorization from the dashboard.
+- Successful reauthorization clears the authorization-required state.
+- Calendar access resumes without restarting Node.js.
+
+## Production Environment
+
+The following production infrastructure is operational:
+
+- Node.js production server
+- systemd service
+- Chromium kiosk
+- Wayland / LabWC display environment
+- Display scheduling
+- Weekday display schedule
+- Weekend display schedule
+
+## Development Status
+
+The dashboard is currently in an operational state.
+
+Future development may include:
+
+- Additional widgets
+- Additional screen functionality
+- Touchscreen navigation
+- Additional automation and integrations
+
+These items are enhancements rather than requirements for the current production architecture.
 
 ---
 

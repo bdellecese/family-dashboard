@@ -6,6 +6,29 @@
 // server endpoints.
 // ============================================================
 
+
+// ============================================================
+// AUTHORIZATION ERROR
+// ============================================================
+
+export class GoogleCalendarAuthorizationRequiredError
+    extends Error {
+
+    constructor(
+        message =
+            "Google Calendar authorization is required. Please reauthorize Google Calendar."
+    ) {
+
+        super(message);
+
+        this.name =
+            "GoogleCalendarAuthorizationRequiredError";
+
+    }
+
+}
+
+
 // ============================================================
 // GET CALENDARS
 // ============================================================
@@ -17,6 +40,28 @@ export async function getCalendars() {
             "/api/google-calendar/calendars"
         );
 
+
+    if (
+        response.status === 401
+    ) {
+
+        const data =
+            await response.json();
+
+        if (
+            data.error ===
+            "authorization_required"
+        ) {
+
+            throw new GoogleCalendarAuthorizationRequiredError(
+                data.message
+            );
+
+        }
+
+    }
+
+
     if (!response.ok) {
 
         const body =
@@ -25,22 +70,31 @@ export async function getCalendars() {
         throw new Error(
             `Google Calendar API error: ${response.status} ${body}`
         );
+
     }
+
 
     const data =
         await response.json();
 
+
     return data;
+
 }
+
 
 // ============================================================
 // GET EVENTS
 // ============================================================
 
 export async function getEventsForRange(
+
     calendarId,
+
     start,
+
     end
+
 ) {
 
     const params =
@@ -57,10 +111,33 @@ export async function getEventsForRange(
 
         });
 
+
     const response =
         await fetch(
             `/api/google-calendar/events?${params.toString()}`
         );
+
+
+    if (
+        response.status === 401
+    ) {
+
+        const data =
+            await response.json();
+
+        if (
+            data.error ===
+            "authorization_required"
+        ) {
+
+            throw new GoogleCalendarAuthorizationRequiredError(
+                data.message
+            );
+
+        }
+
+    }
+
 
     if (!response.ok) {
 
@@ -70,10 +147,14 @@ export async function getEventsForRange(
         throw new Error(
             `Google Calendar API error: ${response.status} ${body}`
         );
+
     }
+
 
     const data =
         await response.json();
 
+
     return data;
+
 }

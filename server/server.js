@@ -14,7 +14,8 @@ import {
     getGoogleCalendarAuthUrl,
     exchangeGoogleCode,
     getCalendars,
-    getEventsForRange
+    getEventsForRange,
+    getGoogleCalendarAuthorizationStatus
 } from "../services/google-calendar/google-calendar-server.js";
 
 import icloudPhotoData
@@ -1627,6 +1628,37 @@ const server =
 
             }
 
+            // =================================================
+            // GOOGLE CALENDAR AUTHORIZATION STATUS
+            // =================================================
+
+            if (
+                requestUrl.pathname ===
+                    "/api/google-calendar/status"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                const status =
+                    getGoogleCalendarAuthorizationStatus();
+
+                response.writeHead(
+                    200,
+                    {
+                        "Content-Type":
+                            "application/json"
+                    }
+                );
+
+                response.end(
+                    JSON.stringify(
+                        status
+                    )
+                );
+
+                return;
+            }
 
             // =================================================
             // GOOGLE CALENDARS
@@ -1670,6 +1702,34 @@ const server =
                         error
                     );
 
+                    if (
+                        error.message ===
+                        "Google Calendar authorization required. Reauthorize Google Calendar."
+                    ) {
+
+                        response.writeHead(
+                            401,
+                            {
+                                "Content-Type":
+                                    "application/json"
+                            }
+                        );
+
+                        response.end(
+                            JSON.stringify({
+
+                                error:
+                                    "authorization_required",
+
+                                message:
+                                    "Google Calendar authorization is required. Please reauthorize Google Calendar."
+
+                            })
+                        );
+
+                        return;
+
+                    }
 
                     response.writeHead(
                         500,
@@ -1678,7 +1738,6 @@ const server =
                                 "application/json"
                         }
                     );
-
 
                     response.end(
                         JSON.stringify({
@@ -1690,7 +1749,6 @@ const server =
                     );
 
                 }
-
 
                 return;
 
@@ -1780,6 +1838,34 @@ const server =
                         error
                     );
 
+                    if (
+                        error.message ===
+                        "Google Calendar authorization required. Reauthorize Google Calendar."
+                    ) {
+
+                        response.writeHead(
+                            401,
+                            {
+                                "Content-Type":
+                                    "application/json"
+                            }
+                        );
+
+                        response.end(
+                            JSON.stringify({
+
+                                error:
+                                    "authorization_required",
+
+                                message:
+                                    "Google Calendar authorization is required. Please reauthorize Google Calendar."
+
+                            })
+                        );
+
+                        return;
+
+                    }
 
                     response.writeHead(
                         500,
@@ -1788,7 +1874,6 @@ const server =
                                 "application/json"
                         }
                     );
-
 
                     response.end(
                         JSON.stringify({
@@ -1800,7 +1885,6 @@ const server =
                     );
 
                 }
-
 
                 return;
 

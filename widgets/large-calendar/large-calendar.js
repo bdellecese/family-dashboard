@@ -1,5 +1,6 @@
 import {
-    getEventsForRange
+    getEventsForRange,
+    GoogleCalendarAuthorizationRequiredError
 } from "../../services/google-calendar/calendar-data.js";
 
 import weatherData from "../../services/weather/weather-data.js";
@@ -11,6 +12,7 @@ import {
 import {
     enableTouchScroll
 } from "../../services/ui/touch-scroll.js";
+
 
 const largeCalendar = {
 
@@ -82,6 +84,7 @@ const largeCalendar = {
         container.appendChild(
             wrapper
         );
+
 
         /*
          * ENABLE TOUCH SCROLLING
@@ -186,10 +189,8 @@ const largeCalendar = {
         /*
          * LOAD WEATHER
          *
-         * Weather service already returns
-         * the next five forecast days.
-         *
-         * Hardcoded to Holden for now.
+         * Weather failure should not prevent
+         * the calendar from rendering.
          */
 
         let weatherByDate =
@@ -351,6 +352,41 @@ const largeCalendar = {
 
             catch (error) {
 
+                /*
+                 * GOOGLE CALENDAR AUTHORIZATION
+                 *
+                 * Do not swallow this error.
+                 * The calendar service has already determined
+                 * that the Google authorization is no longer valid.
+                 */
+
+                if (
+                    error instanceof
+                    GoogleCalendarAuthorizationRequiredError
+                ) {
+
+                    console.error(
+                        "Google Calendar authorization required."
+                    );
+
+
+                    renderAuthorizationRequired(
+                        wrapper
+                    );
+
+
+                    return;
+
+                }
+
+
+                /*
+                 * OTHER CALENDAR ERROR
+                 *
+                 * Preserve the existing behavior for an
+                 * individual calendar failure.
+                 */
+
                 console.error(
                     "Failed to load calendar:",
                     calendarId,
@@ -433,6 +469,102 @@ const largeCalendar = {
     }
 
 };
+
+
+/*
+ * ============================================================
+ * GOOGLE CALENDAR AUTHORIZATION REQUIRED
+ * ============================================================
+ */
+
+function renderAuthorizationRequired(
+    wrapper
+) {
+
+    /*
+     * Remove the normal calendar display.
+     */
+
+    wrapper.innerHTML = "";
+
+
+    const message =
+        document.createElement(
+            "div"
+        );
+
+    message.className =
+        "large-calendar-widget__authorization";
+
+
+    const title =
+        document.createElement(
+            "div"
+        );
+
+    title.className =
+        "large-calendar-widget__authorization-title";
+
+    title.textContent =
+        "Google Calendar authorization required";
+
+
+    const description =
+        document.createElement(
+            "div"
+        );
+
+    description.className =
+        "large-calendar-widget__authorization-message";
+
+    description.textContent =
+        "Google Calendar access has expired or been revoked. Reauthorize Google Calendar to restore your calendar.";
+
+
+    const button =
+        document.createElement(
+            "button"
+        );
+
+    button.type =
+        "button";
+
+    button.className =
+        "large-calendar-widget__authorization-button";
+
+    button.textContent =
+        "Reauthorize Google Calendar";
+
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                "/api/google-calendar/auth";
+
+        }
+    );
+
+
+    message.appendChild(
+        title
+    );
+
+    message.appendChild(
+        description
+    );
+
+    message.appendChild(
+        button
+    );
+
+
+    wrapper.appendChild(
+        message
+    );
+
+}
 
 
 /*

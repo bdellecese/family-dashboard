@@ -19,6 +19,7 @@ const TOKEN_FILE =
 let accessToken = null;
 let accessTokenExpiresAt = 0;
 let refreshToken = null;
+let authorizationRequired = false;
 
 // ============================================================
 // TOKEN STORAGE
@@ -177,7 +178,11 @@ export async function exchangeGoogleCode(
         );
     }
 
+    authorizationRequired = false;
+
     return data;
+
+
 }
 
 // ============================================================
@@ -185,6 +190,15 @@ export async function exchangeGoogleCode(
 // ============================================================
 
 async function refreshGoogleAccessToken() {
+
+    if (
+        authorizationRequired
+    ) {
+
+        throw new Error(
+            "Google Calendar authorization required. Reauthorize Google Calendar."
+        );
+    }
 
     if (
         !refreshToken
@@ -228,6 +242,25 @@ async function refreshGoogleAccessToken() {
         await response.json();
 
     if (!response.ok) {
+
+        if (
+            response.status === 400 &&
+            data.error === "invalid_grant"
+        ) {
+
+            authorizationRequired = true;
+
+            accessToken = null;
+            accessTokenExpiresAt = 0;
+
+            console.error(
+                "Google Calendar authorization required: refresh token is expired or revoked."
+            );
+
+            throw new Error(
+                "Google Calendar authorization required. Reauthorize Google Calendar."
+            );
+        }
 
         throw new Error(
             `Google OAuth token refresh failed: ${response.status} ${JSON.stringify(data)}`
@@ -415,4 +448,16 @@ export async function getEventsForRange(
                 null
         })
     );
+}
+
+// ============================================================
+// AUTHORIZATION STATUS
+// ============================================================
+
+export function getGoogleCalendarAuthorizationStatus() {
+
+    return {
+        authorizationRequired:
+            authorizationRequired
+    };
 }
