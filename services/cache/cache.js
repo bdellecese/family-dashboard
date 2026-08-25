@@ -1,5 +1,16 @@
-const cache = new Map();
+/*
+ * GENERIC IN-MEMORY CACHE
+ */
 
+const cache =
+    new Map();
+
+
+/*
+ * ============================================================
+ * GET FRESH CACHE
+ * ============================================================
+ */
 
 export function getCached(
     key,
@@ -7,10 +18,14 @@ export function getCached(
 ) {
 
     const entry =
-        cache.get(key);
+        cache.get(
+            key
+        );
 
 
-    if (!entry) {
+    if (
+        !entry
+    ) {
 
         return null;
 
@@ -22,9 +37,9 @@ export function getCached(
         entry.timestamp;
 
 
-    if (age > maxAge) {
-
-        cache.delete(key);
+    if (
+        age > maxAge
+    ) {
 
         return null;
 
@@ -36,6 +51,47 @@ export function getCached(
 }
 
 
+/*
+ * ============================================================
+ * GET STALE CACHE
+ * ============================================================
+ *
+ * Returns the most recently cached value regardless
+ * of its age.
+ *
+ * Used as a fallback when an upstream service fails.
+ */
+
+export function getStaleCached(
+    key
+) {
+
+    const entry =
+        cache.get(
+            key
+        );
+
+
+    if (
+        !entry
+    ) {
+
+        return null;
+
+    }
+
+
+    return entry.data;
+
+}
+
+
+/*
+ * ============================================================
+ * SET CACHE
+ * ============================================================
+ */
+
 export function setCached(
     key,
     data
@@ -44,21 +100,37 @@ export function setCached(
     cache.set(
         key,
         {
-            data: data,
-            timestamp: Date.now()
+
+            data:
+                data,
+
+            timestamp:
+                Date.now()
+
         }
     );
 
 }
 
 
+/*
+ * ============================================================
+ * CLEAR CACHE
+ * ============================================================
+ */
+
 export function clearCache(
     key
 ) {
 
-    if (key) {
+    if (
+        key
+    ) {
 
-        cache.delete(key);
+        cache.delete(
+            key
+        );
+
 
         return;
 

@@ -3,124 +3,185 @@
  *
  * Reusable RSS feed loader.
  *
- * Returns a normalized array of stories.
+ * Responsibilities:
+ *
+ * - Load RSS feeds directly
+ * - Normalize stories
+ * - Cache successful responses
+ * - Expire stale RSS cache entries
+ * - Log cache activity
+ *
+ * The generic cache mechanics live in
+ * services/cache/cache.js.
+ */
+
+import {
+    getCached,
+    setCached,
+    clearCache
+} from "../cache/cache.js";
+
+
+/*
+ * ============================================================
+ * CONFIGURATION
+ * ============================================================
+ */
+
+/*
+ * Keep RSS data for 30 minutes.
+ *
+ * This is intentionally much longer than the
+ * dashboard screen rotation interval.
+ */
+
+const RSS_CACHE_MAX_AGE =
+    30 * 60 * 1000;
+
+
+/*
+ * ============================================================
+ * RSS DATA SERVICE
+ * ============================================================
  */
 
 const rssData = {
 
-    async getFeed(feedUrl) {
+    async getFeed(
+        feedUrl
+    ) {
+
+        if (
+            !feedUrl
+        ) {
+
+            throw new Error(
+                "RSS feed URL is required."
+            );
+
+        }
+
 
         /*
-         * RSS-TO-JSON SERVICE
+         * --------------------------------------------------------
+         * CACHE
+         * --------------------------------------------------------
          */
 
-        const url =
-            `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(
+        const cached =
+            getCached(
+                feedUrl,
+                RSS_CACHE_MAX_AGE
+            );
+
+
+        if (
+            cached
+        ) {
+
+            console.log(
+                `[RSS] CACHE HIT: ${feedUrl}`
+            );
+
+            return cached;
+
+        }
+
+
+        console.log(
+            `[RSS] CACHE MISS: ${feedUrl}`
+        );
+
+
+        /*
+         * --------------------------------------------------------
+         * FETCH
+         * --------------------------------------------------------
+         */
+
+        try {
+
+            const stories =
+                await fetchFeed(
+                    feedUrl
+                );
+
+
+            /*
+             * ----------------------------------------------------
+             * CACHE SUCCESSFUL RESULT
+             * ----------------------------------------------------
+             *
+             * Never cache failed requests.
+             */
+
+            setCached(
+                feedUrl,
+                stories
+            );
+
+
+            console.log(
+                `[RSS] CACHE STORE: ${feedUrl} (${stories.length} stories)`
+            );
+
+
+            return stories;
+
+        }
+
+        catch (error) {
+
+            console.error(
+                `[RSS] FETCH ERROR: ${feedUrl} - ${error.message}`
+            );
+
+
+            throw error;
+
+        }
+
+    },
+
+
+    /*
+     * ============================================================
+     * CLEAR CACHE
+     * ============================================================
+     *
+     * Useful during testing or if a feed needs to be
+     * manually refreshed.
+     */
+
+    clearCache(
+        feedUrl
+    ) {
+
+        if (
+            feedUrl
+        ) {
+
+            console.log(
+                `[RSS] CACHE CLEAR: ${feedUrl}`
+            );
+
+
+            clearCache(
                 feedUrl
-            )}`;
-
-
-        /*
-         * FETCH FEED
-         */
-
-        const response =
-            await fetch(url);
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                `RSS request failed: ${response.status}`
             );
+
+
+            return;
 
         }
 
 
-        /*
-         * PARSE RESPONSE
-         */
-
-        const data =
-            await response.json();
+        console.log(
+            "[RSS] CACHE CLEAR: ALL"
+        );
 
 
-        /*
-         * CHECK SERVICE RESPONSE
-         */
-
-        if (
-            data.status !== "ok"
-        ) {
-
-            throw new Error(
-                data.message ||
-                "Unable to retrieve RSS feed."
-            );
-
-        }
-
-
-        /*
-         * MAKE SURE ITEMS IS AN ARRAY
-         */
-
-        if (
-            !Array.isArray(data.items)
-        ) {
-
-            return [];
-
-        }
-
-
-        /*
-         * NORMALIZE STORIES
-         *
-         * Filter out any invalid
-         * RSS items.
-         */
-
-        return data.items
-            .filter(
-                item =>
-                    item &&
-                    typeof item === "object"
-            )
-            .map(
-                item => ({
-
-                    title:
-                        item.title ||
-                        "",
-
-                    link:
-                        item.link ||
-                        "",
-
-                    description:
-                        item.description ||
-                        "",
-
-                    published:
-                        item.pubDate ||
-                        "",
-
-                    source:
-                        data.feed?.title ||
-                        "",
-
-                    image:
-                        getImageUrl(
-                            item
-                        )
-
-                })
-            )
-            .filter(
-                story =>
-                    story.title
-            );
+        clearCache();
 
     }
 
@@ -128,11 +189,386 @@ const rssData = {
 
 
 /*
+ * ============================================================
+ * FETCH RSS FEED
+ * ============================================================
+ */
+
+async function fetchFeed(
+    feedUrl
+) {
+
+    console.log(
+        `[RSS] FETCH: ${feedUrl}`
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * REQUEST RSS XML DIRECTLY
+     * --------------------------------------------------------
+     *
+     * We intentionally do NOT use rss2json.
+     *
+     * This avoids rss2json rate limits and keeps RSS
+     * retrieval under our control.
+     */
+
+    const response =
+        await fetch(
+            feedUrl,
+            {
+                headers: {
+
+                    "User-Agent":
+                        "Family Dashboard RSS Reader/1.0",
+
+                    "Accept":
+                        "application/rss+xml, application/xml, text/xml, */*"
+
+                }
+
+            }
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        throw new Error(
+            `RSS request failed: ${response.status}`
+        );
+
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * READ XML
+     * --------------------------------------------------------
+     */
+
+    const xml =
+        await response.text();
+
+
+    if (
+        !xml
+    ) {
+
+        throw new Error(
+            "RSS feed returned an empty response."
+        );
+
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * PARSE CHANNEL
+     * --------------------------------------------------------
+     */
+
+    const source =
+        decodeXml(
+            getTagValue(
+                xml,
+                "title"
+            ) || ""
+        );
+
+
+    /*
+     * --------------------------------------------------------
+     * FIND ITEMS
+     * --------------------------------------------------------
+     */
+
+    const itemBlocks =
+        getTagBlocks(
+            xml,
+            "item"
+        );
+
+
+    /*
+     * Some feeds use Atom rather than RSS.
+     *
+     * We can support Atom as a fallback if no RSS
+     * items were found.
+     */
+
+    if (
+        itemBlocks.length === 0
+    ) {
+
+        const atomEntries =
+            getTagBlocks(
+                xml,
+                "entry"
+            );
+
+
+        if (
+            atomEntries.length > 0
+        ) {
+
+            const stories =
+                atomEntries
+                    .map(
+                        entry =>
+                            normalizeAtomEntry(
+                                entry,
+                                source
+                            )
+                    )
+                    .filter(
+                        story =>
+                            story.title
+                    );
+
+
+                console.log(
+                    `[RSS] FETCH SUCCESS: ${feedUrl} (${stories.length} stories)`
+                );
+
+
+                return stories;
+
+        }
+
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * NORMALIZE RSS ITEMS
+     * --------------------------------------------------------
+     */
+
+    const stories =
+        itemBlocks
+            .map(
+                item =>
+                    normalizeRssItem(
+                        item,
+                        source
+                    )
+            )
+            .filter(
+                story =>
+                    story.title
+            );
+
+
+    console.log(
+        `[RSS] FETCH SUCCESS: ${feedUrl} (${stories.length} stories)`
+    );
+
+
+    return stories;
+
+}
+
+
+/*
+ * ============================================================
+ * NORMALIZE RSS ITEM
+ * ============================================================
+ */
+
+function normalizeRssItem(
+    item,
+    source
+) {
+
+    const title =
+        decodeXml(
+            getTagValue(
+                item,
+                "title"
+            ) || ""
+        );
+
+
+    const link =
+        decodeXml(
+            getTagValue(
+                item,
+                "link"
+            ) || ""
+        );
+
+
+    const description =
+        getTagValue(
+            item,
+            "description"
+        ) || "";
+
+
+    const published =
+        decodeXml(
+            getTagValue(
+                item,
+                "pubDate"
+            ) ||
+            getTagValue(
+                item,
+                "published"
+            ) ||
+            getTagValue(
+                item,
+                "date"
+            ) ||
+            ""
+        );
+
+
+    const image =
+        getImageUrl(
+            item
+        );
+
+
+    return {
+
+        title,
+
+        link,
+
+        description,
+
+        published,
+
+        source,
+
+        image
+
+    };
+
+}
+
+
+/*
+ * ============================================================
+ * NORMALIZE ATOM ENTRY
+ * ============================================================
+ */
+
+function normalizeAtomEntry(
+    entry,
+    source
+) {
+
+    const title =
+        decodeXml(
+            getTagValue(
+                entry,
+                "title"
+            ) || ""
+        );
+
+
+    /*
+     * Atom links are often represented as:
+     *
+     * <link href="..." />
+     *
+     * rather than:
+     *
+     * <link>...</link>
+     */
+
+    let link =
+        getTagValue(
+            entry,
+            "link"
+        ) || "";
+
+
+    if (
+        !link
+    ) {
+
+        const linkMatch =
+            entry.match(
+                /<link\b[^>]*href=["']([^"']+)["'][^>]*>/i
+            );
+
+
+        if (
+            linkMatch
+        ) {
+
+            link =
+                decodeXml(
+                    linkMatch[1]
+                );
+
+        }
+
+    }
+
+
+    const description =
+        getTagValue(
+            entry,
+            "summary"
+        ) ||
+        getTagValue(
+            entry,
+            "content"
+        ) ||
+        "";
+
+
+    const published =
+        decodeXml(
+            getTagValue(
+                entry,
+                "published"
+            ) ||
+            getTagValue(
+                entry,
+                "updated"
+            ) ||
+            ""
+        );
+
+
+    const image =
+        getImageUrl(
+            entry
+        );
+
+
+    return {
+
+        title,
+
+        link,
+
+        description,
+
+        published,
+
+        source,
+
+        image
+
+    };
+
+}
+
+
+/*
+ * ============================================================
  * GET IMAGE URL
+ * ============================================================
  *
- * rss2json can expose images in
- * several different places depending
- * on the source feed.
+ * RSS feeds can expose images in several different places.
  */
 
 function getImageUrl(
@@ -140,80 +576,130 @@ function getImageUrl(
 ) {
 
     /*
-     * Thumbnail
+     * --------------------------------------------------------
+     * MEDIA CONTENT
+     * --------------------------------------------------------
      */
 
+    const mediaContent =
+        getAttributeUrl(
+            item,
+            "media:content"
+        );
+
+
     if (
-        item.thumbnail
+        mediaContent
     ) {
 
-        return item.thumbnail;
+        return mediaContent;
 
     }
 
 
     /*
-     * Enclosure
+     * --------------------------------------------------------
+     * MEDIA THUMBNAIL
+     * --------------------------------------------------------
      */
 
+    const mediaThumbnail =
+        getAttributeUrl(
+            item,
+            "media:thumbnail"
+        );
+
+
     if (
-        item.enclosure?.link
+        mediaThumbnail
     ) {
 
-        return item.enclosure.link;
+        return mediaThumbnail;
 
     }
 
 
     /*
-     * Media content
+     * --------------------------------------------------------
+     * ENCLOSURE
+     * --------------------------------------------------------
      */
 
+    const enclosure =
+        getAttributeUrl(
+            item,
+            "enclosure"
+        );
+
+
     if (
-        item.media?.content?.url
+        enclosure
     ) {
 
-        return item.media.content.url;
+        return enclosure;
 
     }
 
 
     /*
-     * Media thumbnail
+     * --------------------------------------------------------
+     * IMAGE TAG
+     * --------------------------------------------------------
      */
 
+    const imageTag =
+        item.match(
+            /<image[^>]*>[\s\S]*?<url>([\s\S]*?)<\/url>[\s\S]*?<\/image>/i
+        );
+
+
     if (
-        item.media?.thumbnail?.url
+        imageTag &&
+        imageTag[1]
     ) {
 
-        return item.media.thumbnail.url;
+        return decodeXml(
+            imageTag[1].trim()
+        );
 
     }
 
 
     /*
+     * --------------------------------------------------------
      * IMAGE IN DESCRIPTION
+     * --------------------------------------------------------
      *
-     * Some RSS feeds, including
-     * EyeFootball, embed the image
-     * directly inside the description HTML.
+     * Some feeds, including EyeFootball,
+     * embed the image directly inside
+     * the description HTML.
      */
 
+    const description =
+        getTagValue(
+            item,
+            "description"
+        );
+
+
     if (
-        item.description
+        description
     ) {
 
         const match =
-            item.description.match(
+            description.match(
                 /<img[^>]+src=["']([^"']+)["']/i
             );
+
 
         if (
             match &&
             match[1]
         ) {
 
-            return match[1];
+            return decodeXml(
+                match[1]
+            );
 
         }
 
@@ -221,27 +707,40 @@ function getImageUrl(
 
 
     /*
+     * --------------------------------------------------------
      * IMAGE IN CONTENT
-     *
-     * Fallback for feeds that put
-     * the image in content instead.
+     * --------------------------------------------------------
      */
 
+    const content =
+        getTagValue(
+            item,
+            "content:encoded"
+        ) ||
+        getTagValue(
+            item,
+            "content"
+        );
+
+
     if (
-        item.content
+        content
     ) {
 
         const match =
-            item.content.match(
+            content.match(
                 /<img[^>]+src=["']([^"']+)["']/i
             );
+
 
         if (
             match &&
             match[1]
         ) {
 
-            return match[1];
+            return decodeXml(
+                match[1]
+            );
 
         }
 
@@ -249,10 +748,285 @@ function getImageUrl(
 
 
     /*
-     * No image available
+     * --------------------------------------------------------
+     * NO IMAGE
+     * --------------------------------------------------------
      */
 
     return null;
+
+}
+
+
+/*
+ * ============================================================
+ * GET TAG BLOCKS
+ * ============================================================
+ */
+
+function getTagBlocks(
+    xml,
+    tagName
+) {
+
+    const escapedTag =
+        escapeRegExp(
+            tagName
+        );
+
+
+    const regex =
+        new RegExp(
+            `<${escapedTag}\\b[^>]*>[\\s\\S]*?<\\/${escapedTag}>`,
+            "gi"
+        );
+
+
+    return [
+        ...xml.matchAll(
+            regex
+        )
+    ]
+        .map(
+            match =>
+                match[0]
+        );
+
+}
+
+
+/*
+ * ============================================================
+ * GET TAG VALUE
+ * ============================================================
+ *
+ * Handles:
+ *
+ * <title>Hello</title>
+ *
+ * and namespaced tags such as:
+ *
+ * <content:encoded>...</content:encoded>
+ */
+
+function getTagValue(
+    xml,
+    tagName
+) {
+
+    const escapedTag =
+        escapeRegExp(
+            tagName
+        );
+
+
+    const regex =
+        new RegExp(
+            `<${escapedTag}\\b[^>]*>([\\s\\S]*?)<\\/${escapedTag}>`,
+            "i"
+        );
+
+
+    const match =
+        xml.match(
+            regex
+        );
+
+
+    if (
+        !match
+    ) {
+
+        return "";
+
+    }
+
+
+    return match[1].trim();
+
+}
+
+
+/*
+ * ============================================================
+ * GET ATTRIBUTE URL
+ * ============================================================
+ */
+
+function getAttributeUrl(
+    xml,
+    tagName
+) {
+
+    const escapedTag =
+        escapeRegExp(
+            tagName
+        );
+
+
+    const regex =
+        new RegExp(
+            `<${escapedTag}\\b([^>]*)>`,
+            "i"
+        );
+
+
+    const match =
+        xml.match(
+            regex
+        );
+
+
+    if (
+        !match
+    ) {
+
+        return null;
+
+    }
+
+
+    const attributes =
+        match[1];
+
+
+    /*
+     * Prefer URL attribute.
+     */
+
+    const urlMatch =
+        attributes.match(
+            /\burl=["']([^"']+)["']/i
+        );
+
+
+    if (
+        urlMatch
+    ) {
+
+        return decodeXml(
+            urlMatch[1]
+        );
+
+    }
+
+
+    /*
+     * Enclosures use href in some feeds.
+     */
+
+    const hrefMatch =
+        attributes.match(
+            /\bhref=["']([^"']+)["']/i
+        );
+
+
+    if (
+        hrefMatch
+    ) {
+
+        return decodeXml(
+            hrefMatch[1]
+        );
+
+    }
+
+
+    return null;
+
+}
+
+
+/*
+ * ============================================================
+ * XML DECODER
+ * ============================================================
+ */
+
+function decodeXml(
+    value
+) {
+
+    if (
+        !value
+    ) {
+
+        return "";
+
+    }
+
+
+    return value
+        .replace(
+            /<!\[CDATA\[([\s\S]*?)\]\]>/g,
+            "$1"
+        )
+        .replace(
+            /&amp;/g,
+            "&"
+        )
+        .replace(
+            /&lt;/g,
+            "<"
+        )
+        .replace(
+            /&gt;/g,
+            ">"
+        )
+        .replace(
+            /&quot;/g,
+            '"'
+        )
+        .replace(
+            /&#39;/g,
+            "'"
+        )
+        .replace(
+            /&#x27;/gi,
+            "'"
+        )
+        .replace(
+            /&#(\d+);/g,
+            (
+                match,
+                code
+            ) =>
+                String.fromCharCode(
+                    Number(code)
+                )
+        )
+        .replace(
+            /&#x([0-9a-f]+);/gi,
+            (
+                match,
+                code
+            ) =>
+                String.fromCharCode(
+                    parseInt(
+                        code,
+                        16
+                    )
+                )
+        )
+        .trim();
+
+}
+
+
+/*
+ * ============================================================
+ * ESCAPE REGULAR EXPRESSION
+ * ============================================================
+ */
+
+function escapeRegExp(
+    value
+) {
+
+    return value.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        "\\$&"
+    );
 
 }
 

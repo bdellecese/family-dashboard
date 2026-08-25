@@ -43,6 +43,8 @@ import {
     clearPerformanceEvents
 } from "../services/performance/performance-server.js";
 
+import rssData
+    from "../services/rss/rss-data.js";
 
 const HOST = "0.0.0.0";
 const PORT = 3000;
@@ -2296,6 +2298,97 @@ const server =
 
                     console.error(
                         "Performance data clear failed:",
+                        error
+                    );
+
+
+                    response.writeHead(
+                        500,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            error:
+                                error.message
+
+                        })
+                    );
+
+                }
+
+
+                return;
+
+            }
+
+            // =================================================
+            // RSS FEED
+            // =================================================
+
+            if (
+                requestUrl.pathname ===
+                    "/api/rss"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                try {
+
+                    const feedUrl =
+                        requestUrl
+                            .searchParams
+                            .get(
+                                "url"
+                            );
+
+
+                    if (
+                        !feedUrl
+                    ) {
+
+                        throw new Error(
+                            "RSS feed URL is required."
+                        );
+
+                    }
+
+
+                    const stories =
+                        await rssData.getFeed(
+                            feedUrl
+                        );
+
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            stories
+
+                        })
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "RSS API error:",
                         error
                     );
 

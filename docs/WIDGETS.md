@@ -1467,6 +1467,8 @@ Displays rotating sports trivia questions on the Sports screen.
 
 The widget is designed as a timed trivia experience where the viewer has an opportunity to answer the question before the correct answer and explanation are revealed.
 
+The widget runs continuously while the dashboard screen is active and cleans up its timers when the widget is destroyed or re-rendered.
+
 ## Presentation
 
 The current trivia sequence is:
@@ -1547,9 +1549,87 @@ Example:
 }
 ```
 
+The widget may optionally receive a `sports` configuration value to limit question selection to specific sports.
+
+## Timer Management
+
+The widget uses `setTimeout()` to manage the three phases of each 60-second trivia cycle.
+
+All timers are registered through a shared `schedule()` function.
+
+The widget maintains a `Set` of active timers and removes each timer from the set when it executes.
+
+This provides centralized timer management and allows all outstanding timers to be cancelled when the widget is destroyed.
+
+The widget also maintains a `destroyed` state. Scheduled callbacks check this state before executing, preventing callbacks from continuing after the widget has been removed.
+
+## Cleanup
+
+The widget returns a cleanup function from `render()`.
+
+When cleanup occurs:
+
+1. The widget is marked as destroyed.
+2. All outstanding timers are cleared.
+3. The timer collection is emptied.
+
+This is important because the dashboard can render or re-render widgets as screens change.
+
+Without explicit timer cleanup, previous instances could continue executing their timers after the widget was no longer visible. Each surviving timer could subsequently request another trivia question, causing requests to accumulate over time.
+
+The current implementation prevents this timer/request leak.
+
+## Request Behavior
+
+A new trivia question is retrieved once per 60-second cycle.
+
+Expected behavior is approximately:
+
+```text
+Initial render
+    ↓
+1 data request
+    ↓
+60 seconds
+    ↓
+1 data request
+    ↓
+60 seconds
+    ↓
+1 data request
+    ↓
+...
+```
+
+The widget should not generate multiple concurrent request cycles as a result of previous renders.
+
+## Performance / Validation
+
+The timer lifecycle was specifically reviewed after observing excessive requests from widgets that remained active after being re-rendered.
+
+The revised implementation was validated on the Raspberry Pi production dashboard.
+
+Observed behavior:
+
+* One Sports Trivia data request on initial load.
+* Subsequent requests occur approximately every 60 seconds.
+* No observed accumulation of requests from previous widget instances.
+* Widget timers are explicitly cancelled during cleanup.
+
+Example observed request sequence:
+
+```text
+3:46:39 PM
+3:47:39 PM
+```
+
+This confirms the expected one-request-per-minute behavior.
+
 ## Status
 
 Complete.
+
+The widget provides the required 60-second trivia experience, uses the local trivia data source, supports continuous question rotation, and includes explicit timer lifecycle management and cleanup to prevent accumulating timers and network requests.
 
 ---
 

@@ -1,5 +1,11 @@
-import rssData from "../../services/rss/rss-data.js";
-
+/*
+ * NEWS WIDGET
+ *
+ * Loads RSS stories through the dashboard server.
+ *
+ * RSS fetching and caching are handled server-side
+ * by services/rss/rss-data.js.
+ */
 
 const news = {
 
@@ -12,8 +18,11 @@ const news = {
 
         container.innerHTML = "";
 
+
         /*
+         * ========================================================
          * CONFIGURATION
+         * ========================================================
          */
 
         let feedUrls;
@@ -52,7 +61,9 @@ const news = {
 
 
         /*
+         * ========================================================
          * WRAPPER
+         * ========================================================
          */
 
         const wrapper =
@@ -67,7 +78,18 @@ const news = {
 
 
         /*
+         * ========================================================
          * LOAD FEEDS
+         * ========================================================
+         *
+         * RSS requests go through the dashboard server.
+         *
+         * The server-side RSS service is responsible for:
+         *
+         * - fetching rss2json
+         * - caching
+         * - cache expiration
+         * - stale-cache fallback
          */
 
         let feedResults;
@@ -78,10 +100,37 @@ const news = {
                 await Promise.allSettled(
 
                     feedUrls.map(
-                        feedUrl =>
-                            rssData.getFeed(
-                                feedUrl
-                            )
+                        async feedUrl => {
+
+                            const response =
+                                await fetch(
+                                    `/api/rss?url=${encodeURIComponent(
+                                        feedUrl
+                                    )}`
+                                );
+
+
+                            if (
+                                !response.ok
+                            ) {
+
+                                throw new Error(
+                                    `RSS API request failed: ${response.status}`
+                                );
+
+                            }
+
+
+                            const data =
+                                await response.json();
+
+
+                            return (
+                                data.stories ||
+                                []
+                            );
+
+                        }
                     )
 
                 );
@@ -95,13 +144,16 @@ const news = {
                 error
             );
 
+
             feedResults = [];
 
         }
 
 
         /*
+         * ========================================================
          * COMBINE STORIES
+         * ========================================================
          */
 
         const stories =
@@ -113,12 +165,15 @@ const news = {
                 )
                 .flatMap(
                     result =>
-                        result.value || []
+                        result.value ||
+                        []
                 );
 
 
         /*
+         * ========================================================
          * LOG FAILED FEEDS
+         * ========================================================
          */
 
         feedResults
@@ -142,7 +197,9 @@ const news = {
 
 
         /*
+         * ========================================================
          * SORT STORIES
+         * ========================================================
          *
          * Newest stories first.
          */
@@ -173,7 +230,9 @@ const news = {
 
 
         /*
+         * ========================================================
          * NO STORIES
+         * ========================================================
          */
 
         if (
@@ -199,7 +258,9 @@ const news = {
 
 
         /*
+         * ========================================================
          * UI
+         * ========================================================
          */
 
         const label =
@@ -214,7 +275,9 @@ const news = {
 
 
         /*
+         * ========================================================
          * STORY CONTENT
+         * ========================================================
          */
 
         const storyContent =
@@ -225,7 +288,9 @@ const news = {
 
 
         /*
+         * ========================================================
          * IMAGE
+         * ========================================================
          */
 
         let image = null;
@@ -254,7 +319,9 @@ const news = {
 
 
         /*
+         * ========================================================
          * TEXT
+         * ========================================================
          */
 
         const textContent =
@@ -304,7 +371,9 @@ const news = {
 
 
         /*
+         * ========================================================
          * PROGRESS
+         * ========================================================
          */
 
         const progress =
@@ -327,7 +396,9 @@ const news = {
 
 
         /*
+         * ========================================================
          * BUILD WIDGET
+         * ========================================================
          */
 
         wrapper.appendChild(
@@ -344,7 +415,9 @@ const news = {
 
 
         /*
+         * ========================================================
          * STORY ROTATION
+         * ========================================================
          */
 
         let currentIndex =
@@ -360,31 +433,43 @@ const news = {
                 !stories ||
                 stories.length === 0
             ) {
+
                 return;
+
             }
 
 
             if (
-                currentIndex >= stories.length
+                currentIndex >=
+                stories.length
             ) {
-                currentIndex = 0;
+
+                currentIndex =
+                    0;
+
             }
 
 
             const story =
-                stories[currentIndex];
+                stories[
+                    currentIndex
+                ];
 
 
-            if (!story) {
+            if (
+                !story
+            ) {
+
                 return;
+
             }
 
 
             /*
-            * --------------------------------------------------------
-            * Remove fade classes
-            * --------------------------------------------------------
-            */
+             * ----------------------------------------------------
+             * REMOVE FADE CLASSES
+             * ----------------------------------------------------
+             */
 
             headline.classList.remove(
                 "news-widget__fade"
@@ -398,20 +483,23 @@ const news = {
                 "news-widget__fade"
             );
 
+
             if (
                 image
             ) {
+
                 image.classList.remove(
                     "news-widget__fade"
                 );
+
             }
 
 
             /*
-            * --------------------------------------------------------
-            * IMAGE
-            * --------------------------------------------------------
-            */
+             * ----------------------------------------------------
+             * IMAGE
+             * ----------------------------------------------------
+             */
 
             if (
                 image
@@ -432,6 +520,7 @@ const news = {
                     );
 
                 }
+
                 else {
 
                     image.removeAttribute(
@@ -446,24 +535,25 @@ const news = {
                     );
 
                 }
+
             }
 
 
             /*
-            * --------------------------------------------------------
-            * HEADLINE
-            * --------------------------------------------------------
-            */
+             * ----------------------------------------------------
+             * HEADLINE
+             * ----------------------------------------------------
+             */
 
             headline.textContent =
                 story.title;
 
 
             /*
-            * --------------------------------------------------------
-            * DESCRIPTION
-            * --------------------------------------------------------
-            */
+             * ----------------------------------------------------
+             * DESCRIPTION
+             * ----------------------------------------------------
+             */
 
             description.textContent =
                 cleanDescription(
@@ -472,10 +562,10 @@ const news = {
 
 
             /*
-            * --------------------------------------------------------
-            * METADATA
-            * --------------------------------------------------------
-            */
+             * ----------------------------------------------------
+             * METADATA
+             * ----------------------------------------------------
+             */
 
             metadata.textContent =
                 `${story.source} • ${formatAge(
@@ -484,66 +574,72 @@ const news = {
 
 
             /*
-            * --------------------------------------------------------
-            * Start animations on the next frame.
-            *
-            * This replaces the old offsetWidth layout reads,
-            * which were forcing synchronous browser reflow.
-            * --------------------------------------------------------
-            */
+             * ----------------------------------------------------
+             * START ANIMATIONS
+             * ----------------------------------------------------
+             */
 
-            requestAnimationFrame(() => {
+            requestAnimationFrame(
+                () => {
 
-                headline.classList.add(
-                    "news-widget__fade"
-                );
-
-                description.classList.add(
-                    "news-widget__fade"
-                );
-
-                metadata.classList.add(
-                    "news-widget__fade"
-                );
-
-                if (
-                    image &&
-                    story.image
-                ) {
-                    image.classList.add(
+                    headline.classList.add(
                         "news-widget__fade"
                     );
-                }
+
+                    description.classList.add(
+                        "news-widget__fade"
+                    );
+
+                    metadata.classList.add(
+                        "news-widget__fade"
+                    );
 
 
-                /*
-                * ----------------------------------------------------
-                * RESET PROGRESS BAR
-                * ----------------------------------------------------
-                */
+                    if (
+                        image &&
+                        story.image
+                    ) {
 
-                progressBar.style.animation =
-                    "none";
+                        image.classList.add(
+                            "news-widget__fade"
+                        );
 
-                requestAnimationFrame(() => {
+                    }
+
+
+                    /*
+                     * ------------------------------------------------
+                     * RESET PROGRESS BAR
+                     * ------------------------------------------------
+                     */
 
                     progressBar.style.animation =
-                        `news-progress ${rotationSeconds}s linear`;
+                        "none";
 
-                });
 
-            });
+                    requestAnimationFrame(
+                        () => {
+
+                            progressBar.style.animation =
+                                `news-progress ${rotationSeconds}s linear`;
+
+                        }
+                    );
+
+                }
+            );
 
 
             /*
-            * --------------------------------------------------------
-            * NEXT STORY
-            * --------------------------------------------------------
-            */
+             * ----------------------------------------------------
+             * NEXT STORY
+             * ----------------------------------------------------
+             */
 
             currentIndex =
                 (
-                    currentIndex + 1
+                    currentIndex +
+                    1
                 ) %
                 stories.length;
 
@@ -551,14 +647,18 @@ const news = {
 
 
         /*
+         * ========================================================
          * INITIAL STORY
+         * ========================================================
          */
 
         renderStory();
 
 
         /*
+         * ========================================================
          * ROTATION
+         * ========================================================
          */
 
         setInterval(
@@ -572,7 +672,9 @@ const news = {
 
 
 /*
+ * ============================================================
  * CLEAN RSS DESCRIPTION
+ * ============================================================
  */
 
 function cleanDescription(
@@ -593,6 +695,7 @@ function cleanDescription(
             "div"
         );
 
+
     temp.innerHTML =
         description;
 
@@ -608,7 +711,9 @@ function cleanDescription(
 
 
 /*
+ * ============================================================
  * FORMAT STORY AGE
+ * ============================================================
  */
 
 function formatAge(
@@ -648,8 +753,10 @@ function formatAge(
     const minutes =
         Math.floor(
             (
-                now - date
-            ) / 60000
+                now -
+                date
+            ) /
+            60000
         );
 
 
@@ -673,7 +780,8 @@ function formatAge(
 
     const hours =
         Math.floor(
-            minutes / 60
+            minutes /
+            60
         );
 
 
@@ -688,11 +796,13 @@ function formatAge(
 
     const days =
         Math.floor(
-            hours / 24
+            hours /
+            24
         );
 
 
-    return `${days} day${
+    return `\
+${days} day${
         days === 1
             ? ""
             : "s"
