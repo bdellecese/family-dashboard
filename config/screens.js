@@ -803,7 +803,9 @@ export const screens = {
 
                         sports: [
                             "MLB",
-                            "NBA"
+                            "NBA",
+                            "NFL",
+                            "Soccer"
                         ],
 
                         maxLegends:

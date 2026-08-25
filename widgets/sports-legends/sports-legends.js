@@ -3,10 +3,16 @@
  * SPORTS LEGENDS WIDGET
  * ============================================================
  *
- * Displays rotating sports legends across configured sports.
+ * Displays rotating sports legends.
+ *
+ * Selection and repeat-avoidance are handled by the
+ * Sports Legends data service.
  *
  * ============================================================
  */
+
+let rotationTimer = null;
+let isRendering = false;
 
 import sportsLegendsData
     from "../../services/sports-legends/sports-legends-data.js";
@@ -23,6 +29,16 @@ const sportsLegends = {
         config = {}
     ) {
 
+        if (rotationTimer) {
+
+            clearInterval(
+                rotationTimer
+            );
+
+            rotationTimer = null;
+
+        }
+
         container.innerHTML =
             "";
 
@@ -31,7 +47,7 @@ const sportsLegends = {
          * ====================================================
          * CONFIGURATION
          * ====================================================
- */
+         */
 
         const rotationSeconds =
             config.rotationSeconds ||
@@ -42,7 +58,7 @@ const sportsLegends = {
          * ====================================================
          * WIDGET
          * ====================================================
- */
+         */
 
         const widget =
             document.createElement(
@@ -57,7 +73,7 @@ const sportsLegends = {
          * ====================================================
          * HEADER
          * ====================================================
- */
+         */
 
         const header =
             document.createElement(
@@ -94,7 +110,7 @@ const sportsLegends = {
          * ====================================================
          * CONTENT
          * ====================================================
- */
+         */
 
         const content =
             document.createElement(
@@ -114,7 +130,7 @@ const sportsLegends = {
          * ====================================================
          * ADD WIDGET
          * ====================================================
- */
+         */
 
         container.appendChild(
             widget
@@ -123,71 +139,9 @@ const sportsLegends = {
 
         /*
          * ====================================================
-         * LOAD LEGENDS
-         * ====================================================
- */
-
-        let legends;
-
-
-        try {
-
-            legends =
-                await sportsLegendsData.getLegends(
-                    {
-
-                        sports:
-                            config.sports
-
-                    }
-                );
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "Failed to load Sports Legends:",
-                error
-            );
-
-
-            renderMessage(
-                content,
-                "Sports legends are temporarily unavailable."
-            );
-
-            return;
-
-        }
-
-
-        /*
-         * ====================================================
-         * UNAVAILABLE
-         * ====================================================
- */
-
-        if (
-            !legends ||
-            legends.length === 0
-        ) {
-
-            renderMessage(
-                content,
-                "No sports legends available."
-            );
-
-            return;
-
-        }
-
-
-        /*
-         * ====================================================
          * IMAGE
          * ====================================================
- */
+         */
 
         const image =
             document.createElement(
@@ -205,7 +159,7 @@ const sportsLegends = {
          * ====================================================
          * EVENT ELEMENTS
          * ====================================================
- */
+         */
 
         const sport =
             document.createElement(
@@ -281,293 +235,325 @@ const sportsLegends = {
          * ====================================================
          * RENDER LEGEND
          * ====================================================
- */
+         *
+         * The data service is responsible for:
+         *
+         *   - Random selection
+         *   - Avoiding recently displayed players
+         *   - Persisting display history
+         *   - Resetting the cycle when all players
+         *     have been displayed
+         *
+         * The widget simply asks for the next player.
+         *
+         * ====================================================
+         */
 
-        let currentIndex =
-            0;
+        async function renderLegend() {
 
-
-        function renderLegend() {
-
-            const legend =
-                legends[currentIndex];
-
-
-            if (
-                !legend
-            ) {
-
+            if (isRendering) {
                 return;
-
             }
 
+            isRendering = true;
 
-            /*
-             * ==================================================
-             * REMOVE FADE CLASSES
-             * ==================================================
-             */
+            try {
 
-            image.classList.remove(
-                "sports-legends-widget__fade"
-            );
-
-            sport.classList.remove(
-                "sports-legends-widget__fade"
-            );
-
-            name.classList.remove(
-                "sports-legends-widget__fade"
-            );
-
-            team.classList.remove(
-                "sports-legends-widget__fade"
-            );
-
-            details.classList.remove(
-                "sports-legends-widget__fade"
-            );
-
-            stats.classList.remove(
-                "sports-legends-widget__fade"
-            );
-
-
-            /*
-             * Force animation restart.
-             */
-
-            void name.offsetWidth;
-
-
-            /*
-             * ==================================================
-             * IMAGE
-             * ==================================================
-             */
-
-            if (
-                legend.image
-            ) {
-
-                image.src =
-                    legend.image;
-
-                image.alt =
-                    legend.name;
-
-                image.style.display =
-                    "block";
-
-            }
-
-            else {
-
-                image.removeAttribute(
-                    "src"
-                );
-
-                image.alt =
-                    "";
-
-                image.style.display =
-                    "none";
-
-            }
-
-
-            /*
-             * ==================================================
-             * SPORT
-             * ==================================================
-             */
-
-            sport.textContent =
-                legend.sport;
-
-
-            /*
-             * ==================================================
-             * NAME
-             * ==================================================
-             */
-
-            name.textContent =
-                legend.name;
-
-
-            /*
-             * ==================================================
-             * TEAM
-             * ==================================================
-             */
-
-            team.textContent =
-                legend.team;
-
-
-            /*
-             * ==================================================
-             * DETAILS
-             * ==================================================
-             */
-
-            const detailParts =
-                [];
-
-
-            if (
-                legend.years
-            ) {
-
-                detailParts.push(
-                    legend.years
-                );
-
-            }
-
-
-            if (
-                legend.position
-            ) {
-
-                detailParts.push(
-                    legend.position
-                );
-
-            }
-
-
-            if (
-                legend.hallOfFame
-            ) {
-
-                detailParts.push(
-                    `Hall of Fame ${legend.hallOfFame}`
-                );
-
-            }
-
-
-            details.textContent =
-                detailParts.join(
-                    " • "
-                );
-
-
-            /*
-             * ==================================================
-             * STATS
-             * ==================================================
-             */
-
-            stats.innerHTML =
-                "";
-
-
-            if (
-                Array.isArray(
-                    legend.stats
-                )
-            ) {
-
-                legend.stats
-                    .forEach(
-                        stat => {
-
-                            const statElement =
-                                document.createElement(
-                                    "div"
-                                );
-
-                            statElement.className =
-                                "sports-legends-widget__stat";
-
-                            statElement.textContent =
-                                stat;
-
-
-                            stats.appendChild(
-                                statElement
-                            );
-
+                const legend =
+                    await sportsLegendsData.getNextLegend(
+                        {
+                            sports:
+                                config.sports
                         }
                     );
 
+
+                if (
+                    !legend
+                ) {
+
+                    renderMessage(
+                        content,
+                        "No sports legends available."
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                 * ==================================================
+                 * REMOVE FADE CLASSES
+                 * ==================================================
+                 */
+
+                image.classList.remove(
+                    "sports-legends-widget__fade"
+                );
+
+                sport.classList.remove(
+                    "sports-legends-widget__fade"
+                );
+
+                name.classList.remove(
+                    "sports-legends-widget__fade"
+                );
+
+                team.classList.remove(
+                    "sports-legends-widget__fade"
+                );
+
+                details.classList.remove(
+                    "sports-legends-widget__fade"
+                );
+
+                stats.classList.remove(
+                    "sports-legends-widget__fade"
+                );
+
+
+                /*
+                 * Force animation restart.
+                 */
+
+                void name.offsetWidth;
+
+
+                /*
+                 * ==================================================
+                 * IMAGE
+                 * ==================================================
+                 */
+
+                if (
+                    legend.image
+                ) {
+
+                    image.src =
+                        legend.image;
+
+                    image.alt =
+                        legend.name;
+
+                    image.style.display =
+                        "block";
+
+                }
+
+                else {
+
+                    image.removeAttribute(
+                        "src"
+                    );
+
+                    image.alt =
+                        "";
+
+                    image.style.display =
+                        "none";
+
+                }
+
+
+                /*
+                 * ==================================================
+                 * SPORT
+                 * ==================================================
+                 */
+
+                sport.textContent =
+                    legend.sport;
+
+
+                /*
+                 * ==================================================
+                 * NAME
+                 * ==================================================
+                 */
+
+                name.textContent =
+                    legend.name;
+
+
+                /*
+                 * ==================================================
+                 * TEAM
+                 * ==================================================
+                 */
+
+                team.textContent =
+                    legend.team || "";
+
+
+                /*
+                 * ==================================================
+                 * DETAILS
+                 * ==================================================
+                 */
+
+                const detailParts =
+                    [];
+
+
+                if (
+                    legend.years
+                ) {
+
+                    detailParts.push(
+                        legend.years
+                    );
+
+                }
+
+
+                if (
+                    legend.position
+                ) {
+
+                    detailParts.push(
+                        legend.position
+                    );
+
+                }
+
+
+                if (
+                    legend.hallOfFame
+                ) {
+
+                    detailParts.push(
+                        `Hall of Fame ${legend.hallOfFame}`
+                    );
+
+                }
+
+
+                details.textContent =
+                    detailParts.join(
+                        " • "
+                    );
+
+
+                /*
+                 * ==================================================
+                 * STATS
+                 * ==================================================
+                 */
+
+                stats.innerHTML =
+                    "";
+
+
+                if (
+                    Array.isArray(
+                        legend.stats
+                    )
+                ) {
+
+                    legend.stats
+                        .forEach(
+                            stat => {
+
+                                const statElement =
+                                    document.createElement(
+                                        "div"
+                                    );
+
+                                statElement.className =
+                                    "sports-legends-widget__stat";
+
+                                statElement.textContent =
+                                    stat;
+
+
+                                stats.appendChild(
+                                    statElement
+                                );
+
+                            }
+                        );
+
+                }
+
+
+                /*
+                 * ==================================================
+                 * FADE IN
+                 * ==================================================
+                 */
+
+                image.classList.add(
+                    "sports-legends-widget__fade"
+                );
+
+                sport.classList.add(
+                    "sports-legends-widget__fade"
+                );
+
+                name.classList.add(
+                    "sports-legends-widget__fade"
+                );
+
+                team.classList.add(
+                    "sports-legends-widget__fade"
+                );
+
+                details.classList.add(
+                    "sports-legends-widget__fade"
+                );
+
+                stats.classList.add(
+                    "sports-legends-widget__fade"
+                );
+
             }
 
+            catch (error) {
 
-            /*
-             * ==================================================
-             * FADE IN
-             * ==================================================
-             */
+                console.error(
+                    "Failed to render Sports Legend:",
+                    error
+                );
 
-            image.classList.add(
-                "sports-legends-widget__fade"
-            );
+                renderMessage(
+                    content,
+                    "Sports legends are temporarily unavailable."
+                );
 
-            sport.classList.add(
-                "sports-legends-widget__fade"
-            );
+            }
 
-            name.classList.add(
-                "sports-legends-widget__fade"
-            );
+            finally {
 
-            team.classList.add(
-                "sports-legends-widget__fade"
-            );
+                isRendering = false;
 
-            details.classList.add(
-                "sports-legends-widget__fade"
-            );
-
-            stats.classList.add(
-                "sports-legends-widget__fade"
-            );
-
-
-            /*
-             * ==================================================
-             * NEXT LEGEND
-             * ==================================================
-             */
-
-            currentIndex =
-                (
-                    currentIndex + 1
-                ) %
-                legends.length;
+            }
 
         }
+
 
 
         /*
          * ====================================================
          * INITIAL LEGEND
          * ====================================================
- */
+         */
 
-        renderLegend();
+        await renderLegend();
 
 
         /*
          * ====================================================
          * ROTATION
          * ====================================================
- */
+         */
 
-        if (
-            legends.length > 1
-        ) {
-
+        rotationTimer =
             setInterval(
                 renderLegend,
                 rotationSeconds * 1000
             );
 
-        }
 
     }
 
@@ -584,6 +570,10 @@ function renderMessage(
     container,
     message
 ) {
+
+    container.innerHTML =
+        "";
+
 
     const element =
         document.createElement(
@@ -604,4 +594,5 @@ function renderMessage(
 }
 
 
-export default sportsLegends;
+export default
+    sportsLegends;

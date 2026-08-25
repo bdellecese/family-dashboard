@@ -1579,24 +1579,53 @@ Example:
         "sports-legends",
 
     config: {
-
         sports: [
-
             "MLB",
-            "NBA"
-
+            "NBA",
+            "NFL",
+            "Soccer"
         ],
 
         rotationSeconds:
             30
-
     }
 }
 ```
 
-The `sports` configuration limits the available player pool to the specified sports.
+### Sports
+
+The `sports` configuration is optional.
+
+When specified, it limits the eligible player pool to the listed sports.
+
+For example:
+
+```text
+sports: [
+    "MLB",
+    "NBA"
+]
+```
+
+will include only MLB and NBA players.
+
+When `sports` is omitted, all players in the Sports Legends data file are eligible.
+
+Sport selection is **not weighted equally**. Randomization is performed at the player level. Therefore, a sport with more players will naturally appear more frequently than a sport with fewer players.
+
+For example, if the pool contains 15 MLB players and 3 NFL players, MLB collectively represents a larger percentage of possible selections.
+
+Adding a new sport requires no changes to the selection algorithm. Add the sport and its players to the data file and include the sport in the widget configuration if a restricted pool is being used.
+
+### Rotation
 
 The `rotationSeconds` value controls how frequently the displayed legend changes.
+
+Default:
+
+```text
+30 seconds
+```
 
 ## Data Source
 
@@ -1612,17 +1641,108 @@ Player images are stored under:
 assets/images/sports-legends/
 ```
 
+Player records contain information such as:
+
+* Unique player ID
+* Sport
+* Name
+* Team
+* Career years
+* Position
+* Hall of Fame information
+* Notable statistics
+* Image path
+
+The legacy `familyScore` property is no longer used by the widget or selection algorithm.
+
 ## Selection
 
-Sports Legends uses equal-probability random selection.
+Sports Legends uses **equal-probability random selection at the player level**.
 
-There is no family-score weighting.
+There is no family-score weighting and no sport weighting.
 
-Every eligible player has the same probability of being selected.
+### No-repeat cycle
 
-The widget avoids immediately displaying the same player twice in succession.
+Players are selected randomly from the remaining eligible players.
 
-The selection algorithm does not impose an additional hard-coded limit on the player pool.
+Once a player has been displayed, that player is excluded from subsequent selections until every other eligible player has also been displayed.
+
+This means a player such as Tom Brady cannot appear again during the current cycle until the entire eligible player pool has been displayed.
+
+For example, with 29 eligible players:
+
+```text
+Player 1
+Player 2
+Player 3
+...
+Player 29
+```
+
+will contain every eligible player exactly once, although the order is randomized.
+
+After the 29th player is displayed, the cycle is complete and a new randomized cycle begins.
+
+### Persistent history
+
+The widget maintains the current cycle in browser `localStorage` using:
+
+```text
+sports-legends-cycle
+```
+
+This allows the no-repeat behavior to persist across page reloads and dashboard restarts.
+
+The stored history tracks:
+
+* The current player-pool signature
+* Players already displayed during the current cycle
+
+### Pool changes
+
+The service maintains a signature of the eligible player pool.
+
+If players are added or removed from the eligible pool, the pool signature changes and a new selection cycle is automatically started.
+
+This allows the player data to evolve without requiring changes to the selection logic.
+
+Adding new players or new sports is therefore forward-compatible.
+
+### Cycle reset
+
+When all eligible players have been displayed, the current history is cleared and a new cycle begins.
+
+The first player of the new cycle is selected randomly from the complete pool.
+
+## Data Service
+
+Selection is handled by:
+
+```text
+services/sports-legends/sports-legends-data.js
+```
+
+The service exposes:
+
+```text
+getNextLegend()
+```
+
+Returns the next randomly selected eligible player while enforcing the current no-repeat cycle.
+
+```text
+getHistory()
+```
+
+Returns the current selection history and is useful for debugging.
+
+```text
+resetHistory()
+```
+
+Clears the current cycle and causes the next selection to begin a new cycle.
+
+The widget itself is responsible only for rendering the player and requesting the next legend.
 
 ## Display
 
