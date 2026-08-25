@@ -388,23 +388,32 @@ const photo = {
             };
 
 
-        // ====================================================
+        // ============================================================
         // START TIMER
-        // ====================================================
+        // ============================================================
+
+        let rotationTimer = null;
 
         if (
             photos.length > 1
         ) {
-
-            setInterval(
+            rotationTimer = setInterval(
                 rotate,
                 interval * 1000
             );
-
         }
 
-    }
+        return () => {
+            if (rotationTimer) {
+                clearInterval(
+                    rotationTimer
+                );
 
+                rotationTimer = null;
+            }
+        };
+
+    }
 };
 
 

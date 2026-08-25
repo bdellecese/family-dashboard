@@ -105,7 +105,7 @@ const sportsTrivia = {
          * ====================================================
          * CONTENT
          * ====================================================
- */
+        */
 
         const content =
             document.createElement(
@@ -125,7 +125,7 @@ const sportsTrivia = {
          * ====================================================
          * ADD WIDGET
          * ====================================================
- */
+        */
 
         container.appendChild(
             widget
@@ -136,7 +136,7 @@ const sportsTrivia = {
          * ====================================================
          * LOAD QUESTION
          * ====================================================
- */
+        */
 
         let question;
 
@@ -176,7 +176,7 @@ const sportsTrivia = {
          * ====================================================
          * UNAVAILABLE
          * ====================================================
- */
+        */
 
         if (
             !question
@@ -196,7 +196,7 @@ const sportsTrivia = {
          * ====================================================
          * SPORT
          * ====================================================
- */
+        */
 
         const sport =
             document.createElement(
@@ -216,7 +216,7 @@ const sportsTrivia = {
          * ====================================================
          * QUESTION
          * ====================================================
- */
+        */
 
         const questionElement =
             document.createElement(
@@ -236,7 +236,7 @@ const sportsTrivia = {
          * ====================================================
          * ANSWERS
          * ====================================================
- */
+        */
 
         const answers =
             document.createElement(
@@ -256,7 +256,7 @@ const sportsTrivia = {
          * ====================================================
          * STATUS
          * ====================================================
- */
+        */
 
         const status =
             document.createElement(
@@ -276,7 +276,7 @@ const sportsTrivia = {
          * ====================================================
          * ANSWER REVEAL
          * ====================================================
- */
+        */
 
         const answer =
             document.createElement(
@@ -296,7 +296,7 @@ const sportsTrivia = {
          * ====================================================
          * EXPLANATION
          * ====================================================
- */
+        */
 
         const explanation =
             document.createElement(
@@ -316,7 +316,7 @@ const sportsTrivia = {
          * ====================================================
          * RENDER QUESTION
          * ====================================================
- */
+        */
 
         function renderQuestion() {
 
@@ -400,7 +400,7 @@ const sportsTrivia = {
          * ====================================================
          * REVEAL ANSWER
          * ====================================================
- */
+        */
 
         function revealAnswer() {
 
@@ -437,129 +437,162 @@ const sportsTrivia = {
          * ====================================================
          * INITIAL RENDER
          * ====================================================
- */
+        */
 
         renderQuestion();
 
 
         /*
          * ====================================================
+         * TIMER MANAGEMENT
+         * ====================================================
+         */
+
+        const timers =
+            new Set();
+
+        let destroyed =
+            false;
+
+        function schedule(
+            callback,
+            delay
+        ) {
+
+            const timer =
+                setTimeout(
+                    () => {
+
+                        timers.delete(
+                            timer
+                        );
+
+                        if (
+                            destroyed
+                        ) {
+                            return;
+                        }
+
+                        callback();
+
+                    },
+                    delay
+                );
+
+            timers.add(
+                timer
+            );
+
+            return timer;
+
+        }
+
+
+        /*
+         * ====================================================
          * TIMELINE
          * ====================================================
- */
+        */
+               
 
         /*
          * 0–30 seconds
          */
 
-        const thinkTimer =
-            setTimeout(
-                () => {
-
-                    status.textContent =
-                        "Think you know it?";
-
-                },
-                questionSeconds * 1000
-            );
-
+        schedule(
+            () => {
+                status.textContent =
+                    "Think you know it?";
+            },
+            questionSeconds * 1000
+        );
 
         /*
          * 40 seconds
          */
-
-        const revealTimer =
-            setTimeout(
-                revealAnswer,
-                (
-                    questionSeconds +
-                    thinkSeconds
-                ) * 1000
-            );
-
+    
+        schedule(
+            revealAnswer,
+            (
+                questionSeconds +
+                thinkSeconds
+            ) * 1000
+        );
 
         /*
          * 60 seconds
          */
 
-        const nextTimer =
-            setTimeout(
-                async () => {
+        schedule(
+            async () => {
 
-                    clearTimeout(
-                        thinkTimer
-                    );
+                try {
 
-                    clearTimeout(
-                        revealTimer
-                    );
-
-
-                    try {
-
-                        question =
-                            await sportsTriviaData
-                                .getQuestion(
-                                    {
-                                        sports:
-                                            config.sports
-                                    }
-                                );
-
-
-                        if (
-                            question
-                        ) {
-
-                            renderQuestion();
-
-
-                            /*
-                             * Start a new cycle.
-                             */
-
-                            startCycle();
-
-                        }
-
-                        else {
-
-                            renderMessage(
-                                content,
-                                "No sports trivia available."
+                    question =
+                        await sportsTriviaData
+                            .getQuestion(
+                                {
+                                    sports:
+                                        config.sports
+                                }
                             );
 
-                        }
+
+                    if (
+                        question
+                    ) {
+
+                        renderQuestion();
+
+
+                       /*
+                        * Start a new cycle.
+                        */
+
+                        startCycle();
 
                     }
 
-                    catch (error) {
+                    else {
 
-                        console.error(
-                            "Failed to load next Sports Trivia question:",
-                            error
+                        renderMessage(
+                            content,
+                            "No sports trivia available."
                         );
 
                     }
 
-                },
-                (
-                    questionSeconds +
-                    thinkSeconds +
-                    answerSeconds
-                ) * 1000
-            );
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Failed to load next Sports Trivia question:",
+                        error
+                    );
+
+                }
+
+            },
+            (
+                questionSeconds +
+                thinkSeconds +
+                answerSeconds
+            ) * 1000
+        );
+
+
 
 
         /*
          * ====================================================
          * START NEXT CYCLE
          * ====================================================
- */
+        */
 
         function startCycle() {
 
-            setTimeout(
+            schedule(
                 () => {
 
                     status.textContent =
@@ -570,7 +603,7 @@ const sportsTrivia = {
             );
 
 
-            setTimeout(
+            schedule(
                 revealAnswer,
                 (
                     questionSeconds +
@@ -579,7 +612,7 @@ const sportsTrivia = {
             );
 
 
-            setTimeout(
+            schedule(
                 async () => {
 
                     try {
@@ -624,6 +657,31 @@ const sportsTrivia = {
             );
 
         }
+
+        /*
+         * ====================================================
+         * CLEANUP
+         * ====================================================
+         */
+                
+        return () => {
+
+            destroyed =
+                true;
+
+            for (
+                const timer of timers
+            ) {
+
+                clearTimeout(
+                    timer
+                );
+
+            }
+
+            timers.clear();
+
+        };
 
     }
 
