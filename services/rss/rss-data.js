@@ -202,10 +202,17 @@ async function fetchFeed(
         `[RSS] FETCH: ${feedUrl}`
     );
 
+    const isBrowser =
+        typeof window !== "undefined";
+
+    const requestUrl =
+        isBrowser
+            ? `/api/rss?url=${encodeURIComponent(feedUrl)}`
+            : feedUrl;
 
     /*
      * --------------------------------------------------------
-     * REQUEST RSS XML DIRECTLY
+     * REQUEST RSS 
      * --------------------------------------------------------
      *
      * We intentionally do NOT use rss2json.
@@ -216,7 +223,7 @@ async function fetchFeed(
 
     const response =
         await fetch(
-            feedUrl,
+            requestUrl,
             {
                 headers: {
 
@@ -239,6 +246,44 @@ async function fetchFeed(
         throw new Error(
             `RSS request failed: ${response.status}`
         );
+
+    }
+
+
+    /*
+    * --------------------------------------------------------
+    * BROWSER API RESPONSE
+    * --------------------------------------------------------
+    *
+    * Browser requests go through /api/rss.
+    *
+    * The API returns normalized JSON rather than
+    * raw RSS XML, so return the stories directly.
+    */
+
+    if (
+        isBrowser
+    ) {
+
+        const data =
+            await response.json();
+
+        if (
+            !data ||
+            !Array.isArray(data.stories)
+        ) {
+
+            throw new Error(
+                "RSS API returned an invalid response."
+            );
+
+        }
+
+        console.log(
+            `[RSS] API SUCCESS: ${feedUrl} (${data.stories.length} stories)`
+        );
+
+        return data.stories;
 
     }
 
@@ -402,10 +447,12 @@ function normalizeRssItem(
 
 
     const description =
-        getTagValue(
-            item,
-            "description"
-        ) || "";
+        decodeXml(
+            getTagValue(
+                item,
+                "description"
+            ) || ""
+        );
 
 
     const published =
@@ -983,6 +1030,10 @@ function decodeXml(
         )
         .replace(
             /&#x27;/gi,
+            "'"
+        )
+        .replace(
+            /&apos;/g,
             "'"
         )
         .replace(

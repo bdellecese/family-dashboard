@@ -3,7 +3,8 @@
  * QUOTE OF THE DAY DATA SERVICE
  * ============================================================
  *
- * Loads the daily Quote of the Day directly from FixQuotes.
+ * Loads the daily Quote of the Day through the reusable RSS
+ * service.
  *
  * FixQuotes RSS format:
  *
@@ -13,6 +14,10 @@
  *
  * ============================================================
  */
+
+import rssData
+    from "../rss/rss-data.js";
+
 
 const quoteOfDayData = {
 
@@ -33,89 +38,25 @@ const quoteOfDayData = {
 
             /*
              * ====================================================
-             * FETCH RSS FEED DIRECTLY
+             * LOAD RSS FEED
              * ====================================================
              */
 
-            const response =
-                await fetch(
-                    feedUrl,
-                    {
-                        cache:
-                            "no-store"
-                    }
-                );
-
-
-            if (
-                !response.ok
-            ) {
-
-                throw new Error(
-                    `Quote feed request failed: ${response.status}`
-                );
-
-            }
-
-
-            /*
-             * ====================================================
-             * READ RSS
-             * ====================================================
-             */
-
-            const xml =
-                await response.text();
-
-
-            const parser =
-                new DOMParser();
-
-
-            const document =
-                parser.parseFromString(
-                    xml,
-                    "application/xml"
+            const stories =
+                await rssData.getFeed(
+                    feedUrl
                 );
 
 
             /*
              * ====================================================
-             * CHECK FOR PARSE ERRORS
+             * CHECK RESULTS
              * ====================================================
              */
 
-            const parserError =
-                document.querySelector(
-                    "parsererror"
-                );
-
-
             if (
-                parserError
-            ) {
-
-                throw new Error(
-                    "Unable to parse Quote of the Day feed."
-                );
-
-            }
-
-
-            /*
-             * ====================================================
-             * GET FIRST ITEM
-             * ====================================================
- */
-
-            const item =
-                document.querySelector(
-                    "item"
-                );
-
-
-            if (
-                !item
+                !stories ||
+                stories.length === 0
             ) {
 
                 return {
@@ -130,78 +71,98 @@ const quoteOfDayData = {
 
             }
 
+            /*
+            * ============================================================
+            * FIND TODAY'S QUOTE
+            * ============================================================
+            *
+            * FixQuotes may publish tomorrow's quote first.
+            * Select the story whose publication date matches today.
+            */
+
+            const today =
+                new Date();
+
+            const todayDate =
+                `${today.getFullYear()}-${String(
+                    today.getMonth() + 1
+                ).padStart(2, "0")}-${String(
+                    today.getDate()
+                ).padStart(2, "0")}`;
+
+            const story =
+                stories.find(
+                    item => {
+
+                        if (
+                            !item.published
+                        ) {
+
+                            return false;
+
+                        }
+
+                        const publishedDate =
+                            new Date(
+                                item.published
+                            )
+                                .toISOString()
+                                .slice(0, 10);
+
+                        return (
+                            publishedDate ===
+                            todayDate
+                        );
+
+                    }
+                );
+
+
+            /*
+            * ============================================================
+            * NO QUOTE FOR TODAY
+            * ============================================================
+            */
+
+            if (
+                !story
+            ) {
+
+                return {
+
+                    available:
+                        false,
+
+                    message:
+                        "Quote of the Day is unavailable."
+
+                };
+
+            }
 
             /*
              * ====================================================
-             * EXTRACT FIELDS
+             * EXTRACT DATA
              * ====================================================
- */
+             */
 
             const quote =
                 cleanText(
-                    getElementText(
-                        item,
-                        "description"
-                    )
+                    story.description
                 );
 
 
             const author =
                 cleanText(
-                    getElementText(
-                        item,
-                        "title"
-                    )
+                    story.title
                 );
-
-
-            const link =
-                getElementText(
-                    item,
-                    "link"
-                );
-
-
-            const published =
-                getElementText(
-                    item,
-                    "pubDate"
-                );
-
-
-            /*
-             * ====================================================
-             * IMAGE
-             * ====================================================
- */
-
-            const mediaContent =
-                item.querySelector(
-                    "media\\:content"
-                );
-
-
-            const enclosure =
-                item.querySelector(
-                    "enclosure"
-                );
-
-
-            const image =
-                mediaContent?.getAttribute(
-                    "url"
-                ) ||
-                enclosure?.getAttribute(
-                    "url"
-                ) ||
-                "";
 
 
             /*
              * ====================================================
              * VALIDATE
              * ====================================================
- */
+             */
 
             if (
                 !quote
@@ -238,16 +199,17 @@ const quoteOfDayData = {
                     author,
 
                 source:
+                    story.source ||
                     "FixQuotes",
 
                 link:
-                    link,
+                    story.link,
 
                 published:
-                    published,
+                    story.published,
 
                 image:
-                    image
+                    story.image || ""
 
             };
 
@@ -261,47 +223,21 @@ const quoteOfDayData = {
             );
 
 
-            throw error;
+            return {
+
+                available:
+                    false,
+
+                message:
+                    "Quote of the Day is unavailable."
+
+            };
 
         }
 
     }
 
 };
-
-
-/*
- * ============================================================
- * GET ELEMENT TEXT
- * ============================================================
- */
-
-function getElementText(
-    parent,
-    selector
-) {
-
-    const element =
-        parent.querySelector(
-            selector
-        );
-
-
-    if (
-        !element
-    ) {
-
-        return "";
-
-    }
-
-
-    return (
-        element.textContent ||
-        ""
-    ).trim();
-
-}
 
 
 /*

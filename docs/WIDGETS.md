@@ -768,9 +768,7 @@ Complete.
 
 ## Widget
 
-```text
-news
-```
+    news
 
 ## Purpose
 
@@ -782,27 +780,44 @@ The same news widget can be used for general news or sports news by providing di
 
 Example:
 
-```text
-{
-    name: "news",
-
-    config: {
-
-        feed:
-            "http://feeds.bbci.co.uk/news/world/rss.xml",
-
-        rotationSeconds:
-            30
-
+    {
+        name: "news",
+        config: {
+            feed:
+                "http://feeds.bbci.co.uk/news/world/rss.xml",
+            rotationSeconds:
+                30
+        }
     }
-}
-```
 
 Multiple feeds can also be configured when supported by the widget.
 
 ## Data Source
 
-RSS feed.
+RSS feeds loaded through the reusable `rssData` service.
+
+The `rssData` service provides:
+
+- Server-side RSS retrieval
+- Browser requests through `/api/rss`
+- Shared RSS caching
+- RSS normalization
+- Image extraction
+- XML entity decoding
+
+## Architecture
+
+    news widget
+            ↓
+    news.js
+            ↓
+    rssData.getFeed()
+            ↓
+    /api/rss (browser)
+            or
+    direct RSS fetch (server)
+            ↓
+    Configured RSS feed
 
 ## Notes
 
@@ -2027,19 +2042,44 @@ Complete.
 
 ## Widget
 
-```text
-quote-of-day
-```
+    quote-of-day
 
 ## Purpose
 
-Displays a quote of the day.
+Displays the daily Quote of the Day, including the quote, author, source, publication date, and optional image.
 
 The widget is used by the Chores + Fun screen.
 
 ## Data Source
 
-Configuration / dashboard data.
+FixQuotes RSS feed:
+
+    https://fixquotes.com/feeds/qotd.rss
+
+The feed is loaded through the reusable `rssData` service, which provides:
+
+- Server-side RSS retrieval
+- Browser requests through `/api/rss`
+- Shared RSS caching
+- RSS normalization
+- Image extraction
+- XML entity decoding
+
+The Quote of the Day service selects the story whose publication date matches the current day. This is necessary because FixQuotes may publish the following day's quote before the current day.
+
+## Architecture
+
+    quote-of-day widget
+            ↓
+    quote-of-day-data.js
+            ↓
+    rssData.getFeed()
+            ↓
+    /api/rss (browser)
+            or
+    direct RSS fetch (server)
+            ↓
+    FixQuotes RSS
 
 ## Status
 

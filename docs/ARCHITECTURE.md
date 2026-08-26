@@ -69,6 +69,9 @@ Data Service
     +-- Browser-accessible external API
     |
     +-- Node.js server API
+    |
+    +-- RSS Data Service
+
 ```
 
 Some services communicate directly with external APIs from the browser.
@@ -114,13 +117,17 @@ The project currently follows this general structure:
 +-- services/
 |   |
 |   +-- weather/
+|   +-- rss/
+|   |   |
+|   |   +-- rss-data.js
 |   +-- google-calendar/
 |   |   |
 |   |   +-- calendar-auth.js
 |   |   +-- calendar-data.js
 |   |   +-- google-calendar-server.js
-|   |
+|
 |   +-- dashboard/
+|
 |   +-- ...
 |
 +-- scripts/
@@ -466,7 +473,9 @@ Screens represent complete dashboard pages.
 Examples currently include:
 
 - Information
-- Large Calendar (planned / next major screen)
+- Large Calendar 
+- Chores + Fun
+- Sports
 
 A screen defines:
 
@@ -910,13 +919,127 @@ The exact endpoint implementation may evolve as additional calendar functionalit
 
 ---
 
+# RSS Data Service
+
+The dashboard uses a shared RSS data service for widgets that consume RSS feeds.
+
+The primary service is:
+
+services/rss/rss-data.js
+
+The RSS service is responsible for:
+
+- Fetching RSS feeds
+- Supplying a consistent RSS data structure
+- Handling RSS retrieval
+- Managing RSS caching
+- Providing RSS data to multiple widgets
+
+Widgets should not implement their own RSS fetching logic when the shared RSS service can be used.
+
+The architecture is:
+
+Widget
+   |
+   v
+Widget-specific Data Service
+   |
+   v
+RSS Data Service
+   |
+   v
+RSS Feed
+
+For example:
+
+Quote of the Day
+   |
+   v
+quote-of-day-data.js
+   |
+   v
+rss-data.js
+   |
+   v
+FixQuotes RSS
+
+News
+   |
+   v
+news data logic
+   |
+   v
+rss-data.js
+   |
+   v
+BBC RSS
+
+---
+
 # News
 
-The news widget can consume RSS feeds.
+The News widget consumes RSS feeds through the shared RSS data service.
 
 The feed URL is supplied through widget configuration.
 
-Where a feed cannot be consumed directly by the browser because of CORS restrictions, a server-side service may be introduced.
+The RSS service handles:
+
+- RSS retrieval
+- RSS parsing
+- RSS caching
+- Normalization of RSS stories
+
+The News widget is responsible for presentation and headline rotation.
+
+The same RSS infrastructure is reused by other RSS-based widgets, including Sports News, Word of the Day, and Quote of the Day.
+
+The architecture is:
+
+News Widget
+    |
+    v
+RSS Data Service
+    |
+    v
+Configured RSS Feed
+
+---
+
+# Quote of the Day
+
+The Quote of the Day widget uses the shared RSS data service to retrieve the daily quote from FixQuotes.
+
+The service is:
+
+services/quote-of-day/quote-of-day-data.js
+
+The FixQuotes RSS feed publishes multiple daily entries, including the current day's quote and future/past entries.
+
+The Quote of the Day data service therefore selects the story whose publication date matches the current dashboard date.
+
+The RSS service is responsible for retrieving and normalizing the feed.
+
+The Quote of the Day service is responsible for selecting the appropriate daily story and extracting:
+
+- Quote
+- Author
+- Source
+- Link
+- Publication date
+- Image
+
+The architecture is:
+
+Quote of the Day Widget
+        |
+        v
+quote-of-day-data.js
+        |
+        v
+rss-data.js
+        |
+        v
+FixQuotes RSS
 
 ---
 
@@ -1447,20 +1570,3 @@ The architecture intentionally separates:
 - Display scheduling
 
 This separation should make the dashboard easier to maintain as additional screens, widgets, and services are added.
-
----
-
-# Next Major Development Phase
-
-The next development phase is:
-
-1. Build the large Calendar screen.
-2. Reuse the existing calendar data service.
-3. Establish screen-to-screen navigation.
-4. Implement automatic screen rotation.
-5. Add touchscreen navigation controls.
-6. Add temporary rotation pause/resume behavior.
-7. Continue testing the complete experience on the Raspberry Pi.
-8. Refine the production startup and display scheduling behavior as needed.
-
-The goal is to keep screen navigation centralized and independent of the individual widgets while maintaining a simple, reliable Raspberry Pi deployment.
