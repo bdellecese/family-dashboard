@@ -8,6 +8,7 @@ const DEFAULT_BATCH_COUNT =
     100;
 
 
+
 // ============================================================
 // PHOTO WIDGET
 // ============================================================
@@ -17,12 +18,14 @@ const photo = {
     name: "photo",
 
 
+
     async render(
         container,
         config = {}
     ) {
 
         container.innerHTML = "";
+
 
 
         // ====================================================
@@ -34,6 +37,7 @@ const photo = {
             DEFAULT_ALBUM_URL;
 
 
+
         const interval =
             Number(
                 config.interval ||
@@ -41,11 +45,13 @@ const photo = {
             );
 
 
+
         const batchCount =
             Number(
                 config.batchCount ||
                 DEFAULT_BATCH_COUNT
             );
+
 
 
         // ====================================================
@@ -61,6 +67,7 @@ const photo = {
         container.appendChild(
             wrapper
         );
+
 
 
         // ====================================================
@@ -87,6 +94,7 @@ const photo = {
             );
 
 
+
             showError(
                 wrapper,
                 "Unable to load photos"
@@ -95,6 +103,7 @@ const photo = {
             return;
 
         }
+
 
 
         // ====================================================
@@ -116,6 +125,7 @@ const photo = {
         }
 
 
+
         // ====================================================
         // RANDOMIZE BATCH
         // ====================================================
@@ -123,6 +133,7 @@ const photo = {
         shuffle(
             photos
         );
+
 
 
         // ====================================================
@@ -133,8 +144,10 @@ const photo = {
             createImageLayer();
 
 
+
         const imageB =
             createImageLayer();
+
 
 
         imageA.wrapper.classList.add(
@@ -143,9 +156,11 @@ const photo = {
         );
 
 
+
         imageB.wrapper.classList.add(
             "photo-widget__image-layer"
         );
+
 
 
         wrapper.appendChild(
@@ -155,6 +170,7 @@ const photo = {
         wrapper.appendChild(
             imageB.wrapper
         );
+
 
 
         // ====================================================
@@ -168,9 +184,11 @@ const photo = {
             "photo-widget__caption";
 
 
+
         wrapper.appendChild(
             caption
         );
+
 
 
         // ====================================================
@@ -187,6 +205,7 @@ const photo = {
             );
 
 
+
         if (!initialPhoto) {
 
             showError(
@@ -199,8 +218,10 @@ const photo = {
         }
 
 
+
         currentIndex =
             initialPhoto.index;
+
 
 
         setImage(
@@ -209,10 +230,12 @@ const photo = {
         );
 
 
+
         caption.textContent =
             formatPhotoMetadata(
                 initialPhoto.photo
             );
+
 
 
         // ====================================================
@@ -224,6 +247,7 @@ const photo = {
 
         let inactiveImage =
             imageB;
+
 
 
         // ====================================================
@@ -240,6 +264,7 @@ const photo = {
                             albumUrl,
                             batchCount
                         );
+
 
 
                     if (
@@ -273,9 +298,11 @@ const photo = {
                 }
 
 
+
                 return false;
 
             };
+
 
 
         // ====================================================
@@ -299,6 +326,7 @@ const photo = {
                         await loadNextBatch();
 
 
+
                     if (!loaded) {
 
                         /*
@@ -314,6 +342,7 @@ const photo = {
                 }
 
 
+
                 /*
                  * Find the next photo that actually loads.
                  */
@@ -325,6 +354,7 @@ const photo = {
                     );
 
 
+
                 if (!nextPhoto) {
 
                     return;
@@ -332,8 +362,10 @@ const photo = {
                 }
 
 
+
                 currentIndex =
                     nextPhoto.index;
+
 
 
                 /*
@@ -350,6 +382,7 @@ const photo = {
                 );
 
 
+
                 /*
                  * Crossfade to the new image.
                  */
@@ -359,15 +392,18 @@ const photo = {
                 );
 
 
+
                 inactiveImage.wrapper.classList.add(
                     "photo-widget__image-layer--active"
                 );
+
 
 
                 caption.textContent =
                     formatPhotoMetadata(
                         nextPhoto.photo
                     );
+
 
 
                 /*
@@ -378,14 +414,17 @@ const photo = {
                     activeImage;
 
 
+
                 activeImage =
                     inactiveImage;
+
 
 
                 inactiveImage =
                     temp;
 
             };
+
 
 
         // ============================================================
@@ -397,24 +436,69 @@ const photo = {
         if (
             photos.length > 1
         ) {
-            rotationTimer = setInterval(
-                rotate,
-                interval * 1000
-            );
+
+            rotationTimer =
+                setInterval(
+                    rotate,
+                    interval * 1000
+                );
+
         }
 
+
+
         return () => {
+
             if (rotationTimer) {
+
                 clearInterval(
                     rotationTimer
                 );
 
                 rotationTimer = null;
+
             }
+
         };
 
     }
+
 };
+
+
+
+// ============================================================
+// SHOW ERROR
+// ============================================================
+
+function showError(
+    wrapper,
+    message
+) {
+
+    wrapper.innerHTML = "";
+
+
+
+    const error =
+        document.createElement("div");
+
+    error.className =
+        "photo-widget__error";
+
+
+
+    error.textContent =
+        message;
+
+
+
+    wrapper.appendChild(
+        error
+    );
+
+}
+
 
 
 // ============================================================
@@ -430,6 +514,7 @@ async function loadPhotos(
         new URLSearchParams();
 
 
+
     if (albumUrl) {
 
         params.set(
@@ -438,6 +523,7 @@ async function loadPhotos(
         );
 
     }
+
 
 
     /*
@@ -464,6 +550,7 @@ async function loadPhotos(
     }
 
 
+
     const response =
         await fetch(
             `/api/photos?${params.toString()}`,
@@ -472,6 +559,7 @@ async function loadPhotos(
                 cache: "no-store"
             }
         );
+
 
 
     if (
@@ -485,8 +573,10 @@ async function loadPhotos(
     }
 
 
+
     const data =
         await response.json();
+
 
 
     if (
@@ -501,6 +591,7 @@ async function loadPhotos(
     }
 
 
+
     return (
         data &&
         Array.isArray(
@@ -513,6 +604,7 @@ async function loadPhotos(
     );
 
 }
+
 
 
 // ============================================================
@@ -534,6 +626,7 @@ async function findLoadablePhoto(
     }
 
 
+
     /*
      * Try each photo once, wrapping around to the beginning
      * if necessary.
@@ -552,8 +645,10 @@ async function findLoadablePhoto(
             ) % photos.length;
 
 
+
         const photo =
             photos[index];
+
 
 
         if (
@@ -566,11 +661,13 @@ async function findLoadablePhoto(
         }
 
 
+
         try {
 
             await preloadImage(
                 photo.url
             );
+
 
 
             return {
@@ -593,9 +690,11 @@ async function findLoadablePhoto(
     }
 
 
+
     return null;
 
 }
+
 
 
 // ============================================================
@@ -616,12 +715,14 @@ function preloadImage(
                 new Image();
 
 
+
             image.onload =
                 () => {
 
                     resolve();
 
                 };
+
 
 
             image.onerror =
@@ -636,6 +737,7 @@ function preloadImage(
                 };
 
 
+
             image.src =
                 url;
 
@@ -643,6 +745,7 @@ function preloadImage(
     );
 
 }
+
 
 
 // ============================================================
@@ -658,6 +761,7 @@ function createImageLayer() {
         "photo-widget__image-layer";
 
 
+
     /*
      * Blurred background.
      *
@@ -671,6 +775,7 @@ function createImageLayer() {
 
     background.className =
         "photo-widget__image-background";
+
 
 
     /*
@@ -693,6 +798,7 @@ function createImageLayer() {
         false;
 
 
+
     wrapper.appendChild(
         background
     );
@@ -702,6 +808,7 @@ function createImageLayer() {
     );
 
 
+
     return {
         wrapper,
         background,
@@ -709,6 +816,7 @@ function createImageLayer() {
     };
 
 }
+
 
 
 // ============================================================
@@ -734,10 +842,13 @@ function setImage(
         `url("${url}")`;
 
 
+
     layer.image.src =
         url;
 
 }
+
+
 
 // ============================================================
 // CAPTION
@@ -748,13 +859,17 @@ function formatPhotoMetadata(
 ) {
 
     if (!photo) {
+
         return "";
+
     }
+
 
 
     const caption =
         photo.caption ||
         "";
+
 
 
     const date =
@@ -777,10 +892,12 @@ function formatPhotoMetadata(
             : "";
 
 
+
     const postedBy =
         photo.postedBy
             ? `Posted by ${photo.postedBy}`
             : "";
+
 
 
     return [
@@ -792,6 +909,7 @@ function formatPhotoMetadata(
         .join(" | ");
 
 }
+
 
 
 // ============================================================
@@ -818,6 +936,7 @@ function shuffle(
             );
 
 
+
         [
             array[i],
             array[j]
@@ -829,9 +948,11 @@ function shuffle(
     }
 
 
+
     return array;
 
 }
+
 
 
 export default photo;
