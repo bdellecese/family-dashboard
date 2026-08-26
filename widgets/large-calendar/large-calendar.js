@@ -14,9 +14,11 @@ import {
 } from "../../services/ui/touch-scroll.js";
 
 
+
 const largeCalendar = {
 
     name: "large-calendar",
+
 
 
     async render(
@@ -27,12 +29,14 @@ const largeCalendar = {
         container.innerHTML = "";
 
 
+
         /*
          * CURRENT DATE
          */
 
         const today =
             new Date();
+
 
 
         /*
@@ -57,6 +61,7 @@ const largeCalendar = {
         );
 
 
+
         /*
          * END DATE
          *
@@ -69,6 +74,7 @@ const largeCalendar = {
         endDate.setDate(
             endDate.getDate() + 28
         );
+
 
 
         /*
@@ -86,6 +92,7 @@ const largeCalendar = {
         );
 
 
+
         /*
          * ENABLE TOUCH SCROLLING
          */
@@ -93,6 +100,7 @@ const largeCalendar = {
         enableTouchScroll(
             wrapper
         );
+
 
 
         /*
@@ -106,8 +114,10 @@ const largeCalendar = {
             "large-calendar-widget__legend";
 
 
+
         const calendars =
             config.calendars || [];
+
 
 
         calendars.forEach(
@@ -117,6 +127,7 @@ const largeCalendar = {
                     CALENDARS[calendarId];
 
 
+
                 if (!calendar) {
 
                     return;
@@ -124,11 +135,13 @@ const largeCalendar = {
                 }
 
 
+
                 const item =
                     document.createElement("div");
 
                 item.className =
                     "large-calendar-widget__legend-item";
+
 
 
                 /*
@@ -151,6 +164,7 @@ const largeCalendar = {
                     calendar.color;
 
 
+
                 /*
                  * CALENDAR NAME
                  */
@@ -163,6 +177,7 @@ const largeCalendar = {
 
                 name.textContent =
                     calendar.name;
+
 
 
                 item.appendChild(
@@ -181,9 +196,11 @@ const largeCalendar = {
         );
 
 
+
         wrapper.appendChild(
             legend
         );
+
 
 
         /*
@@ -197,12 +214,14 @@ const largeCalendar = {
             new Map();
 
 
+
         try {
 
             const weather =
                 await weatherData.getWeather(
                     "Holden"
                 );
+
 
 
             if (
@@ -235,6 +254,7 @@ const largeCalendar = {
         }
 
 
+
         /*
          * CALENDAR GRID
          */
@@ -244,6 +264,7 @@ const largeCalendar = {
 
         grid.className =
             "large-calendar-widget__grid";
+
 
 
         /*
@@ -259,6 +280,7 @@ const largeCalendar = {
             "F",
             "S"
         ];
+
 
 
         dayNames.forEach(
@@ -281,12 +303,20 @@ const largeCalendar = {
         );
 
 
+
         /*
          * LOAD EVENTS
+         *
+         * Events from all calendars are merged into
+         * a single date-based structure.
+         *
+         * All-day events are expanded across every
+         * date they span.
          */
 
         const eventsByDate =
             new Map();
+
 
 
         for (
@@ -304,10 +334,87 @@ const largeCalendar = {
                     );
 
 
+
                 for (
                     const event
                     of events
                 ) {
+
+                    /*
+                     * ALL-DAY EVENTS
+                     *
+                     * Google Calendar represents all-day
+                     * event end dates as exclusive.
+                     *
+                     * Example:
+                     *
+                     * start = 2026-08-25
+                     * end   = 2026-08-28
+                     *
+                     * The event appears on:
+                     *
+                     * Aug 25
+                     * Aug 26
+                     * Aug 27
+                     *
+                     * but not Aug 28.
+                     */
+
+                    if (
+                        event.allDay
+                    ) {
+
+                        const allDayDates =
+                            getAllDayEventDates(
+                                event,
+                                startDate,
+                                endDate
+                            );
+
+
+
+                        allDayDates.forEach(
+                            dateKey => {
+
+                                if (
+                                    !eventsByDate.has(
+                                        dateKey
+                                    )
+                                ) {
+
+                                    eventsByDate.set(
+                                        dateKey,
+                                        []
+                                    );
+
+                                }
+
+
+
+                                eventsByDate
+                                    .get(dateKey)
+                                    .push({
+
+                                        ...event,
+
+                                        calendarId
+
+                                    });
+
+                            }
+                        );
+
+
+
+                        continue;
+
+                    }
+
+
+
+                    /*
+                     * TIMED EVENT
+                     */
 
                     const eventDate =
                         getEventDate(
@@ -315,11 +422,13 @@ const largeCalendar = {
                         );
 
 
+
                     if (!eventDate) {
 
                         continue;
 
                     }
+
 
 
                     if (
@@ -334,6 +443,7 @@ const largeCalendar = {
                         );
 
                     }
+
 
 
                     eventsByDate
@@ -370,14 +480,17 @@ const largeCalendar = {
                     );
 
 
+
                     renderAuthorizationRequired(
                         wrapper
                     );
 
 
+
                     return;
 
                 }
+
 
 
                 /*
@@ -398,6 +511,7 @@ const largeCalendar = {
         }
 
 
+
         /*
          * CREATE FOUR WEEKS
          */
@@ -416,10 +530,12 @@ const largeCalendar = {
             );
 
 
+
             const dateKey =
                 formatDateKey(
                     date
                 );
+
 
 
             const isToday =
@@ -427,21 +543,50 @@ const largeCalendar = {
                 formatDateKey(today);
 
 
+
             const isPast =
                 dateKey <
                 formatDateKey(today);
 
 
+
+            /*
+             * GET EVENTS FOR THIS DATE
+             *
+             * At this point events from every calendar
+             * have already been merged into this date.
+             */
+
             const events =
-                eventsByDate.get(
-                    dateKey
-                ) || [];
+                [
+                    ...(eventsByDate.get(
+                        dateKey
+                    ) || [])
+                ];
+
+
+
+            /*
+             * SORT EVENTS BY TIME
+             *
+             * All-day events remain before timed events.
+             *
+             * Timed events are sorted by their actual
+             * start time regardless of which calendar
+             * they came from.
+             */
+
+            events.sort(
+                sortEventsByTime
+            );
+
 
 
             const forecast =
                 weatherByDate.get(
                     dateKey
                 ) || null;
+
 
 
             grid.appendChild(
@@ -458,6 +603,7 @@ const largeCalendar = {
         }
 
 
+
         /*
          * ADD GRID
          */
@@ -469,6 +615,7 @@ const largeCalendar = {
     }
 
 };
+
 
 
 /*
@@ -488,6 +635,7 @@ function renderAuthorizationRequired(
     wrapper.innerHTML = "";
 
 
+
     const message =
         document.createElement(
             "div"
@@ -495,6 +643,7 @@ function renderAuthorizationRequired(
 
     message.className =
         "large-calendar-widget__authorization";
+
 
 
     const title =
@@ -509,6 +658,7 @@ function renderAuthorizationRequired(
         "Google Calendar authorization required";
 
 
+
     const description =
         document.createElement(
             "div"
@@ -519,6 +669,7 @@ function renderAuthorizationRequired(
 
     description.textContent =
         "Google Calendar access has expired or been revoked. Reauthorize Google Calendar to restore your calendar.";
+
 
 
     const button =
@@ -536,6 +687,7 @@ function renderAuthorizationRequired(
         "Reauthorize Google Calendar";
 
 
+
     button.addEventListener(
         "click",
         () => {
@@ -545,6 +697,7 @@ function renderAuthorizationRequired(
 
         }
     );
+
 
 
     message.appendChild(
@@ -560,6 +713,7 @@ function renderAuthorizationRequired(
     );
 
 
+
     wrapper.appendChild(
         message
     );
@@ -567,8 +721,11 @@ function renderAuthorizationRequired(
 }
 
 
+
 /*
+ * ============================================================
  * CREATE DAY
+ * ============================================================
  */
 
 function createDay(
@@ -587,6 +744,7 @@ function createDay(
         "large-calendar-widget__day";
 
 
+
     /*
      * TODAY
      */
@@ -600,6 +758,7 @@ function createDay(
         );
 
     }
+
 
 
     /*
@@ -617,6 +776,7 @@ function createDay(
     }
 
 
+
     /*
      * DATE
      */
@@ -626,6 +786,7 @@ function createDay(
 
     number.className =
         "large-calendar-widget__day-number";
+
 
 
     if (
@@ -651,9 +812,11 @@ function createDay(
     }
 
 
+
     cell.appendChild(
         number
     );
+
 
 
     /*
@@ -675,6 +838,7 @@ function createDay(
     );
 
 
+
     /*
      * SEPARATE ALL-DAY
      * AND TIMED EVENTS
@@ -687,11 +851,13 @@ function createDay(
         );
 
 
+
     const timedEvents =
         events.filter(
             event =>
                 !event.allDay
         );
+
 
 
     /*
@@ -709,6 +875,7 @@ function createDay(
             "large-calendar-widget__all-day-events";
 
 
+
         allDayEvents.forEach(
             event => {
 
@@ -722,11 +889,13 @@ function createDay(
         );
 
 
+
         cell.appendChild(
             allDayContainer
         );
 
     }
+
 
 
     /*
@@ -744,6 +913,7 @@ function createDay(
             "large-calendar-widget__timed-events";
 
 
+
         timedEvents.forEach(
             event => {
 
@@ -757,6 +927,7 @@ function createDay(
         );
 
 
+
         cell.appendChild(
             timedContainer
         );
@@ -764,13 +935,502 @@ function createDay(
     }
 
 
+
     return cell;
 
 }
 
 
+
 /*
+ * ============================================================
+ * SORT EVENTS BY TIME
+ * ============================================================
+ *
+ * All-day events appear first.
+ *
+ * Timed events are sorted by their actual start
+ * timestamp, regardless of calendar.
+ *
+ * If two events have the same start time, their
+ * end time is used as a secondary sort.
+ *
+ * Finally, title provides a stable fallback.
+ */
+
+function sortEventsByTime(
+    a,
+    b
+) {
+
+    /*
+     * All-day events first.
+     */
+
+    if (
+        a.allDay &&
+        !b.allDay
+    ) {
+
+        return -1;
+
+    }
+
+
+
+    if (
+        !a.allDay &&
+        b.allDay
+    ) {
+
+        return 1;
+
+    }
+
+
+
+    /*
+     * Both are all-day.
+     *
+     * Preserve their existing order.
+     */
+
+    if (
+        a.allDay &&
+        b.allDay
+    ) {
+
+        return 0;
+
+    }
+
+
+
+    /*
+     * TIMED EVENTS
+     */
+
+    const aStart =
+        a.start
+            ? new Date(a.start).getTime()
+            : Number.MAX_SAFE_INTEGER;
+
+
+
+    const bStart =
+        b.start
+            ? new Date(b.start).getTime()
+            : Number.MAX_SAFE_INTEGER;
+
+
+
+    if (
+        aStart !== bStart
+    ) {
+
+        return aStart - bStart;
+
+    }
+
+
+
+    /*
+     * Same start time.
+     * Sort by end time.
+     */
+
+    const aEnd =
+        a.end
+            ? new Date(a.end).getTime()
+            : Number.MAX_SAFE_INTEGER;
+
+
+
+    const bEnd =
+        b.end
+            ? new Date(b.end).getTime()
+            : Number.MAX_SAFE_INTEGER;
+
+
+
+    if (
+        aEnd !== bEnd
+    ) {
+
+        return aEnd - bEnd;
+
+    }
+
+
+
+    /*
+     * Final stable-ish fallback.
+     */
+
+    return String(
+        a.title || ""
+    ).localeCompare(
+        String(
+            b.title || ""
+        )
+    );
+
+}
+
+
+
+/*
+ * ============================================================
+ * GET ALL-DAY EVENT DATES
+ * ============================================================
+ *
+ * Google Calendar all-day events use date-only values.
+ *
+ * The start date is inclusive.
+ * The end date is exclusive.
+ *
+ * Example:
+ *
+ * start = 2026-08-25
+ * end   = 2026-08-28
+ *
+ * Dates returned:
+ *
+ * 2026-08-25
+ * 2026-08-26
+ * 2026-08-27
+ *
+ * The function also clips the result to the
+ * four-week calendar display.
+ */
+
+function getAllDayEventDates(
+    event,
+    rangeStart,
+    rangeEnd
+) {
+
+    if (
+        !event.start
+    ) {
+
+        return [];
+
+    }
+
+
+
+    /*
+     * Some calendar data implementations may
+     * provide the all-day values as strings:
+     *
+     * YYYY-MM-DD
+     */
+
+    const eventStart =
+        parseDateOnly(
+            event.start
+        );
+
+
+
+    if (
+        !eventStart
+    ) {
+
+        return [];
+
+    }
+
+
+
+    /*
+     * Google Calendar's all-day end date
+     * is normally exclusive.
+     *
+     * If no end exists, treat it as a
+     * single-day event.
+     */
+
+    let eventEnd;
+
+    if (
+        event.end
+    ) {
+
+        eventEnd =
+            parseDateOnly(
+                event.end
+            );
+
+    }
+
+    else {
+
+        eventEnd =
+            new Date(
+                eventStart
+            );
+
+        eventEnd.setDate(
+            eventEnd.getDate() + 1
+        );
+
+    }
+
+
+
+    if (
+        !eventEnd
+    ) {
+
+        eventEnd =
+            new Date(
+                eventStart
+            );
+
+        eventEnd.setDate(
+            eventEnd.getDate() + 1
+        );
+
+    }
+
+
+
+    /*
+     * Clip the event to the visible
+     * four-week calendar range.
+     */
+
+    const visibleStart =
+        new Date(
+            rangeStart
+        );
+
+
+
+    visibleStart.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+
+    const visibleEnd =
+        new Date(
+            rangeEnd
+        );
+
+
+
+    visibleEnd.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+
+    /*
+     * If the event is completely outside
+     * the visible range, return nothing.
+     */
+
+    if (
+        eventEnd <= visibleStart ||
+        eventStart >= visibleEnd
+    ) {
+
+        return [];
+
+    }
+
+
+
+    const firstDate =
+        eventStart > visibleStart
+            ? new Date(eventStart)
+            : new Date(visibleStart);
+
+
+
+    const lastDateExclusive =
+        eventEnd < visibleEnd
+            ? new Date(eventEnd)
+            : new Date(visibleEnd);
+
+
+
+    const dates = [];
+
+
+
+    const current =
+        new Date(firstDate);
+
+
+
+    while (
+        current < lastDateExclusive
+    ) {
+
+        dates.push(
+            formatDateKey(
+                current
+            )
+        );
+
+
+
+        current.setDate(
+            current.getDate() + 1
+        );
+
+    }
+
+
+
+    return dates;
+
+}
+
+
+
+/*
+ * ============================================================
+ * PARSE DATE-ONLY VALUE
+ * ============================================================
+ *
+ * Avoid:
+ *
+ * new Date("2026-08-25")
+ *
+ * because date-only strings are interpreted as UTC
+ * and can shift to the previous day depending on
+ * the browser's timezone.
+ *
+ * Instead, construct the local date explicitly.
+ */
+
+function parseDateOnly(
+    value
+) {
+
+    if (
+        !value
+    ) {
+
+        return null;
+
+    }
+
+
+
+    /*
+     * Already a Date object.
+     */
+
+    if (
+        value instanceof Date
+    ) {
+
+        const result =
+            new Date(
+                value
+            );
+
+        result.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+        return result;
+
+    }
+
+
+
+    /*
+     * Handle YYYY-MM-DD.
+     */
+
+    if (
+        typeof value === "string" &&
+        /^\d{4}-\d{2}-\d{2}$/.test(
+            value
+        )
+    ) {
+
+        const [
+            year,
+            month,
+            day
+        ] =
+            value
+                .split("-")
+                .map(
+                    Number
+                );
+
+
+
+        return new Date(
+            year,
+            month - 1,
+            day
+        );
+
+    }
+
+
+
+    /*
+     * Fallback for other date formats.
+     */
+
+    const parsed =
+        new Date(
+            value
+        );
+
+
+
+    if (
+        Number.isNaN(
+            parsed.getTime()
+        )
+    ) {
+
+        return null;
+
+    }
+
+
+
+    parsed.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+
+    return parsed;
+
+}
+
+
+
+/*
+ * ============================================================
  * CREATE WEATHER
+ * ============================================================
  *
  * Returns a fixed-height weather row.
  *
@@ -790,6 +1450,7 @@ function createWeather(
         "large-calendar-widget__weather";
 
 
+
     if (
         !forecast ||
         isPast
@@ -798,6 +1459,7 @@ function createWeather(
         return weather;
 
     }
+
 
 
     /*
@@ -816,6 +1478,7 @@ function createWeather(
         );
 
 
+
     /*
      * HIGH
      */
@@ -828,6 +1491,7 @@ function createWeather(
 
     high.textContent =
         `${Math.round(forecast.high)}°`;
+
 
 
     /*
@@ -844,6 +1508,7 @@ function createWeather(
         `${Math.round(forecast.low)}°`;
 
 
+
     /*
      * PRECIPITATION
      */
@@ -856,6 +1521,7 @@ function createWeather(
 
     precipitation.textContent =
         `💧 ${forecast.precipitationProbability ?? 0}%`;
+
 
 
     /*
@@ -879,13 +1545,17 @@ function createWeather(
     );
 
 
+
     return weather;
 
 }
 
 
+
 /*
+ * ============================================================
  * WEATHER ICON
+ * ============================================================
  *
  * Open-Meteo WMO weather codes.
  */
@@ -987,8 +1657,11 @@ function getWeatherIcon(
 }
 
 
+
 /*
+ * ============================================================
  * CREATE ALL-DAY EVENT
+ * ============================================================
  *
  * ICON → TITLE
  */
@@ -1004,10 +1677,12 @@ function createAllDayEvent(
         "large-calendar-widget__all-day-event";
 
 
+
     const calendar =
         CALENDARS[
             event.calendarId
         ];
+
 
 
     /*
@@ -1019,11 +1694,13 @@ function createAllDayEvent(
         "#cccccc";
 
 
+
     item.style.backgroundColor =
         calendarColor;
 
     item.style.borderColor =
         calendarColor;
+
 
 
     /*
@@ -1043,6 +1720,7 @@ function createAllDayEvent(
         "&nbsp;";
 
 
+
     /*
      * TITLE
      */
@@ -1060,6 +1738,7 @@ function createAllDayEvent(
         "#ffffff";
 
 
+
     /*
      * BUILD
      */
@@ -1073,13 +1752,17 @@ function createAllDayEvent(
     );
 
 
+
     return item;
 
 }
 
 
+
 /*
+ * ============================================================
  * CREATE TIMED EVENT
+ * ============================================================
  *
  * ICON → TIME → TITLE
  */
@@ -1095,10 +1778,12 @@ function createEvent(
         "large-calendar-widget__event";
 
 
+
     const calendar =
         CALENDARS[
             event.calendarId
         ];
+
 
 
     /*
@@ -1118,6 +1803,7 @@ function createEvent(
         "&nbsp;";
 
 
+
     /*
      * TIME
      */
@@ -1129,10 +1815,12 @@ function createEvent(
         "large-calendar-widget__event-time";
 
 
+
     const start =
         new Date(
             event.start
         );
+
 
 
     const end =
@@ -1143,6 +1831,7 @@ function createEvent(
             : null;
 
 
+
     const startTime =
         start.toLocaleTimeString(
             undefined,
@@ -1151,6 +1840,7 @@ function createEvent(
                 minute: "2-digit"
             }
         );
+
 
 
     const endTime =
@@ -1165,9 +1855,11 @@ function createEvent(
             : "";
 
 
+
     time.innerHTML =
         `<span class="large-calendar-widget__event-start">${startTime}</span>` +
         `<span class="large-calendar-widget__event-end">→ ${endTime}</span>`;
+
 
 
     /*
@@ -1179,6 +1871,7 @@ function createEvent(
 
     content.className =
         "large-calendar-widget__event-content";
+
 
 
     /*
@@ -1195,9 +1888,11 @@ function createEvent(
         event.title;
 
 
+
     content.appendChild(
         title
     );
+
 
 
     /*
@@ -1218,11 +1913,13 @@ function createEvent(
             `at ${event.location}`;
 
 
+
         content.appendChild(
             location
         );
 
     }
+
 
 
     /*
@@ -1242,13 +1939,17 @@ function createEvent(
     );
 
 
+
     return item;
 
 }
 
 
+
 /*
+ * ============================================================
  * GET EVENT DATE
+ * ============================================================
  */
 
 function getEventDate(
@@ -1264,8 +1965,12 @@ function getEventDate(
     }
 
 
+
     /*
      * ALL-DAY EVENT
+     *
+     * All-day events are handled separately
+     * by getAllDayEventDates().
      */
 
     if (
@@ -1275,6 +1980,7 @@ function getEventDate(
         return event.start;
 
     }
+
 
 
     /*
@@ -1290,8 +1996,11 @@ function getEventDate(
 }
 
 
+
 /*
+ * ============================================================
  * FORMAT DATE KEY
+ * ============================================================
  *
  * YYYY-MM-DD
  */
@@ -1322,6 +2031,7 @@ function formatDateKey(
     return `${year}-${month}-${day}`;
 
 }
+
 
 
 export default largeCalendar;

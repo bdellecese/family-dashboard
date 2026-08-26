@@ -14,15 +14,18 @@ The dashboard is built using:
 - ES modules
 - Node.js
 - External web APIs
+- RSS feeds
 - Browser-based rendering
 
-There is no Node.js build process or bundler. Node.js is used as the production application server and for server-side services that require credentials or authentication that should not be exposed to the browser.
+There is no Node.js build process or bundler. Node.js is used as the production application server and for server-side services that require credentials, authentication, or server-side processing that should not be exposed to the browser.
 
 The production environment consists of:
 
 ```text
 Raspberry Pi
+
     |
+
     +-- Node.js application server
     |       |
     |       +-- Dashboard static files
@@ -50,33 +53,50 @@ The general application flow is:
 
 ```text
 Dashboard
+
     |
+
     v
+
 Screen Manager
+
     |
+
     v
+
 Screen
+
     |
+
     v
+
 Region
+
     |
+
     v
+
 Widget
+
     |
+
     v
-Data Service
+
+Widget-specific Data Service
+
     |
+
     +-- Browser-accessible external API
     |
     +-- Node.js server API
     |
-    +-- RSS Data Service
-
+    +-- Shared RSS Data Service
 ```
 
 Some services communicate directly with external APIs from the browser.
-
 Services requiring protected credentials, persistent authentication, or server-side processing communicate through the Node.js application server.
+
+RSS-based widgets use the shared RSS data service rather than implementing RSS retrieval independently.
 
 ---
 
@@ -86,6 +106,7 @@ The project currently follows this general structure:
 
 ```text
 /
+
 |
 +-- index.html
 |
@@ -120,14 +141,18 @@ The project currently follows this general structure:
 |   +-- rss/
 |   |   |
 |   |   +-- rss-data.js
+|   |
 |   +-- google-calendar/
 |   |   |
 |   |   +-- calendar-auth.js
 |   |   +-- calendar-data.js
 |   |   +-- google-calendar-server.js
-|
+|   |
+|   +-- quote-of-day/
+|   |   |
+|   |   +-- quote-of-day-data.js
+|   |
 |   +-- dashboard/
-|
 |   +-- ...
 |
 +-- scripts/
@@ -143,6 +168,7 @@ The project currently follows this general structure:
 |   +-- calendar-list/
 |   +-- countdown/
 |   +-- news/
+|   +-- quote-of-day/
 |   +-- prayer-list/
 |   +-- family-menu/
 |   +-- wifi/
@@ -152,6 +178,7 @@ The project currently follows this general structure:
 +-- docs/
 |   |
 |   +-- architecture.md
+|   +-- widgets.md
 ```
 
 The exact directory contents may evolve as additional screens, widgets, and services are added.
@@ -540,15 +567,18 @@ The screen manager should be the central authority for screen navigation.
 
 Widgets should not directly control which screen is displayed.
 
-## Future Navigation
+## Navigation
 
-The screen manager will eventually support both:
+The screen manager supports the concept of:
 
 ```text
-Automatic rotation
+Automatic Rotation
+
       |
+
       v
-Next screen
+
+Next Screen
 ```
 
 and:
@@ -563,7 +593,7 @@ Touchscreen
    +-- Home
 ```
 
-Both mechanisms should use the same screen navigation functions.
+Both mechanisms use the same screen navigation functions.
 
 ---
 
@@ -685,11 +715,13 @@ The preferred architecture is:
 Widget
   |
   v
-Data Service
+Widget-specific Data Service
   |
   +-- Browser-accessible API
   |
   +-- Node.js server API
+  |
+  +-- Shared RSS Data Service
 ```
 
 For example:
@@ -732,6 +764,49 @@ This separation allows:
 - Multiple widgets to reuse the same data source
 - API changes to be isolated from UI code
 - Credentials and refresh tokens to remain on the server
+
+---
+
+# Shared RSS Data Service
+
+The dashboard uses a shared RSS data service for widgets that consume RSS feeds.
+
+The primary service is:
+
+```text
+services/rss/rss-data.js
+```
+
+The RSS service is responsible for:
+
+- Fetching RSS feeds
+- Parsing RSS responses
+- Normalizing RSS stories
+- Managing RSS caching
+- Providing a consistent data structure to RSS-based widgets
+
+Widgets should not implement their own RSS fetching logic when the shared RSS service can be used.
+
+The architecture is:
+
+```text
+Widget-specific Data Service
+        |
+        v
+rss-data.js
+        |
+        v
+Configured RSS Feed
+```
+
+This allows multiple widgets to use different RSS feeds while sharing the same retrieval, parsing, normalization, and caching infrastructure.
+
+Examples include:
+
+- News
+- Sports News
+- Word of the Day
+- Quote of the Day
 
 ---
 
@@ -919,63 +994,6 @@ The exact endpoint implementation may evolve as additional calendar functionalit
 
 ---
 
-# RSS Data Service
-
-The dashboard uses a shared RSS data service for widgets that consume RSS feeds.
-
-The primary service is:
-
-services/rss/rss-data.js
-
-The RSS service is responsible for:
-
-- Fetching RSS feeds
-- Supplying a consistent RSS data structure
-- Handling RSS retrieval
-- Managing RSS caching
-- Providing RSS data to multiple widgets
-
-Widgets should not implement their own RSS fetching logic when the shared RSS service can be used.
-
-The architecture is:
-
-Widget
-   |
-   v
-Widget-specific Data Service
-   |
-   v
-RSS Data Service
-   |
-   v
-RSS Feed
-
-For example:
-
-Quote of the Day
-   |
-   v
-quote-of-day-data.js
-   |
-   v
-rss-data.js
-   |
-   v
-FixQuotes RSS
-
-News
-   |
-   v
-news data logic
-   |
-   v
-rss-data.js
-   |
-   v
-BBC RSS
-
----
-
 # News
 
 The News widget consumes RSS feeds through the shared RSS data service.
@@ -1011,25 +1029,50 @@ The Quote of the Day widget uses the shared RSS data service to retrieve the dai
 
 The service is:
 
+```text
 services/quote-of-day/quote-of-day-data.js
+```
 
 The FixQuotes RSS feed publishes multiple daily entries, including the current day's quote and future/past entries.
 
-The Quote of the Day data service therefore selects the story whose publication date matches the current dashboard date.
+The Quote of the Day data service selects the story whose publication date matches the current dashboard date.
 
-The RSS service is responsible for retrieving and normalizing the feed.
+For example, if the dashboard date is:
 
-The Quote of the Day service is responsible for selecting the appropriate daily story and extracting:
+```text
+2026-08-26
+```
 
-- Quote
-- Author
-- Source
-- Link
-- Publication date
-- Image
+the service selects the RSS story whose publication date is:
+
+```text
+2026-08-26
+```
+
+rather than simply selecting the first RSS story returned by the feed.
+
+This ensures that the displayed quote corresponds to the current dashboard date.
+
+The RSS service is responsible for:
+
+- Fetching the RSS feed
+- Parsing the RSS response
+- Normalizing RSS stories
+- Caching RSS data
+
+The Quote of the Day data service is responsible for:
+
+- Selecting the story for the current dashboard date
+- Extracting the quote
+- Extracting the author
+- Extracting the source
+- Extracting the link
+- Extracting the publication date
+- Extracting the image when available
 
 The architecture is:
 
+```text
 Quote of the Day Widget
         |
         v
@@ -1040,6 +1083,7 @@ rss-data.js
         |
         v
 FixQuotes RSS
+```
 
 ---
 
@@ -1302,15 +1346,15 @@ Screen rotation should not be implemented independently by individual widgets.
 
 # Touchscreen Navigation
 
-The eventual dashboard will support touchscreen navigation.
+The dashboard is intended to support touchscreen navigation.
 
-The navigation system should allow viewers to:
+The navigation system allows viewers to:
 
 - Move to the next screen
 - Move to the previous screen
 - Return to a primary/home screen
 
-Touchscreen navigation should communicate with the screen manager rather than directly manipulating screen DOM elements.
+Touchscreen navigation communicates with the screen manager rather than directly manipulating screen DOM elements.
 
 ## Automatic Rotation and Touch Interaction
 
@@ -1364,6 +1408,7 @@ The Node.js server is now an intentional part of the production architecture bec
 - Providing server-side API endpoints
 - Protecting Google Calendar authentication
 - Persisting OAuth refresh tokens
+- Supporting server-side data processing where required
 
 Additional infrastructure should only be introduced when it provides a meaningful benefit.
 
@@ -1375,6 +1420,9 @@ Long-lived credentials, OAuth refresh tokens, API secrets, and similar sensitive
 
 When building a new widget, first determine whether an existing data service can provide the required information.
 
+Shared services such as `rss-data.js` should be reused rather than duplicating common retrieval and parsing logic.
+
+
 ## 8. Test incrementally
 
 Changes should generally be introduced one file at a time and tested in the browser before moving to the next change.
@@ -1382,6 +1430,12 @@ Changes should generally be introduced one file at a time and tested in the brow
 ## 9. Keep deployment concerns centralized
 
 Startup, shutdown, process supervision, and display scheduling should be handled by the Raspberry Pi deployment layer rather than individual dashboard widgets.
+
+## 10. Keep shared data logic centralized
+
+When multiple widgets consume the same type of external data, common retrieval, parsing, normalization, and caching logic should be implemented in a shared data service.
+
+Widget-specific services should focus on transforming shared data into the information required by the widget.
 
 ---
 
@@ -1406,6 +1460,8 @@ The following screens are operational:
 - Large Calendar screen
 - Chores + Fun screen
 - Sports screen
+
+Screen order and duration are controlled by `config/screens.js`.
 
 Screen rotation is operational.
 
@@ -1440,6 +1496,34 @@ The following dashboard functionality is operational:
 - Sports Trivia
 - On This Day Sports
 - Sonos status
+
+## RSS Infrastructure
+
+The shared RSS data service is operational.
+
+RSS-based widgets use the shared service where applicable.
+
+The shared RSS service provides:
+
+- RSS retrieval
+- RSS parsing
+- Story normalization
+- RSS caching
+
+Current RSS-based functionality includes:
+
+- News
+- Sports News
+- Word of the Day
+- Quote of the Day
+
+## Quote of the Day
+
+Quote of the Day is operational.
+
+The widget retrieves stories through the shared RSS data service and selects the story whose publication date matches the current dashboard date.
+
+This prevents the widget from displaying a previous day's quote when the RSS feed contains multiple recent entries.
 
 ## Google Calendar Authorization
 
@@ -1520,42 +1604,78 @@ The current production architecture can be summarized as:
 
 ```text
                          Raspberry Pi
+
                               |
+
           +-------------------+-------------------+
+
           |                                       |
+
           v                                       v
+
       systemd                                  LightDM
+
           |                                       |
+
           v                                       v
+
 family-dashboard.service                        LabWC
+
           |                                       |
+
           v                                       v
+
        Node.js                            display-schedule.sh
+
           |                                       |
+
           v                                       v
+
    server/server.js                          Chromium
+
           |                                       |
+
           |                                       v
+
           +------------> localhost:3000 <----------+
+
                               |
+
                               v
+
                          Dashboard
+
                               |
+
                  +------------+------------+
+
                  |                         |
+
                  v                         v
+
               Widgets                 Data Services
+
                                            |
-                              +------------+------------+
-                              |                         |
-                              v                         v
-                         Browser APIs              Node.js APIs
-                                                        |
-                                                        v
-                                               Server-side Services
-                                                        |
-                                                        v
-                                               External APIs
+
+                         +-----------------+-----------------+
+
+                         |                 |                 |
+
+                         v                 v                 v
+
+                  Browser APIs       Node.js APIs      RSS Data Service
+
+                                           |                 |
+
+                                           v                 v
+
+                                  Server-side Services   RSS Feeds
+
+                                           |
+
+                                           v
+
+                                     External APIs
 ```
 
 The architecture intentionally separates:
@@ -1564,6 +1684,7 @@ The architecture intentionally separates:
 - Screen management
 - Widget rendering
 - Data services
+- Shared RSS infrastructure
 - Server-side authentication
 - Production server startup
 - Display process management
