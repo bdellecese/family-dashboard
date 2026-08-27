@@ -87,16 +87,16 @@
         {
             "id": "mlb-007",
             "sport": "MLB",
-            "difficulty": "easy",
-            "question": "How many strikes result in a strikeout?",
+            "difficulty": "hard",
+            "question": "Who is the only player in Major League Baseball history to hit a walk-off, inside-the-park grand slam home run?",
             "answers": [
-                "2",
-                "3",
-                "4",
-                "5"
+                "Roberto Clemente",
+                "Babe Ruth",
+                "Barry Bonds",
+                "Enos Slaughter"
             ],
-            "correctAnswer": "3",
-            "explanation": "A batter normally strikes out after three strikes."
+            "correctAnswer": "Roberto Clemente",
+            "explanation": "On July 25, 1956, in a game against the Chicago Cubs at Forbes Field, Roberto Clemente hit a deep drive that eluded the outfielders and rolled far enough for him to race all the way around the bases safely to win the game."
         },
         {
             "id": "mlb-008",
@@ -130,15 +130,15 @@
             "id": "mlb-010",
             "sport": "MLB",
             "difficulty": "medium",
-            "question": "Which pitcher is the only player to have his name used for the pitching Triple Crown award?",
+            "question": "What 300-game winner accumulated the same number of hits at the plate as he did wins on the mound?",
             "answers": [
                 "Cy Young",
                 "Walter Johnson",
-                "Sandy Koufax",
+                "Warren Spahn",
                 "Nolan Ryan"
             ],
-            "correctAnswer": "Cy Young",
-            "explanation": "The Cy Young Award is presented annually to the best pitcher in each league."
+            "correctAnswer": "Warren Spahn",
+            "explanation": "Spahn amassed 363 victories and 363 base hits in his 21-year career, split proportionately among the three teams he played for: Braves (356 wins and 356 hits); Mets (4 and 4) and Giants (3 and 3)."
         },
 
         {
@@ -200,16 +200,16 @@
         {
             "id": "nba-005",
             "sport": "NBA",
-            "difficulty": "easy",
-            "question": "How many points is a free throw worth?",
+            "difficulty": "medium",
+            "question": "Who has the most assists in NBA history?",
             "answers": [
-                "1",
-                "2",
-                "3",
-                "4"
+                "Magic Johnson",
+                "John Stockton",
+                "Jason Kidd",
+                "Lebron James"
             ],
-            "correctAnswer": "1",
-            "explanation": "A successful free throw is worth one point."
+            "correctAnswer": "John Stockton",
+            "explanation": "John Stockton holds the NBA all-time career record with 15,806 assists, averaging 10.5 assists per game. He led the NBA in assists a record nine consecutive seasons."
         },
         {
             "id": "nba-006",
@@ -281,7 +281,20 @@
             "correctAnswer": "Tim Duncan",
             "explanation": "Tim Duncan was famously nicknamed the Big Fundamental."
         },
-
+                {
+            "id": "nba-011",
+            "sport": "NBA",
+            "difficulty": "hard",
+            "question": "How many championships have the San Antonio Spurs won?",
+            "answers": [
+                "5",
+                "3",
+                "1",
+                "6"
+            ],
+            "correctAnswer": "5",
+            "explanation": "All five titles were won under head coach Gregg Popovich and featured franchise icon Tim Duncan."
+        },
         {
             "id": "nfl-001",
             "sport": "NFL",
