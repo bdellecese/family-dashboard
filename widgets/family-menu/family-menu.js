@@ -360,18 +360,56 @@ function renderMenu(
 
 
     /*
-     * ----------------------------------------
-     * Render days
-     * ----------------------------------------
-     */
+    * ----------------------------------------
+    * Render days
+    * ----------------------------------------
+    */
+
+    const today =
+        new Intl.DateTimeFormat(
+            "en-US",
+            {
+                weekday: "long"
+            }
+        ).format(
+            new Date()
+        );
+
 
     for (
         const meal of menu.meals
     ) {
 
+        const isToday =
+            meal.day === today;
+
+
         /*
-         * Day header
-         */
+        * Day section
+        */
+
+        const daySection =
+            document.createElement(
+                "div"
+            );
+
+
+        daySection.className =
+            "family-menu-widget__day";
+
+
+        if (isToday) {
+
+            daySection.classList.add(
+                "family-menu-widget__day--today"
+            );
+
+        }
+
+
+        /*
+        * Day header
+        */
 
         const dayElement =
             document.createElement(
@@ -383,40 +421,87 @@ function renderMenu(
             "family-menu-widget__day-name";
 
 
-        dayElement.textContent =
+        if (isToday) {
+
+            dayElement.classList.add(
+                "family-menu-widget__day-name--today"
+            );
+
+
+            const todayElement =
+                document.createElement(
+                    "span"
+                );
+
+
+            todayElement.className =
+                "family-menu-widget__today-label";
+
+
+            todayElement.textContent =
+                "TODAY";
+
+
+            dayElement.appendChild(
+                todayElement
+            );
+
+        }
+
+
+        const dayText =
+            document.createElement(
+                "span"
+            );
+
+
+        dayText.textContent =
             meal.day;
 
 
-        list.appendChild(
+        dayElement.appendChild(
+            dayText
+        );
+
+
+        daySection.appendChild(
             dayElement
         );
 
 
         /*
-         * Meals
-         */
+        * Meals
+        */
 
         addMeal(
-            list,
+            daySection,
             "B",
             meal.breakfast,
-            meal.breakfastUrl
+            meal.breakfastUrl,
+            isToday
         );
 
 
         addMeal(
-            list,
+            daySection,
             "L",
             meal.lunch,
-            meal.lunchUrl
+            meal.lunchUrl,
+            isToday
         );
 
 
         addMeal(
-            list,
+            daySection,
             "D",
             meal.dinner,
-            meal.dinnerUrl
+            meal.dinnerUrl,
+            isToday
+        );
+
+
+        list.appendChild(
+            daySection
         );
 
     }
@@ -434,7 +519,8 @@ function addMeal(
     container,
     prefix,
     meal,
-    url
+    url,
+    isToday = false
 ) {
 
     /*
@@ -457,6 +543,14 @@ function addMeal(
     element.className =
         "family-menu-widget__meal";
 
+
+    if (isToday) {
+
+        element.classList.add(
+            "family-menu-widget__meal--today"
+        );
+
+    }
 
     /*
      * Meal prefix

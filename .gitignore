@@ -10,4 +10,5 @@ config/todoist.js
 config/google-calendar.js
 config/google-calendar-token.json
 data/school-lunch/
+data/sports/
 data/dashboard-performance.json

@@ -4,6 +4,12 @@
 }
 
 
+/*
+ * ----------------------------------------
+ * Title
+ * ----------------------------------------
+ */
+
 .family-menu-widget__title {
     font-size: 1vw;
     margin-bottom: 16px;
@@ -15,23 +21,122 @@
 }
 
 
+/*
+ * ----------------------------------------
+ * Menu list
+ * ----------------------------------------
+ */
+
 .family-menu-widget__list {
     display: flex;
     flex-direction: column;
 }
 
 
+/*
+ * ----------------------------------------
+ * Day sections
+ * ----------------------------------------
+ */
+
+.family-menu-widget__day {
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+
+
+/*
+ * Normal days are intentionally muted
+ * so Today stands out.
+ */
+
+.family-menu-widget__day:not(
+    .family-menu-widget__day--today
+) {
+    opacity: .65;
+}
+
+
 .family-menu-widget__day-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
     font-size: .75vw;
 
-    margin-top: 12px;
     margin-bottom: 4px;
 }
 
 
+/*
+ * ----------------------------------------
+ * Today
+ * ----------------------------------------
+ */
+
+.family-menu-widget__day--today {
+    margin-top: 16px;
+    margin-bottom: 16px;
+
+    padding: 12px 14px 14px;
+
+    border-radius: 8px;
+
+    background:
+        rgba(135, 206, 235, 0.14);
+
+    border-left:
+        5px solid rgb(135, 206, 235);
+}
+
+
+.family-menu-widget__day-name--today {
+    font-size: .9vw;
+    font-weight: 500;
+
+    margin-bottom: 8px;
+}
+
+
+/*
+ * TODAY badge
+ */
+
+.family-menu-widget__today-label {
+    order: -1;
+
+    padding: 4px 9px;
+
+    background:
+        rgb(135, 206, 235);
+
+    color: #fff;
+
+    font-size: .55vw;
+    font-weight: 500;
+
+    letter-spacing: .1em;
+
+    border-radius: 4px;
+
+    text-shadow:
+        rgba(0, 0, 0, 0.25)
+        1px 1px 0px;
+}
+
+
+/*
+ * ----------------------------------------
+ * Meals
+ * ----------------------------------------
+ */
+
 .family-menu-widget__meal {
     display: grid;
-    grid-template-columns: 32px 32px minmax(0, 1fr);
+
+    grid-template-columns:
+        32px 32px minmax(0, 1fr);
+
     column-gap: 6px;
 
     align-items: baseline;
@@ -42,15 +147,59 @@
     margin-bottom: 4px;
 }
 
+
+.family-menu-widget__meal--today {
+    font-size: 1.1vw;
+    font-weight: 500;
+
+    margin-bottom: 6px;
+}
+
+
+/*
+ * ----------------------------------------
+ * Meal icon
+ * ----------------------------------------
+ */
+
 .family-menu-widget__meal i {
     width: 28px;
     text-align: center;
 }
 
+
+.family-menu-widget__meal-icon {
+    color: rgb(135, 206, 235);
+
+    font-size: 28px;
+    line-height: 20px;
+
+    width: 24px;
+
+    text-align: center;
+
+    text-shadow:
+        rgba(0, 0, 0, 0.3)
+        1px 1px 0px;
+}
+
+
+/*
+ * ----------------------------------------
+ * Meal prefix
+ * ----------------------------------------
+ */
+
 .family-menu-widget__meal-prefix {
     font-size: 28px;
 }
 
+
+/*
+ * ----------------------------------------
+ * Meal links
+ * ----------------------------------------
+ */
 
 .family-menu-widget__meal a {
     color: inherit;
@@ -60,16 +209,4 @@
 
 .family-menu-widget__meal a:hover {
     text-decoration: underline;
-}
-
-.family-menu-widget__meal-icon {
-    color: rgb(135, 206, 235);
-    font-size: 28px;
-    line-height: 20px;
-    width: 24px;
-
-    text-align: center;
-    text-shadow:
-        rgba(0, 0, 0, 0.3)
-        1px 1px 0px;
 }
