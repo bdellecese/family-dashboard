@@ -406,6 +406,10 @@ export async function getEventsForRange(
 
     return (
         data.items || []
+    )
+        .filter(
+            event =>
+                event.visibility !== "private"
     ).map(
         event => ({
 

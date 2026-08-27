@@ -91,7 +91,7 @@ export const CALENDARS = {
     /* WU Softball - Energy Athletics */
     "gvco5trj7a8eip611tr883v8jsbftad6@import.calendar.google.com": {
         name: "WU Softball",
-        icon: "fa-fw fas fa-baseball",
+        icon: "fa-fw fas fa-baseball-bat-ball",
         color: "rgb(228, 196, 65)"
     },
 
@@ -106,4 +106,11 @@ export const CALENDARS = {
         icon: "fa-fw fas fa-trophy",
         color: "#f5a623"
     },
+
+    /* Fall ball Softball */
+    "h9b6sa72im49g27qv0hc09ofird2bm27@import.calendar.google.com": {
+        name: "Fall ball Softball",
+        icon: "fa-fw fas fa-baseball",
+        color: "rgb(228, 196, 65)"
+    }
 };

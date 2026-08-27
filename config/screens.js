@@ -393,33 +393,35 @@ export const screens = {
 
                         calendars: [
 
-                            "family01156229611257150686@group.calendar.google.com",
+                            "family01156229611257150686@group.calendar.google.com", /* Family */
 
                             "barry.dellecese@gmail.com",
 
-                            "m1tj3sivp5mmipt3f5a0d164cifunqm4@import.calendar.google.com",
+                            "m1tj3sivp5mmipt3f5a0d164cifunqm4@import.calendar.google.com", /* Barry TripIt */
 
                             "natalie.dellecese@gmail.com",
 
-                            "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com",
+                            "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com", /* TSC */
 
                             "james.dellecese@gmail.com",
 
-                            "kkpcjqa95gv87cn0ojj5oi7s6o3h6195@import.calendar.google.com",
+                            "kkpcjqa95gv87cn0ojj5oi7s6o3h6195@import.calendar.google.com", /* WU U16 */
 
                             "isabella.c.dellecese@gmail.com",
 
-                            "snu45s689m3sm81dga137mebkmuraoq0@import.calendar.google.com",
+                            "snu45s689m3sm81dga137mebkmuraoq0@import.calendar.google.com", /* WU Softball - GC */
 
-                            "gvco5trj7a8eip611tr883v8jsbftad6@import.calendar.google.com",
+                            "gvco5trj7a8eip611tr883v8jsbftad6@import.calendar.google.com", /* WU Softball - Energy Athletics */
+
+                            "h9b6sa72im49g27qv0hc09ofird2bm27@import.calendar.google.com", /* Fall softball */
 
                             "alexander.dellecese@gmail.com",
 
-                            "878vjmvnrhp8soe4g89lmditinvg9tpm@import.calendar.google.com",
+                            "878vjmvnrhp8soe4g89lmditinvg9tpm@import.calendar.google.com", /* WU U10 */
 
                             "theodore.dellecese@gmail.com",
 
-                            "en.usa#holiday@group.v.calendar.google.com"
+                            "en.usa#holiday@group.v.calendar.google.com" /* US Holidays */
 
                         ],
 
