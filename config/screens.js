@@ -774,13 +774,6 @@ export const screens = {
                 {
 
                     name:
-                        "on-this-day-sports"
-
-                },
-
-                {
-
-                    name:
                         "sports-trivia"
 
                 }

@@ -128,7 +128,6 @@
  *
  * Top:
  *   News
- *   On This Day
  *
  * Bottom:
  *   Sports Trivia
@@ -171,9 +170,7 @@
 
 /*
  * ============================================================
- * COLUMN 2 TOP
- *
- * News + On This Day share the top half.
+ * COLUMN 2 NEWS
  * ============================================================
  */
 
@@ -201,9 +198,7 @@
 
 /*
  * ============================================================
- * COLUMN 2 SECOND WIDGET
- *
- * On This Day sits directly below News.
+ * COLUMN 2 TRIVIA
  * ============================================================
  */
 
@@ -216,40 +211,6 @@
 
     grid-row:
         2;
-
-    min-width:
-        0;
-
-    min-height:
-        0;
-
-    overflow:
-        hidden;
-
-}
-
-
-/*
- * ============================================================
- * COLUMN 2 TRIVIA
- *
- * Trivia occupies the bottom half.
- *
- * This is achieved by making the three widgets a
- * two-row layout where the first two widgets share
- * the top half and Trivia occupies the bottom half.
- * ============================================================
- */
-
-.sports-layout
-.column-2
-.widget:nth-child(3) {
-
-    grid-column:
-        1;
-
-    grid-row:
-        3;
 
     min-width:
         0;
