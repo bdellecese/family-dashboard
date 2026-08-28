@@ -46,28 +46,6 @@ export async function getCommuteData(
 
     /*
      * ----------------------------------------
-     * Check AM window
-     * ----------------------------------------
-     */
-
-    const currentTime =
-        getTimeString(now);
-
-
-    if (
-        currentTime <
-            COMMUTE_SETTINGS.amStart ||
-        currentTime >=
-            COMMUTE_SETTINGS.amEnd
-    ) {
-
-        return [];
-
-    }
-
-
-    /*
-     * ----------------------------------------
      * Build commute data
      * ----------------------------------------
      */
@@ -78,98 +56,125 @@ export async function getCommuteData(
 
                 /*
                  * --------------------------------
-                 * Find today's matching event
+                 * Find today's next matching events
                  * --------------------------------
                  */
 
-                const matchingEvent =
-                    findMatchingEvent(
+                const matchingEvents =
+                    findMatchingEvents(
                         destination,
-                        calendarEvents
-                    );
-
-
-                /*
-                 * No relevant event today
-                 */
-
-                if (
-                    !matchingEvent
-                ) {
-
-                    return null;
-
-                }
-
-
-                /*
-                 * --------------------------------
-                 * Get live travel time
-                 * --------------------------------
-                 */
-
-                const currentMinutes =
-                    currentMinutesByDestination[
-                        destination.id
-                    ];
-
-
-                /*
-                 * No travel data available
-                 */
-
-                if (
-                    currentMinutes === undefined
-                ) {
-
-                    return null;
-
-                }
-
-
-                /*
-                 * --------------------------------
-                 * Calculate delay
-                 * --------------------------------
-                 */
-
-                const delayMinutes =
-                    currentMinutes -
-                    destination.normalMinutes;
-
-
-                /*
-                 * --------------------------------
-                 * Determine arrival time
-                 *
-                 * The calendar event determines
-                 * when she needs to arrive.
-                 * --------------------------------
-                 */
-
-                const arriveBy =
-                    getEventStartTime(
-                        matchingEvent
-                    );
-
-
-                /*
-                 * --------------------------------
-                 * Calculate leave-by time
-                 *
-                 * Arrival buffer is added to the
-                 * travel time.
-                 * --------------------------------
-                 */
-
-                const leaveBy =
-                    calculateLeaveBy(
-                        arriveBy,
-                        currentMinutes,
-                        destination.arrivalBufferMinutes || 0,
+                        calendarEvents,
                         now
                     );
 
+
+                /*
+                 * No relevant events remaining
+                 * today.
+                 */
+
+                if (
+                    matchingEvents.length === 0
+                ) {
+
+                    return null;
+
+                }
+
+
+                /*
+                 * --------------------------------
+                 * Build upcoming events
+                 * --------------------------------
+                 *
+                 * Each event gets its own resolved
+                 * destination address.
+                 *
+                 * Priority:
+                 *
+                 *   1. destination.address
+                 *   2. event.location
+                 *
+                 * This allows sports events to have
+                 * different destinations.
+                 * --------------------------------
+                 */
+
+                const events =
+                    matchingEvents.map(
+                        event => {
+
+                            const address =
+                                destination.address ||
+                                event.location ||
+                                null;
+
+
+                            return {
+
+                                id:
+                                    event.id,
+
+                                title:
+                                    event.title,
+
+                                start:
+                                    event.start,
+
+                                end:
+                                    event.end,
+
+                                /*
+                                 * Original calendar
+                                 * location.
+                                 */
+
+                                location:
+                                    event.location,
+
+                                /*
+                                 * Resolved commute
+                                 * destination.
+                                 *
+                                 * Config address wins.
+                                 * Otherwise use the
+                                 * event location.
+                                 */
+
+                                address,
+
+                                /*
+                                 * Event start is the
+                                 * required arrival time.
+                                 */
+
+                                arriveBy:
+                                    getEventStartTime(
+                                        event
+                                    ),
+
+                                /*
+                                 * Populated later by
+                                 * commute-server.js.
+                                 */
+
+                                currentMinutes:
+                                    null,
+
+                                leaveBy:
+                                    null
+
+                            };
+
+                        }
+                    );
+
+
+                /*
+                 * --------------------------------
+                 * Return destination
+                 * --------------------------------
+                 */
 
                 return {
 
@@ -179,46 +184,34 @@ export async function getCommuteData(
                     name:
                         destination.name,
 
-                    address:
-                        destination.address,
+                    /*
+                     * Keep configured address
+                     * when one exists.
+                     *
+                     * Otherwise this remains null
+                     * because the actual address is
+                     * event-specific.
+                     */
 
-                    currentMinutes,
+                    address:
+                        destination.address ||
+                        null,
+
+                    /*
+                     * Optional.
+                     *
+                     * Only destinations that have
+                     * normalMinutes configured will
+                     * have delay/status comparisons.
+                     */
 
                     normalMinutes:
                         destination.normalMinutes,
 
-                    delayMinutes,
-
-                    arriveBy,
-
                     arrivalBufferMinutes:
                         destination.arrivalBufferMinutes || 0,
 
-                    leaveBy,
-
-                    event: {
-
-                        id:
-                            matchingEvent.id,
-
-                        title:
-                            matchingEvent.title,
-
-                        start:
-                            matchingEvent.start,
-
-                        end:
-                            matchingEvent.end,
-
-                        location:
-                            matchingEvent.location
-
-                    },
-
-                    status:
-                        getStatus(
-                            delayMinutes
-                        )
+                    events
 
                 };
 
@@ -233,24 +226,23 @@ export async function getCommuteData(
 
 /*
  * ============================================
- * FIND MATCHING EVENT
+ * FIND MATCHING EVENTS
  * ============================================
+ *
+ * Returns up to two matching events occurring
+ * later today.
+ *
+ * Events whose start time has already passed
+ * are ignored.
  *
  * Matching behavior comes from the
  * destination.calendarMatch configuration.
- *
- * type: "calendar"
- *     Matches any event on the specified
- *     calendar.
- *
- * type: "title"
- *     Matches an event whose title contains
- *     the configured value.
  */
 
-function findMatchingEvent(
+function findMatchingEvents(
     destination,
-    calendarEvents
+    calendarEvents,
+    now
 ) {
 
     const match =
@@ -261,39 +253,43 @@ function findMatchingEvent(
         !match
     ) {
 
-        return null;
+        return [];
 
     }
 
 
     /*
      * ----------------------------------------
-     * Match by calendar
+     * Find matching events
      * ----------------------------------------
+     */
+
+    let matchingEvents;
+
+
+    /*
+     * MATCH BY CALENDAR
      */
 
     if (
         match.type === "calendar"
     ) {
 
-        return (
-            calendarEvents.find(
+        matchingEvents =
+            calendarEvents.filter(
                 event =>
                     event.calendarId ===
                     match.calendarId
-            ) || null
-        );
+            );
 
     }
 
 
     /*
-     * ----------------------------------------
-     * Match by title
-     * ----------------------------------------
+     * MATCH BY TITLE
      */
 
-    if (
+    else if (
         match.type === "title"
     ) {
 
@@ -309,12 +305,13 @@ function findMatchingEvent(
             !searchValue
         ) {
 
-            return null;
+            return [];
 
         }
 
-        return (
-            calendarEvents.find(
+
+        matchingEvents =
+            calendarEvents.filter(
                 event =>
                     event.calendarId ===
                         match.calendarId &&
@@ -325,12 +322,95 @@ function findMatchingEvent(
                     .includes(
                         searchValue
                     )
-            ) || null
-        );
+            );
+
     }
 
 
-    return null;
+    else {
+
+        return [];
+
+    }
+
+
+    /*
+     * ----------------------------------------
+     * Keep timed events that have not started
+     * yet.
+     *
+     * All-day events are excluded because they
+     * do not provide a useful arrival time.
+     * ----------------------------------------
+     */
+
+    matchingEvents =
+        matchingEvents.filter(
+            event => {
+
+                if (
+                    !event.start ||
+                    !event.start.includes("T")
+                ) {
+
+                    return false;
+
+                }
+
+
+                const eventStart =
+                    new Date(
+                        event.start
+                    );
+
+
+                if (
+                    Number.isNaN(
+                        eventStart.getTime()
+                    )
+                ) {
+
+                    return false;
+
+                }
+
+
+                return (
+                    eventStart > now
+                );
+
+            }
+        );
+
+
+    /*
+     * ----------------------------------------
+     * Sort chronologically.
+     * ----------------------------------------
+     */
+
+    matchingEvents.sort(
+        (a, b) => {
+
+            return (
+                new Date(a.start).getTime() -
+                new Date(b.start).getTime()
+            );
+
+        }
+    );
+
+
+    /*
+     * ----------------------------------------
+     * Return the next two events only.
+     * ----------------------------------------
+     */
+
+    return matchingEvents.slice(
+        0,
+        2
+    );
 
 }
 
@@ -390,105 +470,6 @@ function getEventStartTime(
 
     return getTimeString(
         eventStart
-    );
-
-}
-
-
-/*
- * ============================================
- * STATUS
- * ============================================
- */
-
-function getStatus(
-    delayMinutes
-) {
-
-    if (
-        delayMinutes <= 2
-    ) {
-
-        return "normal";
-
-    }
-
-
-    if (
-        delayMinutes <= 5
-    ) {
-
-        return "slower";
-
-    }
-
-
-    return "delayed";
-
-}
-
-
-/*
- * ============================================
- * LEAVE BY
- * ============================================
- */
-
-function calculateLeaveBy(
-    arriveBy,
-    travelMinutes,
-    arrivalBufferMinutes,
-    now
-) {
-
-    if (
-        !arriveBy
-    ) {
-
-        return null;
-
-    }
-
-
-    const [
-        hours,
-        minutes
-    ] =
-        arriveBy
-            .split(":")
-            .map(Number);
-
-
-    const arrival =
-        new Date(
-            now
-        );
-
-
-    arrival.setHours(
-        hours,
-        minutes,
-        0,
-        0
-    );
-
-
-    /*
-     * Leave early enough to cover both:
-     *
-     *   1. current travel time
-     *   2. configured arrival buffer
-     */
-
-    arrival.setMinutes(
-        arrival.getMinutes() -
-        travelMinutes -
-        arrivalBufferMinutes
-    );
-
-
-    return getTimeString(
-        arrival
     );
 
 }

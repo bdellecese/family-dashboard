@@ -13,7 +13,9 @@ const commute = {
 
 
         /*
+         * ========================================================
          * WRAPPER
+         * ========================================================
          */
 
         const wrapper =
@@ -28,7 +30,9 @@ const commute = {
 
 
         /*
+         * ========================================================
          * TITLE
+         * ========================================================
          */
 
         const title =
@@ -46,7 +50,9 @@ const commute = {
 
 
         /*
+         * ========================================================
          * LOAD DATA
+         * ========================================================
          */
 
         let data;
@@ -97,7 +103,11 @@ const commute = {
 
 
         /*
-         * NO COMMUTE DATA
+         * ========================================================
+         * NO COMMUTE EVENTS TO DISPLAY
+         * ========================================================
+         *
+         * No remaining commute events today.
          */
 
         if (
@@ -111,8 +121,35 @@ const commute = {
             message.className =
                 "commute-widget__empty";
 
-            message.textContent =
-                "No commute events to display!";
+
+            const title =
+                document.createElement("div");
+
+            title.className =
+                "commute-widget__empty-title";
+
+            title.textContent =
+                "🎉 You're all done!";
+
+
+            const subtitle =
+                document.createElement("div");
+
+            subtitle.className =
+                "commute-widget__empty-subtitle";
+
+            subtitle.textContent =
+                "No more commutes today.";
+
+
+            message.appendChild(
+                title
+            );
+
+            message.appendChild(
+                subtitle
+            );
+
 
             wrapper.appendChild(
                 message
@@ -124,7 +161,9 @@ const commute = {
 
 
         /*
+         * ========================================================
          * DESTINATIONS
+         * ========================================================
          */
 
         const destinations =
@@ -157,7 +196,9 @@ const commute = {
 
 
 /*
+ * ============================================================
  * DESTINATION
+ * ============================================================
  */
 
 function createDestination(
@@ -172,7 +213,9 @@ function createDestination(
 
 
     /*
+     * ========================================================
      * NAME
+     * ========================================================
      */
 
     const name =
@@ -186,123 +229,81 @@ function createDestination(
 
 
     /*
+     * ========================================================
      * ADDRESS
+     * ========================================================
+     *
+     * Only show an address here when it is configured.
+     *
+     * For event-based destinations, the address belongs
+     * to the individual event.
      */
 
-    const address =
-        document.createElement("div");
+    if (
+        item.address
+    ) {
 
-    address.className =
-        "commute-widget__address";
+        const address =
+            document.createElement("div");
 
-    address.textContent =
-        item.address;
+        address.className =
+            "commute-widget__address";
 
+        address.textContent =
+            item.address;
 
-    /*
-     * CURRENT COMMUTE
-     */
-
-    const current =
-        document.createElement("div");
-
-    current.className =
-        "commute-widget__current";
-
-
-    const icon =
-        document.createElement("i");
-
-    icon.className =
-        "fas fa-car commute-widget__icon";
-
-    icon.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-
-
-    const minutes =
-        document.createElement("span");
-
-    minutes.className =
-        "commute-widget__minutes";
-
-    minutes.textContent =
-        `${item.currentMinutes} min`;
-
-
-    const status =
-        document.createElement("span");
-
-    status.className =
-        `commute-widget__status commute-widget__status--${item.status}`;
-
-    status.textContent =
-        formatStatus(
-            item.status,
-            item.delayMinutes
+        destination.appendChild(
+            address
         );
 
-
-    current.appendChild(
-        icon
-    );
-
-    current.appendChild(
-        minutes
-    );
-
-    current.appendChild(
-        status
-    );
+    }
 
 
     /*
-     * TIMES
+     * ========================================================
+     * UPCOMING EVENTS
+     * ========================================================
      */
 
-    const times =
+    const events =
         document.createElement("div");
 
-    times.className =
-        "commute-widget__times";
+    events.className =
+        "commute-widget__events";
 
 
-    times.appendChild(
-        createTime(
-            "Leave by",
-            item.leaveBy
-        )
-    );
+    /*
+     * Render each upcoming event.
+     */
 
-    times.appendChild(
-        createTime(
-            "Arrive by",
-            item.arriveBy,
-            item.arrivalBufferMinutes
-        )
+    item.events.forEach(
+        event => {
+
+            events.appendChild(
+                createEvent(
+                    event,
+                    item.arrivalBufferMinutes,
+                    item.address
+                )
+            );
+
+        }
     );
 
 
     /*
+     * ========================================================
      * BUILD
+     * ========================================================
      */
 
-    destination.appendChild(
-        name
+    destination.insertBefore(
+        name,
+        destination.firstChild
     );
 
     destination.appendChild(
-        address
-    );
-
-    destination.appendChild(
-        current
-    );
-
-    destination.appendChild(
-        times
+        events
     );
 
 
@@ -312,7 +313,211 @@ function createDestination(
 
 
 /*
+ * ============================================================
+ * EVENT
+ * ============================================================
+ */
+
+function createEvent(
+    event,
+    arrivalBufferMinutes,
+    configuredAddress
+) {
+
+    const element =
+        document.createElement("div");
+
+    element.className =
+        "commute-widget__event";
+
+
+    /*
+     * ========================================================
+     * EVENT TITLE
+     * ========================================================
+     */
+
+    const title =
+        document.createElement("div");
+
+    title.className =
+        "commute-widget__event-title";
+
+    title.textContent =
+        event.title;
+
+
+    /*
+     * ========================================================
+     * EVENT LOCATION
+     * ========================================================
+     *
+     * Only show the event location when the destination
+     * itself does not have a configured address.
+     *
+     * This keeps fixed destinations clean while allowing
+     * sports events to show their actual location.
+     */
+
+    if (
+        event.address &&
+        !configuredAddress
+    ) {
+
+        const address =
+            document.createElement("div");
+
+        address.className =
+            "commute-widget__event-address";
+
+        address.textContent =
+            event.address;
+
+        element.appendChild(
+            address
+        );
+
+    }
+
+
+    /*
+     * ========================================================
+     * CURRENT TRAVEL TIME
+     * ========================================================
+     */
+
+    if (
+        event.currentMinutes !== null &&
+        event.currentMinutes !== undefined
+    ) {
+
+        const current =
+            document.createElement("div");
+
+        current.className =
+            "commute-widget__current";
+
+
+        const icon =
+            document.createElement("i");
+
+        icon.className =
+            "fas fa-car commute-widget__icon";
+
+        icon.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+        const minutes =
+            document.createElement("span");
+
+        minutes.className =
+            "commute-widget__minutes";
+
+        minutes.textContent =
+            `${event.currentMinutes} min`;
+
+
+        current.appendChild(
+            icon
+        );
+
+        current.appendChild(
+            minutes
+        );
+
+
+        /*
+         * STATUS
+         */
+
+        if (
+            event.status &&
+            event.delayMinutes !== undefined
+        ) {
+
+            const status =
+                document.createElement("span");
+
+            status.className =
+                `commute-widget__status commute-widget__status--${event.status}`;
+
+            status.textContent =
+                formatStatus(
+                    event.status,
+                    event.delayMinutes
+                );
+
+            current.appendChild(
+                status
+            );
+
+        }
+
+
+        element.appendChild(
+            current
+        );
+
+    }
+
+
+    /*
+     * ========================================================
+     * TIMES
+     * ========================================================
+     */
+
+    const times =
+        document.createElement("div");
+
+    times.className =
+        "commute-widget__event-times";
+
+
+    times.appendChild(
+        createTime(
+            "Leave",
+            event.leaveBy
+        )
+    );
+
+
+    times.appendChild(
+        createTime(
+            "Arrive",
+            event.arriveBy,
+            arrivalBufferMinutes
+        )
+    );
+
+
+    /*
+     * ========================================================
+     * BUILD
+     * ========================================================
+     */
+
+    element.appendChild(
+        title
+    );
+
+    element.appendChild(
+        times
+    );
+
+
+    return element;
+
+}
+
+
+/*
+ * ============================================================
  * TIME
+ * ============================================================
  */
 
 function createTime(
@@ -344,10 +549,23 @@ function createTime(
     valueElement.className =
         "commute-widget__time-value";
 
-    valueElement.textContent =
-        formatTime(
-            value
-        );
+
+    if (
+        value
+    ) {
+
+        valueElement.textContent =
+            formatTime(
+                value
+            );
+
+    }
+    else {
+
+        valueElement.textContent =
+            "--";
+
+    }
 
 
     element.appendChild(
@@ -360,11 +578,13 @@ function createTime(
 
 
     /*
+     * ========================================================
      * ARRIVAL BUFFER
+     * ========================================================
      */
 
     if (
-        label === "Arrive by" &&
+        label === "Arrive" &&
         arrivalBufferMinutes > 0
     ) {
 
@@ -390,7 +610,9 @@ function createTime(
 
 
 /*
+ * ============================================================
  * FORMAT TIME
+ * ============================================================
  */
 
 function formatTime(
@@ -422,7 +644,9 @@ function formatTime(
 
 
 /*
+ * ============================================================
  * STATUS
+ * ============================================================
  */
 
 function formatStatus(

@@ -126,57 +126,161 @@ export async function getCommute() {
 
     /*
      * ----------------------------------------
-     * Get live travel times
+     * Build base commute data
      * ----------------------------------------
      *
-     * Only request driving times for
-     * destinations that actually have a
-     * matching event today.
+     * This determines the next two matching
+     * events for each configured destination.
      * ----------------------------------------
      */
 
-    const currentMinutesByDestination =
-        {};
+    const commuteData =
+        await getCommuteData(
+            {},
+            now,
+            calendarEvents
+        );
 
+
+    /*
+     * ----------------------------------------
+     * Calculate live travel time
+     * ----------------------------------------
+     *
+     * Travel time is calculated per event
+     * because each event may have a different
+     * destination.
+     * ----------------------------------------
+     */
 
     for (
         const destination of
-        COMMUTE_DESTINATIONS
+        commuteData
     ) {
 
-        const matchingEvent =
-            findMatchingEvent(
-                destination,
-                calendarEvents
-            );
-
-
-        if (
-            !matchingEvent
+        for (
+            const event of
+            destination.events
         ) {
 
-            continue;
+            /*
+             * --------------------------------
+             * Determine destination address
+             * --------------------------------
+             *
+             * Configured address takes priority.
+             *
+             * If there is no configured address,
+             * use the event location.
+             * --------------------------------
+             */
 
-        }
+            const address =
+                event.address;
 
 
-        try {
+            /*
+             * --------------------------------
+             * No address available
+             * --------------------------------
+             */
 
-            currentMinutesByDestination[
-                destination.id
-            ] =
-                await getDrivingDuration(
-                    destination.address
+            if (
+                !address
+            ) {
+
+                console.warn(
+                    `No commute address available for ${event.title}`
                 );
 
-        }
+                event.currentMinutes =
+                    null;
 
-        catch (error) {
+                event.leaveBy =
+                    null;
 
-            console.error(
-                `Commute lookup failed for ${destination.name}:`,
-                error.message
-            );
+                continue;
+
+            }
+
+
+            /*
+             * --------------------------------
+             * Get live driving duration
+             * --------------------------------
+             */
+
+            try {
+
+                const currentMinutes =
+                    await getDrivingDuration(
+                        address
+                    );
+
+
+                event.currentMinutes =
+                    currentMinutes;
+
+
+                /*
+                 * --------------------------------
+                 * Calculate leave-by time
+                 * --------------------------------
+                 */
+
+                event.leaveBy =
+                    calculateLeaveBy(
+                        event.arriveBy,
+                        currentMinutes,
+                        destination.arrivalBufferMinutes,
+                        now
+                    );
+
+
+                /*
+                 * --------------------------------
+                 * Calculate delay/status only
+                 * when normalMinutes is configured.
+                 * --------------------------------
+                 */
+
+                if (
+                    destination.normalMinutes !==
+                    undefined &&
+                    destination.normalMinutes !==
+                    null
+                ) {
+
+                    event.normalMinutes =
+                        destination.normalMinutes;
+
+                    event.delayMinutes =
+                        currentMinutes -
+                        destination.normalMinutes;
+
+                    event.status =
+                        getStatus(
+                            event.delayMinutes
+                        );
+
+                }
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    `Commute lookup failed for ${event.title}:`,
+                    error.message
+                );
+
+                event.currentMinutes =
+                    null;
+
+                event.leaveBy =
+                    null;
+
+            }
 
         }
 
@@ -185,36 +289,50 @@ export async function getCommute() {
 
     /*
      * ----------------------------------------
-     * Calculate commute data
+     * Remove events where travel time could
+     * not be determined.
      * ----------------------------------------
      */
 
-    return await getCommuteData(
-        currentMinutesByDestination,
-        now,
-        calendarEvents
-    );
+    return commuteData
+        .map(
+            destination => {
+
+                destination.events =
+                    destination.events.filter(
+                        event =>
+                            event.currentMinutes !== null
+                    );
+
+                return destination;
+
+            }
+        )
+        .filter(
+            destination =>
+                destination.events.length > 0
+        );
 
 }
 
 
 /*
  * ============================================
- * FIND MATCHING EVENT
+ * LEAVE BY
  * ============================================
  */
 
-function findMatchingEvent(
-    destination,
-    calendarEvents
+function calculateLeaveBy(
+    arriveBy,
+    travelMinutes,
+    arrivalBufferMinutes,
+    now
 ) {
 
-    const match =
-        destination.calendarMatch;
-
-
     if (
-        !match
+        !arriveBy ||
+        travelMinutes === null ||
+        travelMinutes === undefined
     ) {
 
         return null;
@@ -222,83 +340,101 @@ function findMatchingEvent(
     }
 
 
-    /*
-     * ----------------------------------------
-     * Only consider events from the configured
-     * calendar.
-     * ----------------------------------------
-     */
+    const [
+        hours,
+        minutes
+    ] =
+        arriveBy
+            .split(":")
+            .map(Number);
 
-    const events =
-        calendarEvents.filter(
-            event =>
-                event.calendarId ===
-                match.calendarId
+
+    const arrival =
+        new Date(
+            now
         );
 
 
+    arrival.setHours(
+        hours,
+        minutes,
+        0,
+        0
+    );
+
+
     /*
-     * ----------------------------------------
-     * Match any event on the calendar
-     * ----------------------------------------
+     * Leave early enough to cover:
+     *
+     *   1. current travel time
+     *   2. configured arrival buffer
      */
+
+    arrival.setMinutes(
+        arrival.getMinutes() -
+        travelMinutes -
+        (arrivalBufferMinutes || 0)
+    );
+
+
+    return getTimeString(
+        arrival
+    );
+
+}
+
+
+/*
+ * ============================================
+ * STATUS
+ * ============================================
+ */
+
+function getStatus(
+    delayMinutes
+) {
 
     if (
-        match.type === "calendar"
+        delayMinutes <= 2
     ) {
 
-        return (
-            events[0] ||
-            null
-        );
+        return "normal";
 
     }
 
 
-    /*
-     * ----------------------------------------
-     * Match event title
-     * ----------------------------------------
-     */
-
     if (
-        match.type === "title"
+        delayMinutes <= 5
     ) {
 
-        const searchValue =
-            String(
-                match.value || ""
-            )
-            .trim()
-            .toLowerCase();
+        return "slower";
+
+    }
 
 
-        if (
-            !searchValue
-        ) {
+    return "delayed";
 
-            return null;
+}
 
+
+/*
+ * ============================================
+ * TIME STRING
+ * ============================================
+ */
+
+function getTimeString(
+    date
+) {
+
+    return new Intl.DateTimeFormat(
+        "en-US",
+        {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
         }
-
-
-        return (
-            events.find(
-                event =>
-                    String(
-                        event.title || ""
-                    )
-                    .toLowerCase()
-                    .includes(
-                        searchValue
-                    )
-            ) ||
-            null
-        );
-
-    }
-
-
-    return null;
+    )
+    .format(date);
 
 }

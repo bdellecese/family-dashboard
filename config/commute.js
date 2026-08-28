@@ -5,12 +5,10 @@ export const COMMUTE_SETTINGS = {
         "Tuesday",
         "Wednesday",
         "Thursday",
-        "Friday"
-    ],
-
-    amStart: "06:00",
-
-    amEnd: "23:59"
+        "Friday",
+        "Saturday",
+        "Sunday"
+    ]
 
 };
 
@@ -20,7 +18,7 @@ export const COMMUTE_ORIGIN =
 export const COMMUTE_DESTINATIONS = [
 
     {
-        id: "work-1",
+        id: "commute-1",
 
         name: "The Surgery Center",
 
@@ -38,7 +36,7 @@ export const COMMUTE_DESTINATIONS = [
     },
 
     {
-        id: "work-2",
+        id: "commute-2",
 
         name: "UMass Memorial",
 
@@ -54,6 +52,21 @@ export const COMMUTE_DESTINATIONS = [
             value: "UMass"
         }
 
-    }
+    },
+    
+    {
+        id: "commute-3",
+
+        name: "Wachusett United",
+
+        arrivalBufferMinutes: 10,
+
+        calendarMatch: {
+            type: "calendar",
+            calendarId:
+                "878vjmvnrhp8soe4g89lmditinvg9tpm@import.calendar.google.com"
+        }
+
+    }   
 
 ];
