@@ -9,6 +9,8 @@ config/todoist.js
 
 config/google-calendar.js
 config/google-calendar-token.json
+config/google-routes.js
+
 data/school-lunch/
 data/sports/
 data/dashboard-performance.json

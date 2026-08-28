@@ -46,6 +46,11 @@ import {
 import rssData
     from "../services/rss/rss-data.js";
 
+import {
+    getCommute
+} from "../services/commute/commute-server.js";
+
+
 const HOST = "0.0.0.0";
 const PORT = 3000;
 
@@ -1018,6 +1023,74 @@ const server =
 
             }
 
+
+            // =================================================
+            // COMMUTE
+            // =================================================
+
+            if (
+                requestUrl.pathname ===
+                    "/api/commute"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                try {
+
+                    const commute =
+                        await getCommute();
+
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify(
+                            commute
+                        )
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Commute error:",
+                        error
+                    );
+
+
+                    response.writeHead(
+                        500,
+                        {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            error:
+                                error.message
+
+                        })
+                    );
+
+                }
+
+
+                return;
+
+            }
 
             // =================================================
             // HEALTH CHECK
