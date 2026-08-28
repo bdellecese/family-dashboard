@@ -526,7 +526,7 @@ information: {
     theme: "dark",
 
     duration: {
-        minutes: 20
+        seconds: 60
     },
 
     regions: {
@@ -764,6 +764,64 @@ This separation allows:
 - Multiple widgets to reuse the same data source
 - API changes to be isolated from UI code
 - Credentials and refresh tokens to remain on the server
+
+---
+
+# Data Caching
+
+Data services may use caching to reduce unnecessary requests to external
+services and improve dashboard responsiveness.
+
+Shared caching infrastructure is provided by:
+
+```text
+services/cache/cache.js
+```
+
+The cache provides a simple in-memory key/value mechanism with expiration
+support.
+
+The general pattern is:
+
+```text
+Widget
+|
+v
+Data Service
+|
+v
+Cache
+|
++-- Cache HIT --> Return cached data
+|
++-- Cache MISS
+|
+v
+External API
+|
+v
+Cache result
+|
+v
+Return data
+```
+
+Caching is service-specific. Each data service determines whether caching
+is appropriate and controls the appropriate cache lifetime for its data.
+
+Caching is intended to:
+
+- Reduce external API requests
+- Reduce dependency on external service availability
+- Improve dashboard response time
+- Avoid repeatedly retrieving unchanged data
+- Reduce unnecessary authentication or network activity
+
+The cache is currently process-local and in-memory. Cached data is therefore
+lost when the Node.js process restarts.
+
+The cache should not be treated as persistent storage or as the source of
+truth for application data.
 
 ---
 
@@ -1089,13 +1147,42 @@ FixQuotes RSS
 
 # Photos
 
-The photo widget is intended to display rotating photos.
+The Photo widget displays rotating photos from an iCloud shared photo
+album.
 
-The current implementation is designed around an iCloud shared photo album.
+The browser does not retrieve the iCloud photo stream directly. The
+dashboard uses a Node.js server-side data service to communicate with
+iCloud and provide photo data to the browser.
 
-Browser CORS restrictions may affect direct access to iCloud services during development.
+The architecture is:
 
-A server-side proxy or alternative data service should only be introduced if required.
+Photo Widget
+      |
+      v
+/api/photos
+      |
+      v
+iCloud Photo Data Service
+      |
+      v
+Cache
+      |
+      v
+iCloud Shared Photo Album
+
+The iCloud photo data service is responsible for:
+
+- Communicating with the iCloud shared photo service
+- Filtering the album contents to supported image assets
+- Selecting the photos used by the dashboard
+- Retrieving asset URLs
+- Caching photo data to reduce repeated iCloud requests
+
+The photo service maintains a cached batch of photos so that repeated
+dashboard requests do not require a complete iCloud retrieval.
+
+The browser requests photo data from the local Node.js server rather
+than communicating directly with iCloud.
 
 ---
 
@@ -1334,7 +1421,7 @@ Example:
 
 ```text
 duration: {
-    minutes: 20
+    seconds: 60
 }
 ```
 
@@ -1478,6 +1565,7 @@ The following dashboard functionality is operational:
 - Countdown
 - Prayer
 - Family Menu
+- Commute
 - Wi-Fi
 - Photos
 - School Lunch
@@ -1494,7 +1582,6 @@ The following dashboard functionality is operational:
 - Sports News
 - Sports Legends
 - Sports Trivia
-- On This Day Sports
 - Sonos status
 
 ## RSS Infrastructure

@@ -85,6 +85,7 @@ external API
 | calendar | Calendar display | Yes | Google Calendar | Complete |
 | large-calendar | Four-week calendar + weather | Yes | Google Calendar / Open-Meteo | Complete |
 | calendar-list | Multi-calendar event list | Yes | Google Calendar | Complete |
+| commute | Upcoming commute and leave-by information | Yes | Google Calendar / Google Routes | Complete |
 | countdown | Event countdowns | Yes | Configuration / data | Complete |
 | news | Rotating news headlines | Yes | RSS | Complete |
 | prayer-list | Prayer list | TBD | Configuration / data | Complete |
@@ -737,6 +738,410 @@ Google Calendar.
 ## Status
 
 Complete.
+
+---
+
+# Commute
+
+## Widget
+
+```text
+commute
+```
+
+## Purpose
+
+Displays upcoming commute information based on the family's calendar.
+
+The widget identifies upcoming calendar events that require travel and calculates:
+
+* Current driving time
+* Normal driving time, when configured
+* Traffic delay
+* Required arrival time
+* Recommended leave-by time
+* Configured arrival buffer
+
+The widget is intended to answer a simple question:
+
+> "Where do we need to go next, and when do we need to leave?"
+
+The widget supports both fixed destinations and event-specific destinations.
+
+## Configuration
+
+Commute configuration is maintained separately from the widget.
+
+Example:
+
+```text
+export const COMMUTE_SETTINGS = {
+
+    activeDays: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+    ]
+
+};
+
+export const COMMUTE_ORIGIN =
+    "28 Patriot Way, Holden, MA 01520";
+
+export const COMMUTE_DESTINATIONS = [
+
+    {
+        id: "commute-1",
+
+        name: "The Surgery Center",
+
+        address:
+            "151 Main St, Shrewsbury, MA 01545",
+
+        normalMinutes:
+            15,
+
+        arrivalBufferMinutes:
+            15,
+
+        calendarMatch: {
+            type: "calendar",
+            calendarId:
+                "..."
+        }
+
+    },
+
+    {
+        id: "commute-2",
+
+        name: "UMass Memorial",
+
+        address:
+            "119 Belmont St, Worcester, MA 01605",
+
+        normalMinutes:
+            14,
+
+        arrivalBufferMinutes:
+            10,
+
+        calendarMatch: {
+            type: "title",
+            calendarId:
+                "...",
+
+            value:
+                "UMass"
+        }
+
+    },
+
+    {
+        id: "commute-3",
+
+        name: "Wachusett United",
+
+        arrivalBufferMinutes:
+            30,
+
+        calendarMatch: {
+            type: "calendar",
+            calendarId:
+                "..."
+        }
+
+    }
+
+];
+```
+
+### Configuration Properties
+
+`COMMUTE_SETTINGS.activeDays`
+
+Controls the days on which commute processing is active.
+
+`COMMUTE_ORIGIN`
+
+Defines the starting location used for driving-time calculations.
+
+`COMMUTE_DESTINATIONS`
+
+Defines the destinations that should be monitored.
+
+Each destination may specify:
+
+* `id`
+* `name`
+* `address`
+* `normalMinutes`
+* `arrivalBufferMinutes`
+* `calendarMatch`
+
+### Destination Address
+
+A destination can provide a fixed `address`.
+
+When configured, that address is used for every matching event.
+
+If no destination address is configured, the widget uses the event's calendar `location` as the driving destination.
+
+This allows event-based destinations such as sports games to use the actual location from the calendar event.
+
+The resolution priority is:
+
+```text
+destination.address
+        ↓
+event.location
+        ↓
+no destination
+```
+
+## Calendar Matching
+
+The commute service supports two matching methods.
+
+### Match by Calendar
+
+```text
+calendarMatch: {
+    type: "calendar",
+    calendarId: "..."
+}
+```
+
+All timed events from the specified calendar are considered commute events.
+
+### Match by Title
+
+```text
+calendarMatch: {
+    type: "title",
+    calendarId: "...",
+    value: "UMass"
+}
+```
+
+Only events from the specified calendar whose title contains the configured value are considered matches.
+
+Title matching is case-insensitive.
+
+## Event Selection
+
+Only timed events occurring later today are considered.
+
+All-day events are excluded because they do not provide a meaningful arrival time.
+
+Events are sorted chronologically and the next two matching events are returned for each configured destination.
+
+Events whose start time has already passed are ignored.
+
+## Driving Time
+
+Driving time is calculated using the Google Routes service.
+
+The calculation is performed separately for each upcoming event because different events may have different destinations.
+
+For example:
+
+```text
+Surgery Center
+    ↓
+Configured destination address
+
+Wachusett United game
+    ↓
+Calendar event location
+```
+
+This allows a single commute widget to support both fixed destinations and event-specific destinations.
+
+## Leave-By Calculation
+
+The recommended leave-by time is calculated using:
+
+```text
+event arrival time
+    -
+current driving time
+    -
+arrival buffer
+    =
+leave-by time
+```
+
+For example:
+
+```text
+Event starts:       6:00 PM
+Current drive:      25 min
+Arrival buffer:     30 min
+
+Leave by:           5:05 PM
+```
+
+The arrival buffer is configured independently for each destination.
+
+This allows different types of events to have different preparation requirements.
+
+## Traffic / Status
+
+When `normalMinutes` is configured, the widget compares the current driving time against the configured normal driving time.
+
+```text
+delayMinutes =
+    currentMinutes -
+    normalMinutes
+```
+
+Status is classified as:
+
+```text
+0–2 minutes slower:
+    normal
+
+3–5 minutes slower:
+    slower
+
+6+ minutes slower:
+    delayed
+```
+
+If current travel time is faster than normal, the widget displays the amount of time saved.
+
+Destinations without `normalMinutes` do not display a traffic comparison.
+
+## Display
+
+Each destination displays:
+
+```text
+Destination Name
+Address
+
+🚗 25 min    +4 min
+
+Upcoming Event
+Leave       Arrive
+5:05 PM     6:00 PM
+            30 min buffer
+```
+
+For destinations with multiple upcoming events, each event is displayed separately.
+
+The widget displays the destination's configured address when available.
+
+For event-based destinations without a configured address, the destination address may be unavailable at the destination level because the actual location belongs to the individual event.
+
+## No Commutes
+
+When there are no remaining matching commute events for the day, the widget displays:
+
+```text
+🎉 You're all done!
+
+No more commutes today.
+```
+
+This is preferable to displaying an empty widget.
+
+## Error Handling
+
+If a calendar lookup fails, the failure is logged and processing continues for the remaining calendars.
+
+If driving time cannot be determined for an individual event, that event is excluded from the final commute results.
+
+If no usable commute events remain, the widget displays the normal "You're all done!" state.
+
+## Data Services
+
+Calendar data is retrieved through the existing Google Calendar service:
+
+```text
+services/google-calendar/google-calendar-server.js
+```
+
+Commute event matching and commute data preparation are handled by:
+
+```text
+services/commute/commute-data.js
+```
+
+Live driving time is retrieved through:
+
+```text
+services/commute/google-routes.js
+```
+
+The server-side commute API is:
+
+```text
+services/commute/commute-server.js
+```
+
+The browser widget is:
+
+```text
+widgets/commute/commute.js
+```
+
+## Data Flow
+
+```text
+screen configuration
+        |
+        v
+commute widget
+        |
+        v
+/api/commute
+        |
+        +--------------------------+
+        |                          |
+        v                          v
+Google Calendar              commute-data.js
+        |                          |
+        +------------+-------------+
+                     |
+                     v
+              matching events
+                     |
+                     v
+              Google Routes
+                     |
+                     v
+             driving duration
+                     |
+                     v
+          leave-by / traffic status
+                     |
+                     v
+             commute widget
+```
+
+The commute service reuses the existing Google Calendar infrastructure rather than implementing a separate calendar integration.
+
+## Performance Considerations
+
+Calendar events are retrieved once for the current day and shared across the configured commute destinations.
+
+Only the calendars referenced by `COMMUTE_DESTINATIONS` are queried.
+
+Driving time is calculated only for the next two matching events for each destination.
+
+This limits unnecessary calendar and routing requests while still providing the information needed by the dashboard.
+
+## Status
+
+Complete.
+
+The commute widget supports calendar-driven commute detection, fixed and event-specific destinations, live driving time, traffic comparison, arrival buffers, leave-by calculations, and graceful handling of missing or unavailable commute data.
 
 ---
 
@@ -2246,6 +2651,7 @@ The Information screen combines:
 * Weather
 * Sonos status
 * Family menu
+* Commute
 
 ## Calendar
 
