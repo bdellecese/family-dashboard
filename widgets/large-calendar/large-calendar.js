@@ -1910,17 +1910,15 @@ function createEvent(
             "large-calendar-widget__event-location";
 
         location.textContent =
-            `at ${event.location}`;
-
-
+            `at ${formatEventLocation(
+                event.location
+            )}`;
 
         content.appendChild(
             location
         );
 
     }
-
-
 
     /*
      * BUILD EVENT
@@ -1944,7 +1942,62 @@ function createEvent(
 
 }
 
+/*
+ * ============================================================
+ * FORMAT EVENT LOCATION
+ * ============================================================
+ *
+ * Online meeting URLs can be extremely long and consume
+ * significant space in the calendar display.
+ *
+ * If the location contains an HTTP/HTTPS URL anywhere,
+ * treat it as an online meeting.
+ */
 
+function formatEventLocation(
+    location
+) {
+
+    const value =
+        String(
+            location || ""
+        )
+        .trim();
+
+    if (
+        !value
+    ) {
+
+        return "";
+
+    }
+
+
+    /*
+     * Detect a URL anywhere in the location.
+     *
+     * This handles:
+     *
+     * https://teams.microsoft.com/...
+     * Video, https://teams.microsoft.com/...
+     * Zoom: https://zoom.us/...
+     * Google Meet - https://meet.google.com/...
+     */
+
+    if (
+        /https?:\/\//i.test(
+            value
+        )
+    ) {
+
+        return "Online meeting";
+
+    }
+
+
+    return value;
+
+}
 
 /*
  * ============================================================
