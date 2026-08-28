@@ -12,7 +12,8 @@ import {
 
 export async function getCommuteData(
     currentMinutesByDestination = {},
-    now = new Date()
+    now = new Date(),
+    calendarEvents = []
 ) {
 
     /*
@@ -75,6 +76,38 @@ export async function getCommuteData(
         .map(
             destination => {
 
+                /*
+                 * --------------------------------
+                 * Find today's matching event
+                 * --------------------------------
+                 */
+
+                const matchingEvent =
+                    findMatchingEvent(
+                        destination,
+                        calendarEvents
+                    );
+
+
+                /*
+                 * No relevant event today
+                 */
+
+                if (
+                    !matchingEvent
+                ) {
+
+                    return null;
+
+                }
+
+
+                /*
+                 * --------------------------------
+                 * Get live travel time
+                 * --------------------------------
+                 */
+
                 const currentMinutes =
                     currentMinutesByDestination[
                         destination.id
@@ -94,15 +127,46 @@ export async function getCommuteData(
                 }
 
 
+                /*
+                 * --------------------------------
+                 * Calculate delay
+                 * --------------------------------
+                 */
+
                 const delayMinutes =
                     currentMinutes -
                     destination.normalMinutes;
 
 
+                /*
+                 * --------------------------------
+                 * Determine arrival time
+                 *
+                 * The calendar event determines
+                 * when she needs to arrive.
+                 * --------------------------------
+                 */
+
+                const arriveBy =
+                    getEventStartTime(
+                        matchingEvent
+                    );
+
+
+                /*
+                 * --------------------------------
+                 * Calculate leave-by time
+                 *
+                 * Arrival buffer is added to the
+                 * travel time.
+                 * --------------------------------
+                 */
+
                 const leaveBy =
                     calculateLeaveBy(
-                        destination.arriveBy,
+                        arriveBy,
                         currentMinutes,
+                        destination.arrivalBufferMinutes || 0,
                         now
                     );
 
@@ -125,10 +189,31 @@ export async function getCommuteData(
 
                     delayMinutes,
 
-                    arriveBy:
-                        destination.arriveBy,
+                    arriveBy,
+
+                    arrivalBufferMinutes:
+                        destination.arrivalBufferMinutes || 0,
 
                     leaveBy,
+
+                    event: {
+
+                        id:
+                            matchingEvent.id,
+
+                        title:
+                            matchingEvent.title,
+
+                        start:
+                            matchingEvent.start,
+
+                        end:
+                            matchingEvent.end,
+
+                        location:
+                            matchingEvent.location
+
+                    },
 
                     status:
                         getStatus(
@@ -142,6 +227,170 @@ export async function getCommuteData(
         .filter(
             Boolean
         );
+
+}
+
+
+/*
+ * ============================================
+ * FIND MATCHING EVENT
+ * ============================================
+ *
+ * Matching behavior comes from the
+ * destination.calendarMatch configuration.
+ *
+ * type: "calendar"
+ *     Matches any event on the specified
+ *     calendar.
+ *
+ * type: "title"
+ *     Matches an event whose title contains
+ *     the configured value.
+ */
+
+function findMatchingEvent(
+    destination,
+    calendarEvents
+) {
+
+    const match =
+        destination.calendarMatch;
+
+
+    if (
+        !match
+    ) {
+
+        return null;
+
+    }
+
+
+    /*
+     * ----------------------------------------
+     * Match by calendar
+     * ----------------------------------------
+     */
+
+    if (
+        match.type === "calendar"
+    ) {
+
+        return (
+            calendarEvents.find(
+                event =>
+                    event.calendarId ===
+                    match.calendarId
+            ) || null
+        );
+
+    }
+
+
+    /*
+     * ----------------------------------------
+     * Match by title
+     * ----------------------------------------
+     */
+
+    if (
+        match.type === "title"
+    ) {
+
+        const searchValue =
+            String(
+                match.value || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        if (
+            !searchValue
+        ) {
+
+            return null;
+
+        }
+
+        return (
+            calendarEvents.find(
+                event =>
+                    event.calendarId ===
+                        match.calendarId &&
+                    String(
+                        event.title || ""
+                    )
+                    .toLowerCase()
+                    .includes(
+                        searchValue
+                    )
+            ) || null
+        );
+    }
+
+
+    return null;
+
+}
+
+
+/*
+ * ============================================
+ * EVENT START TIME
+ * ============================================
+ */
+
+function getEventStartTime(
+    event
+) {
+
+    if (
+        !event ||
+        !event.start
+    ) {
+
+        return null;
+
+    }
+
+
+    /*
+     * ----------------------------------------
+     * All-day events do not provide a useful
+     * arrival time for commute purposes.
+     * ----------------------------------------
+     */
+
+    if (
+        !event.start.includes("T")
+    ) {
+
+        return null;
+
+    }
+
+
+    const eventStart =
+        new Date(
+            event.start
+        );
+
+
+    if (
+        Number.isNaN(
+            eventStart.getTime()
+        )
+    ) {
+
+        return null;
+
+    }
+
+
+    return getTimeString(
+        eventStart
+    );
 
 }
 
@@ -188,8 +437,18 @@ function getStatus(
 function calculateLeaveBy(
     arriveBy,
     travelMinutes,
+    arrivalBufferMinutes,
     now
 ) {
+
+    if (
+        !arriveBy
+    ) {
+
+        return null;
+
+    }
+
 
     const [
         hours,
@@ -214,9 +473,17 @@ function calculateLeaveBy(
     );
 
 
+    /*
+     * Leave early enough to cover both:
+     *
+     *   1. current travel time
+     *   2. configured arrival buffer
+     */
+
     arrival.setMinutes(
         arrival.getMinutes() -
-        travelMinutes
+        travelMinutes -
+        arrivalBufferMinutes
     );
 
 

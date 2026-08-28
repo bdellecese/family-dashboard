@@ -28,7 +28,12 @@ export const COMMUTE_DESTINATIONS = [
 
         normalMinutes: 15,
 
-        arriveBy: "08:00"
+        arrivalBufferMinutes: 0,
+
+        calendarMatch: {
+            type: "calendar",
+            calendarId: "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com"
+        }
 
     },
 
@@ -41,7 +46,13 @@ export const COMMUTE_DESTINATIONS = [
 
         normalMinutes: 14,
 
-        arriveBy: "07:00"
+        arrivalBufferMinutes: 10,
+
+        calendarMatch: {
+            type: "title",
+            calendarId: "natalie.dellecese@gmail.com",
+            value: "UMass"
+        }
 
     }
 

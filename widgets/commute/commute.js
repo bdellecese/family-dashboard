@@ -112,7 +112,7 @@ const commute = {
                 "commute-widget__empty";
 
             message.textContent =
-                "No commute information";
+                "No commute events to display!";
 
             wrapper.appendChild(
                 message

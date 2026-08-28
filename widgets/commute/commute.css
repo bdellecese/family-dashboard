@@ -186,3 +186,22 @@
 
     opacity: .65;
 }
+
+/*
+ * NO COMMUTE EVENTS TO DISPLAY
+ */
+
+
+.commute-widget__empty {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 100%;
+
+    font-size: .7vw;
+
+    opacity: .65;
+}
