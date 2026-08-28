@@ -483,6 +483,13 @@
 
 .weather-column {
 
+    display:
+        grid;
+
+    grid-template-rows:
+        minmax(0, 3fr)
+        minmax(0, 1fr);
+
     width:
         100%;
 
@@ -492,12 +499,8 @@
     min-height:
         0;
 
-    display:
-        grid;
-
-    grid-template-rows:
-        minmax(0, 3fr)
-        minmax(0, 1fr);
+    gap:
+        10px;
 
     overflow:
         hidden;
@@ -595,9 +598,14 @@
  * ============================================================
  * MENU COLUMN
  *
- * Contains the Family Menu widget.
+ * Contains:
  *
- * Occupies the full height of the third column.
+ *   TOP    = Family Menu
+ *   BOTTOM = Commute
+ *
+ * Proportions:
+ *   3/4 Family Menu
+ *   1/4 Commute
  * ============================================================
  */
 
@@ -607,7 +615,7 @@
         grid;
 
     grid-template-rows:
-        minmax(0, 1fr)
+        minmax(0, 3fr)
         minmax(0, 1fr);
 
     width:
@@ -621,6 +629,9 @@
 
     gap:
         10px;
+
+    border-radius:
+        16px;
 
     overflow:
         hidden;
