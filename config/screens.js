@@ -337,16 +337,33 @@ export const screens = {
                      * =================================================
                      */
 
-                    "menu-column": [
 
-                        {
+                    "menu-column": {
 
-                            name:
-                                "family-menu"
+                        "menu": [
 
-                        }
+                            {
 
-                    ]
+                                name:
+                                    "family-menu"
+
+                            }
+
+                        ],
+
+
+                        "commute": [
+
+                            {
+
+                                name:
+                                    "commute"
+
+                            }
+
+                        ]
+
+                    }
 
                 }
 
