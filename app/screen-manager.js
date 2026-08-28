@@ -253,13 +253,22 @@ async function destroyWidgetList(
     widgets
 ) {
 
+
     for (
         const widget of widgets
     ) {
+            
+        console.log(
+            `[WIDGET] ${widget.name} destroy start`
+        );
 
         await destroyWidget(
             widget.name,
             widget.container
+        );
+
+        console.log(
+            `[WIDGET] ${widget.name} destroy complete`
         );
 
     }
@@ -315,7 +324,6 @@ export async function loadScreen(
     const generation =
         ++screenLoadGeneration;
 
-
     const screen =
         screens[screenName];
 
@@ -343,38 +351,8 @@ export async function loadScreen(
 
     }
 
-
-    /*
-     * Stop the current screen's timers/listeners/widgets.
-     */
-
-    await destroyCurrentScreen();
-
-
-    /*
-     * The screen may have changed while cleanup
-     * was running.
-     */
-
-    if (
-        generation !==
-        screenLoadGeneration
-    ) {
-
-        screenTimer.end({
-
-            success:
-                false,
-
-            stale:
-                true
-
-        });
-
-
-        return false;
-
-    }
+    const previousWidgets =
+        activeWidgets;
 
 
     const dashboard =
@@ -545,49 +523,72 @@ export async function loadScreen(
 
         }
 
+    /*
+     * ====================================================
+     * COMMIT SCREEN
+     * ====================================================
+     *
+     * Everything has loaded successfully.
+     *
+     * The old screen is still visible at this point.
+     *
+     * Replace it with the fully-built new screen in
+     * one operation.
+     */
 
-        /*
-         * ====================================================
-         * COMMIT SCREEN
-         * ====================================================
-         *
-         * Everything has loaded successfully.
-         * The screen is still current.
-         *
-         * Now replace the dashboard contents in one operation.
-         */
+    console.log(
+        `[SCREEN] Committing ${screenName} (${widgetsForScreen.length} widgets)`
+    );
 
-        dashboard.innerHTML =
-            "";
-
-
-        dashboard.className =
-            screen.layout;
-
-
-        dashboard.dataset.theme =
-            screen.theme ||
-            "dark";
+    dashboard.innerHTML =
+        "";
 
 
-        for (
-            const region of screenRegions
-        ) {
-
-            dashboard.appendChild(
-                region
-            );
-
-        }
+    dashboard.className =
+        screen.layout;
 
 
-        /*
-         * Only now does this screen become the
-         * active screen.
-         */
+    dashboard.dataset.theme =
+        screen.theme ||
+        "dark";
 
-        activeWidgets =
-            widgetsForScreen;
+
+    for (
+        const region of screenRegions
+    ) {
+
+        dashboard.appendChild(
+            region
+        );
+
+    }
+
+
+    /*
+     * The new screen is now active.
+     */
+
+    activeWidgets =
+        widgetsForScreen;
+
+
+    /*
+     * ====================================================
+     * DESTROY PREVIOUS SCREEN
+     * ====================================================
+     *
+     * The new screen is already visible, so destroying
+     * the previous widgets cannot create a blank period.
+     * ====================================================
+     */
+
+    console.log(
+        `[SCREEN] Destroying previous screen (${previousWidgets.length} widgets)`
+    );
+
+    await destroyWidgetList(
+        previousWidgets
+    );
 
 
         screenTimer.end({
@@ -662,12 +663,15 @@ async function showCurrentScreen() {
 
     }
 
-
     const screenName =
         screenOrder[
             currentScreenIndex
         ];
 
+
+    console.log(
+        `[SCREEN] Starting transition to ${screenName}`
+    );
 
     const screen =
         screens[screenName];
@@ -702,7 +706,6 @@ async function showCurrentScreen() {
 
     }
 
-
     /*
      * Capture the generation BEFORE starting the load.
      *
@@ -721,7 +724,10 @@ async function showCurrentScreen() {
         await loadScreen(
             screenName
         );
-
+    
+    console.log(
+        `[SCREEN] ${screenName} load completed: ${loaded}`
+    );
 
     /*
      * Do not schedule rotation if:

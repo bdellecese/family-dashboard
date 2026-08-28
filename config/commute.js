@@ -57,7 +57,7 @@ export const COMMUTE_DESTINATIONS = [
     {
         id: "commute-3",
 
-        name: "Wachusett United",
+        name: "WU U10",
 
         arrivalBufferMinutes: 10,
 
@@ -67,6 +67,36 @@ export const COMMUTE_DESTINATIONS = [
                 "878vjmvnrhp8soe4g89lmditinvg9tpm@import.calendar.google.com"
         }
 
-    }   
+    },
+
+    {
+        id: "commute-4",
+
+        name: "WU Softball",
+
+        arrivalBufferMinutes: 10,
+
+        calendarMatch: {
+            type: "calendar",
+            calendarId:
+                "snu45s689m3sm81dga137mebkmuraoq0@import.calendar.google.com"
+        }
+
+    },
+
+    {
+        id: "commute-5",
+
+        name: "Fall Softball",
+
+        arrivalBufferMinutes: 10,
+
+        calendarMatch: {
+            type: "calendar",
+            calendarId:
+                "h9b6sa72im49g27qv0hc09ofird2bm27@import.calendar.google.com"
+        }
+
+    }
 
 ];

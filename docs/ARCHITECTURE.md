@@ -562,14 +562,173 @@ The screen manager is responsible for:
 - Loading the widgets within those regions
 - Managing screen duration
 - Advancing between screens
+- Managing touchscreen navigation
 
-The screen manager should be the central authority for screen navigation.
+The screen manager is the central authority for screen navigation.
 
-Widgets should not directly control which screen is displayed.
+## Screen Loading and Transition
+
+Screens are built completely before being displayed.
+
+The screen manager builds the requested screen in a detached DOM structure while the currently active screen remains visible.
+
+The general flow is:
+
+```text
+Request Screen
+      |
+      v
+Create Screen Generation
+      |
+      v
+Build Screen in Detached DOM
+      |
+      +-- Build Regions
+      |      |
+      |      +-- Load Widgets
+      |
+      v
+Verify Screen Load is Still Current
+      |
+      +-- NO --> Destroy Newly Loaded Widgets
+      |          |
+      |          v
+      |        Abort
+      |
+      +-- YES
+           |
+           v
+      Commit New Screen
+           |
+           v
+      Display New Screen
+           |
+           v
+      Destroy Previous Screen
+```
+
+The previous screen is not removed until the new screen has successfully completed loading.
+
+This prevents a slow-loading widget or screen from leaving the dashboard blank during a normal screen transition.
+
+## Screen Load Generations
+
+Each screen load is assigned a generation number.
+
+When a new screen load or navigation action begins, the generation changes.
+
+Asynchronous widget loading checks the generation before and after loading.
+
+If the generation has changed, the screen load is considered stale.
+
+A stale screen:
+
+- Is not committed to the dashboard
+- Has any widgets created during the load destroyed
+- Does not schedule automatic rotation
+
+This prevents an older asynchronous screen load from replacing a newer screen after navigation has already occurred.
+
+# Widget Lifecycle
+
+Widgets may implement:
+
+```text
+    render(container, config)
+
+    destroy()
+```
+
+render() initializes the widget and attaches any required event
+listeners, timers, intervals, subscriptions, or other resources.
+
+destroy() releases resources created by render().
+
+Widgets that create ongoing asynchronous activity should implement
+destroy() so that the screen manager can safely remove the widget
+during screen transitions.
+
+The widget lifecycle is:
+
+```text
+    Load
+      |
+      v
+    render()
+      |
+      v
+    Active
+      |
+      v
+    destroy()
+      |
+      v
+    Removed
+```
+
+## Screen Commit Principle
+
+The screen manager treats screen transitions as an **atomic UI operation** from the viewer's perspective.
+
+The dashboard should transition from:
+
+```text
+Old Screen
+```
+
+directly to:
+
+```text
+New Screen
+```
+
+rather than passing through:
+
+```text
+Old Screen
+    |
+    v
+Empty Dashboard
+    |
+    v
+New Screen
+```
+
+The goal is to ensure that slow or asynchronous widgets do not cause a visible blank screen during normal screen rotation or manual navigation.
+
+# Asynchronous Operations
+
+The dashboard contains asynchronous operations including:
+
+- Screen loading
+- Widget loading
+- API requests
+- RSS retrieval
+- Authentication
+- Image retrieval
+
+Asynchronous work must not assume that the screen or widget that
+started the operation is still active when the operation completes.
+
+Screen generations are used to determine whether asynchronous screen
+loads are still current.
+
+A completed asynchronous operation must therefore be treated as:
+
+```text
+    Current
+        |
+        +-- Commit result
+
+    Stale
+        |
+        +-- Ignore result
+        +-- Destroy resources created during the operation
+```
 
 ## Navigation
 
-The screen manager supports the concept of:
+The screen manager supports:
 
 ```text
 Automatic Rotation
@@ -585,15 +744,55 @@ and:
 
 ```text
 Touchscreen
-   |
+
    +-- Previous
-   |
+
    +-- Next
-   |
+
    +-- Home
 ```
 
 Both mechanisms use the same screen navigation functions.
+
+Manual navigation invalidates any screen load currently in progress so that an older asynchronous load cannot later overwrite the newly requested screen.
+
+## Automatic Rotation
+
+After a screen successfully loads, the screen manager schedules the next screen using the duration defined by the screen configuration.
+
+A rotation timer is associated with the current screen load generation.
+
+If a newer navigation action occurs, the previous timer becomes stale and cannot advance the screen.
+
+This prevents overlapping rotation operations and ensures that only the current screen controls the next automatic transition.
+
+# Error Handling
+
+Individual widget or data-service failures should not bring down the
+dashboard application.
+
+Widget failures should be isolated to the affected widget or screen
+load where practical.
+
+A failed widget during screen construction should:
+
+- Report the failure
+- Allow the screen manager to determine whether the screen can still
+  be displayed
+- Clean up resources created during the failed load
+- Avoid leaving the currently displayed screen in a broken state
+
+Server-side service failures should similarly return controlled API
+responses rather than terminating the Node.js application.
+
+The dashboard should favor graceful degradation over application-wide
+failure.
+
+A failure in an individual widget should not unnecessarily prevent the
+remainder of the screen from being displayed. However, failures that
+prevent a screen from being constructed successfully should prevent that
+screen generation from being committed and should leave the currently
+displayed screen intact.
 
 ---
 
@@ -808,6 +1007,10 @@ Return data
 
 Caching is service-specific. Each data service determines whether caching
 is appropriate and controls the appropriate cache lifetime for its data.
+
+For example, the iCloud photo service uses a time-limited cache for its
+photo batch to avoid repeatedly retrieving the same photo metadata and
+asset URLs from iCloud.
 
 Caching is intended to:
 
@@ -1181,8 +1384,9 @@ The iCloud photo data service is responsible for:
 The photo service maintains a cached batch of photos so that repeated
 dashboard requests do not require a complete iCloud retrieval.
 
-The browser requests photo data from the local Node.js server rather
-than communicating directly with iCloud.
+The photo stream/cache has a defined expiration period, after which the
+service refreshes the cached photo batch from iCloud. Repeated requests
+within the cache lifetime are served from the existing cached data.
 
 ---
 
@@ -1532,15 +1736,6 @@ The dashboard currently operates as a four-screen rotating information system.
 
 ## Operational Screens
 
-The configured screen rotation is:
-
-    1. Information — 60 seconds
-    2. Large Calendar — 60 seconds
-    3. Chores + Fun — 60 seconds
-    4. Sports — 60 seconds
-
-Screen order and duration are controlled by `config/screens.js`.
-
 The following screens are operational:
 
 - Information screen
@@ -1548,9 +1743,16 @@ The following screens are operational:
 - Chores + Fun screen
 - Sports screen
 
+Screen rotation is operational. 
+
 Screen order and duration are controlled by `config/screens.js`.
 
-Screen rotation is operational.
+The configured screen rotation is:
+
+    1. Information — 60 seconds
+    2. Large Calendar — 60 seconds
+    3. Chores + Fun — 60 seconds
+    4. Sports — 60 seconds
 
 ## Operational Widgets and Services
 
@@ -1647,8 +1849,7 @@ The dashboard is currently in an operational state.
 Future development may include:
 
 - Additional widgets
-- Additional screen functionality
-- Touchscreen navigation
+- Additional screens or screen configurations
 - Additional automation and integrations
 
 These items are enhancements rather than requirements for the current production architecture.

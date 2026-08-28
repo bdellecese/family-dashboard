@@ -1,59 +1,45 @@
 export const CALENDARS = {
 
     "family01156229611257150686@group.calendar.google.com": {
-
         name: "Family",
         icon: "fa-fw fas fa-home",
         color: "#039be5"
-
     },
 
     "barry.dellecese@gmail.com": {
-
         name: "Barry",
         icon: "fa-fw fas fa-user-circle",
         color: "#0b8043"
-
     },
 
     "natalie.dellecese@gmail.com": {
-
         name: "Natalie",
         icon:"fa-fw fas fa-chess-queen",
         color: "#9e69af"
-
     },
 
     "james.dellecese@gmail.com": {
-
         name: "James",
         icon:"fa-fw fas fa-user-secret",
         color: "rgb(63, 81, 181)"
-
     },
 
     "isabella.c.dellecese@gmail.com": {
-
         name: "Isabella",
         icon:"fa-fw fas fa-dog",
         color: "rgb(228, 196, 65)"
-
     },
 
     "alexander.dellecese@gmail.com": {
-
         name: "Zander",
         icon:"fa-fw fas fa-hamburger",
         color: "rgb(213, 0, 0)"
-
     },
 
     "theodore.dellecese@gmail.com": {
-
         name: "Teddy",
         icon:"fa-fw fas fa-paw",
         color: "rgb(124, 179, 66)"
-
     },
 
     "m1tj3sivp5mmipt3f5a0d164cifunqm4@import.calendar.google.com": {
@@ -107,7 +93,6 @@ export const CALENDARS = {
         color: "#f5a623"
     },
 
-    /* Fall ball Softball */
     "h9b6sa72im49g27qv0hc09ofird2bm27@import.calendar.google.com": {
         name: "Fall ball Softball",
         icon: "fa-fw fas fa-baseball",
