@@ -28,7 +28,7 @@ export const COMMUTE_DESTINATIONS = [
 
         normalMinutes: 15,
 
-        arrivalBufferMinutes: 0,
+        arrivalBufferMinutes: 15,
 
         calendarMatch: {
             type: "calendar",

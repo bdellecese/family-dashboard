@@ -168,6 +168,13 @@
     line-height: 1.2;
 }
 
+.commute-widget__time-buffer {
+    font-size: .4vw;
+    line-height: 1.2;
+    opacity: .5;
+    margin-top: 2px;
+}
+
 
 /*
  * ERROR

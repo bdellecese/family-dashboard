@@ -38,7 +38,7 @@ const commute = {
             "commute-widget__title";
 
         title.textContent =
-            "Commute Times";
+            "Today's Commute";
 
         wrapper.appendChild(
             title
@@ -279,7 +279,8 @@ function createDestination(
     times.appendChild(
         createTime(
             "Arrive by",
-            item.arriveBy
+            item.arriveBy,
+            item.arrivalBufferMinutes
         )
     );
 
@@ -316,7 +317,8 @@ function createDestination(
 
 function createTime(
     label,
-    value
+    value,
+    arrivalBufferMinutes = 0
 ) {
 
     const element =
@@ -355,6 +357,31 @@ function createTime(
     element.appendChild(
         valueElement
     );
+
+
+    /*
+     * ARRIVAL BUFFER
+     */
+
+    if (
+        label === "Arrive by" &&
+        arrivalBufferMinutes > 0
+    ) {
+
+        const bufferElement =
+            document.createElement("div");
+
+        bufferElement.className =
+            "commute-widget__time-buffer";
+
+        bufferElement.textContent =
+            `${arrivalBufferMinutes} min buffer`;
+
+        element.appendChild(
+            bufferElement
+        );
+
+    }
 
 
     return element;
