@@ -60,7 +60,7 @@ const prayerList = {
 
 
         prayerTitle.textContent =
-            "Today's Prayer:";
+            "Today's Prayer";
 
 
         wrapper.appendChild(

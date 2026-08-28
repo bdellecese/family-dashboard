@@ -39,7 +39,7 @@ export const COMMUTE_DESTINATIONS = [
 
         address: "119 Belmont St, Worcester, MA 01605",
 
-        normalMinutes: 15,
+        normalMinutes: 14,
 
         arriveBy: "07:00"
 

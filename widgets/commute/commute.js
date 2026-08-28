@@ -38,7 +38,7 @@ const commute = {
             "commute-widget__title";
 
         title.textContent =
-            "COMMUTE";
+            "Commute Times";
 
         wrapper.appendChild(
             title

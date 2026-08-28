@@ -61,7 +61,7 @@
 
 .commute-widget__name {
     font-size: .8vw;
-    font-weight: 400;
+    font-weight: 300;
 
     line-height: 1.2;
 
@@ -101,7 +101,7 @@
 
 
 .commute-widget__icon {
-    font-size: .8vw;
+    font-size: .75vw;
 
     line-height: 1;
 
@@ -110,7 +110,7 @@
 
 
 .commute-widget__minutes {
-    font-size: 1.15vw;
+    font-size: 1vw;
     font-weight: 300;
 
     line-height: 1;
