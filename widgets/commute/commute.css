@@ -22,14 +22,9 @@
 .commute-widget__title {
     width: 100%;
 
-    font-size: .5vw;
-    font-weight: 500;
+    font-size: 1vw;
 
-    letter-spacing: .08em;
-
-    opacity: .55;
-
-    margin-bottom: 14px;
+    margin-bottom: 16px;
 }
 
 
