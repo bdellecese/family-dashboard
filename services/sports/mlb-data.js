@@ -206,16 +206,10 @@ async function getSchedule(
     if (
         cached
     ) {
-        console.log(
-            `MLB schedule cache hit: ${apiDate}`
-        );
 
         return cached;
     }
 
-    console.log(
-        `MLB schedule cache miss: ${apiDate}`
-    );
 
     const data =
         await fetchJson(
@@ -254,16 +248,8 @@ async function getGameFeed(
     if (
         cached
     ) {
-        console.log(
-            `MLB game cache hit: ${gamePk}`
-        );
-
         return cached;
     }
-
-    console.log(
-        `MLB game cache miss: ${gamePk}`
-    );
 
     const data =
         await fetchJson(
@@ -369,16 +355,8 @@ async function getStandings() {
     if (
         cached
     ) {
-        console.log(
-            "MLB standings cache hit"
-        );
-
         return cached;
     }
-
-    console.log(
-        "MLB standings cache miss"
-    );
 
     const url =
         `${MLB_API}/standings?` +
@@ -420,16 +398,8 @@ async function getWildCardStandings() {
     if (
         cached
     ) {
-        console.log(
-            "MLB wild card cache hit"
-        );
-
         return cached;
     }
-
-    console.log(
-        "MLB wild card cache miss"
-    );
 
     const url =
         `${MLB_API}/standings?` +

@@ -1,0 +1,1707 @@
+/*
+ * ============================================================
+ * NFL SCOREBOARD
+ * ============================================================
+ */
+
+.sports-scoreboard__sport--nfl {
+
+    --nfl-background:
+        #003F8E;
+
+    --nfl-panel:
+        rgba(
+            0,
+            0,
+            0,
+            0.18
+        );
+
+    --nfl-panel-alt:
+        rgba(
+            0,
+            0,
+            0,
+            0.12
+        );
+
+    --nfl-text:
+        #FFFFFF;
+
+    --nfl-muted:
+        rgba(
+            255,
+            255,
+            255,
+            0.72
+        );
+
+    --nfl-line:
+        rgba(
+            255,
+            255,
+            255,
+            0.20
+        );
+
+    --nfl-accent:
+        #FFFFFF;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+    background:
+        var(--nfl-background);
+
+    color:
+        var(--nfl-text);
+
+    font-family:
+        "Oswald",
+        sans-serif;
+
+}
+
+
+/*
+ * ============================================================
+ * ROOT
+ * ============================================================
+ */
+
+.nfl-scoreboard {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    padding:
+        10px 20px;
+
+    box-sizing:
+        border-box;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * HEADER
+ * ============================================================
+ */
+
+.nfl-header {
+
+    flex:
+        0 0 auto;
+
+    display:
+        flex;
+
+    align-items:
+        baseline;
+
+    justify-content:
+        space-between;
+
+    margin-bottom:
+        7px;
+
+    padding-bottom:
+        5px;
+
+    border-bottom:
+        1px solid
+        var(--nfl-line);
+
+}
+
+
+.nfl-title {
+
+    font-size:
+        clamp(
+            22px,
+            2vw,
+            36px
+        );
+
+    font-weight:
+        500;
+
+    letter-spacing:
+        5px;
+
+    line-height:
+        1;
+
+}
+
+
+.nfl-week {
+
+    font-size:
+        clamp(
+            10px,
+            0.75vw,
+            18px
+        );
+
+    font-weight:
+        500;
+
+    letter-spacing:
+        3px;
+
+    color:
+        var(--nfl-muted);
+
+}
+
+
+/*
+ * ============================================================
+ * MAIN
+ * ============================================================
+ */
+
+.nfl-main {
+
+    flex:
+        1 1 auto;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        8px;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * PANELS
+ * ============================================================
+ */
+
+.nfl-panel {
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    background:
+        var(--nfl-panel-alt);
+
+    border:
+        1px solid
+        var(--nfl-line);
+
+    border-radius:
+        3px;
+
+    overflow:
+        hidden;
+
+}
+
+
+.nfl-featured-panel {
+
+    flex:
+        0 0 auto;
+
+}
+
+
+.nfl-other-games-panel {
+
+    flex:
+        1 1 auto;
+
+}
+
+
+/*
+ * ============================================================
+ * PANEL TITLE
+ * ============================================================
+ */
+
+.nfl-panel-title {
+
+    padding:
+        6px 11px;
+
+    background:
+        var(--nfl-panel);
+
+    border-left:
+        5px solid
+        var(--nfl-accent);
+
+    font-size:
+        clamp(
+            19px,
+            1.45vw,
+            32px
+        );
+
+    font-weight:
+        600;
+
+    letter-spacing:
+        5px;
+
+    line-height:
+        1;
+
+}
+
+
+/*
+ * ============================================================
+ * FEATURED GAMES
+ * ============================================================
+ */
+
+.nfl-featured-games {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        12px;
+
+    padding:
+        9px 10px 10px;
+
+}
+
+
+.nfl-featured-slot {
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+}
+
+
+/*
+ * ============================================================
+ * FEATURED GAME
+ * ============================================================
+ */
+
+.nfl-featured-game {
+
+    min-width:
+        0;
+
+    padding:
+        7px 9px 8px;
+
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            0.12
+        );
+
+    border:
+        1px solid
+        var(--nfl-line);
+
+    border-radius:
+        3px;
+
+}
+
+
+/*
+ * ============================================================
+ * FEATURED STATUS
+ * ============================================================
+ */
+
+.nfl-featured-status {
+
+    margin-bottom:
+        5px;
+
+    color:
+        var(--nfl-muted);
+
+    font-size:
+        clamp(
+            10px,
+            0.7vw,
+            17px
+        );
+
+    font-weight:
+        600;
+
+    letter-spacing:
+        2px;
+
+    line-height:
+        1;
+
+}
+
+
+/*
+ * ============================================================
+ * FEATURED SCORE HEADER
+ *
+ * TEAM | Q1 Q2 Q3 Q4 FINAL
+ * ============================================================
+ */
+
+.nfl-featured-score-header {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(
+            0,
+            1fr
+        )
+        repeat(
+            4,
+            clamp(
+                24px,
+                2vw,
+                42px
+            )
+        )
+        clamp(
+            42px,
+            3.2vw,
+            64px
+        );
+
+    align-items:
+        center;
+
+    padding:
+        0 3px 4px;
+
+    border-bottom:
+        1px solid
+        var(--nfl-line);
+
+    color:
+        var(--nfl-muted);
+
+    font-size:
+        clamp(
+            10px,
+            0.68vw,
+            16px
+        );
+
+    font-weight:
+        600;
+
+    letter-spacing:
+        1px;
+
+    line-height:
+        1;
+
+}
+
+
+.nfl-featured-score-header span,
+.nfl-featured-score-header strong {
+
+    text-align:
+        right;
+
+}
+
+
+.nfl-featured-score-header strong {
+
+    color:
+        var(--nfl-text);
+
+}
+
+
+/*
+ * ============================================================
+ * FEATURED TEAM ROW
+ * ============================================================
+ */
+
+.nfl-featured-team-row {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(
+            0,
+            1fr
+        )
+        repeat(
+            4,
+            clamp(
+                24px,
+                2vw,
+                42px
+            )
+        )
+        clamp(
+            42px,
+            3.2vw,
+            64px
+        );
+
+    align-items:
+        center;
+
+    min-height:
+        clamp(
+            48px,
+            4.1vw,
+            70px
+        );
+
+    padding:
+        4px 3px;
+
+    border-bottom:
+        1px solid
+        var(--nfl-line);
+
+}
+
+
+.nfl-featured-team-row:last-child {
+
+    border-bottom:
+        0;
+
+}
+
+
+.nfl-featured-team-info {
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    overflow:
+        hidden;
+
+}
+
+
+.nfl-featured-team-logo {
+
+    flex:
+        0 0 auto;
+
+    width:
+        clamp(
+            34px,
+            2.8vw,
+            54px
+        );
+
+    height:
+        clamp(
+            34px,
+            2.8vw,
+            54px
+        );
+
+    object-fit:
+        contain;
+
+}
+
+
+.nfl-featured-team-name {
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    white-space:
+        nowrap;
+
+    text-overflow:
+        ellipsis;
+
+    font-size:
+        clamp(
+            17px,
+            1.38vw,
+            32px
+        );
+
+    font-weight:
+        600;
+
+    letter-spacing:
+        0.3px;
+
+    line-height:
+        1.05;
+
+}
+
+
+.nfl-featured-score-line {
+
+    display:
+        contents;
+
+}
+
+
+.nfl-featured-score-line span,
+.nfl-featured-score-line strong {
+
+    text-align:
+        right;
+
+    font-size:
+        clamp(
+            15px,
+            1.12vw,
+            27px
+        );
+
+    font-variant-numeric:
+        tabular-nums;
+
+    line-height:
+        1;
+
+}
+
+
+.nfl-featured-score-line strong {
+
+    font-size:
+        clamp(
+            20px,
+            1.5vw,
+            34px
+        );
+
+    font-weight:
+        700;
+
+}
+
+
+/*
+ * ============================================================
+ * WINNER
+ * ============================================================
+ */
+
+.nfl-featured-team-row--winner
+.nfl-featured-team-name {
+
+    font-weight:
+        700;
+
+}
+
+
+.nfl-featured-team-row--winner
+.nfl-featured-score-line strong {
+
+    font-weight:
+        700;
+
+}
+
+
+/*
+ * ============================================================
+ * FEATURED META
+ * ============================================================
+ */
+
+.nfl-featured-meta {
+
+    display:
+        flex;
+
+    align-items:
+        baseline;
+
+    gap:
+        12px;
+
+    margin-top:
+        6px;
+
+    padding:
+        0 3px;
+
+    color:
+        var(--nfl-muted);
+
+    font-size:
+        clamp(
+            10px,
+            0.7vw,
+            16px
+        );
+
+    font-weight:
+        500;
+
+    letter-spacing:
+        1.5px;
+
+    line-height:
+        1.1;
+
+}
+
+
+.nfl-featured-date {
+
+    white-space:
+        nowrap;
+
+}
+
+
+.nfl-featured-venue {
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    white-space:
+        nowrap;
+
+    text-overflow:
+        ellipsis;
+
+}
+
+
+/*
+ * ============================================================
+ * FEATURED LEADERS
+ * ============================================================
+ */
+
+.nfl-featured-leaders {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        8px;
+
+    margin-top:
+        8px;
+
+    padding-top:
+        7px;
+
+    border-top:
+        1px solid
+        var(--nfl-line);
+
+}
+
+
+/*
+ * ============================================================
+ * LEADER CATEGORY
+ * ============================================================
+ */
+
+.nfl-featured-leader {
+
+    min-width:
+        0;
+
+}
+
+
+.nfl-featured-leader-title {
+
+    margin-bottom:
+        4px;
+
+    color:
+        var(--nfl-muted);
+
+    font-size:
+        clamp(
+            10px,
+            0.72vw,
+            17px
+        );
+
+    font-weight:
+        600;
+
+    letter-spacing:
+        2.5px;
+
+    line-height:
+        1;
+
+}
+
+
+.nfl-featured-leader-row {
+
+    min-width:
+        0;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        auto
+        minmax(
+            0,
+            1fr
+        );
+
+    column-gap:
+        7px;
+
+    row-gap:
+        1px;
+
+    padding:
+        3px 0;
+
+    border-bottom:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.12
+        );
+
+}
+
+
+.nfl-featured-leader-row:last-child {
+
+    border-bottom:
+        0;
+
+}
+
+
+.nfl-featured-leader-team {
+
+    font-size:
+        clamp(
+            11px,
+            0.78vw,
+            18px
+        );
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        1px;
+
+}
+
+
+.nfl-featured-leader-name {
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    white-space:
+        nowrap;
+
+    text-overflow:
+        ellipsis;
+
+    font-size:
+        clamp(
+            12px,
+            0.85vw,
+            19px
+        );
+
+    font-weight:
+        600;
+
+}
+
+
+.nfl-featured-leader-stats {
+
+    grid-column:
+        2;
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    white-space:
+        nowrap;
+
+    text-overflow:
+        ellipsis;
+
+    color:
+        var(--nfl-muted);
+
+    font-size:
+        clamp(
+            9px,
+            0.65vw,
+            15px
+        );
+
+    letter-spacing:
+        0.3px;
+
+}
+
+
+/*
+ * ============================================================
+ * OTHER GAMES
+ * ============================================================
+ */
+
+.nfl-league-games {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    padding:
+        7px 10px 8px;
+
+    box-sizing:
+        border-box;
+
+    overflow:
+        hidden;
+
+}
+
+
+.nfl-games-grid {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    column-gap:
+        10px;
+
+    overflow:
+        hidden;
+
+}
+
+.nfl-game-column {
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+}
+
+
+.nfl-game {
+
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    margin-bottom:
+        4px;
+
+    padding:
+        4px 5px 5px;
+
+    box-sizing:
+        border-box;
+
+    border-bottom:
+        1px solid
+        var(--nfl-line);
+
+}
+
+
+.nfl-game-status {
+
+    margin-bottom:
+        3px;
+
+    color:
+        var(--nfl-muted);
+
+    font-size:
+        clamp(
+            9px,
+            0.62vw,
+            15px
+        );
+
+    font-weight:
+        600;
+
+    letter-spacing:
+        1.5px;
+
+    line-height:
+        1;
+
+}
+
+
+.nfl-game-row {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(
+            0,
+            1fr
+        )
+        auto;
+
+    align-items:
+        center;
+
+    min-height:
+        clamp(
+            25px,
+            2.1vw,
+            39px
+        );
+
+}
+
+
+.nfl-game-team {
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    overflow:
+        hidden;
+
+}
+
+
+.nfl-game-logo {
+
+    flex:
+        0 0 auto;
+
+    width:
+        clamp(
+            22px,
+            1.65vw,
+            34px
+        );
+
+    height:
+        clamp(
+            22px,
+            1.65vw,
+            34px
+        );
+
+    object-fit:
+        contain;
+
+}
+
+
+.nfl-game-team span {
+
+    overflow:
+        hidden;
+
+    white-space:
+        nowrap;
+
+    text-overflow:
+        ellipsis;
+
+    font-size:
+        clamp(
+            15px,
+            1.12vw,
+            27px
+        );
+
+    font-weight:
+        600;
+
+    letter-spacing:
+        0.5px;
+
+    line-height:
+        1;
+
+}
+
+
+.nfl-game-score {
+
+    min-width:
+        34px;
+
+    padding-left:
+        12px;
+
+    text-align:
+        right;
+
+    font-size:
+        clamp(
+            16px,
+            1.18vw,
+            28px
+        );
+
+    font-weight:
+        500;
+
+    font-variant-numeric:
+        tabular-nums;
+
+    line-height:
+        1;
+
+}
+
+
+.nfl-game-score--winner {
+
+    font-weight:
+        700;
+
+}
+
+
+/*
+ * ============================================================
+ * MESSAGES
+ * ============================================================
+ */
+
+.nfl-featured-message,
+.nfl-no-games {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    color:
+        var(--nfl-muted);
+
+    font-size:
+        12px;
+
+    font-weight:
+        500;
+
+    letter-spacing:
+        2px;
+
+}
+
+
+/*
+ * ============================================================
+ * SMALLER DASHBOARD HEIGHTS
+ * ============================================================
+ */
+
+@media (
+    max-height: 700px
+) {
+
+    .nfl-scoreboard {
+
+        padding:
+            7px 14px;
+
+    }
+
+
+    .nfl-header {
+
+        margin-bottom:
+            4px;
+
+        padding-bottom:
+            3px;
+
+    }
+
+
+    .nfl-title {
+
+        font-size:
+            clamp(
+                20px,
+                1.8vw,
+                32px
+            );
+
+    }
+
+
+    .nfl-week {
+
+        font-size:
+            clamp(
+                9px,
+                0.65vw,
+                16px
+            );
+
+    }
+
+
+    .nfl-main {
+
+        gap:
+            6px;
+
+    }
+
+
+    .nfl-panel-title {
+
+        padding:
+            5px 8px;
+
+        border-left-width:
+            4px;
+
+        font-size:
+            clamp(
+                17px,
+                1.25vw,
+                28px
+            );
+
+    }
+
+
+    .nfl-featured-games {
+
+        gap:
+            8px;
+
+        padding:
+            6px 7px 7px;
+
+    }
+
+
+    .nfl-featured-game {
+
+        padding:
+            5px 7px 6px;
+
+    }
+
+
+    .nfl-featured-status {
+
+        margin-bottom:
+            3px;
+
+        font-size:
+            clamp(
+                9px,
+                0.6vw,
+                14px
+            );
+
+    }
+
+
+    .nfl-featured-team-row {
+
+        min-height:
+            clamp(
+                40px,
+                3.5vw,
+                58px
+            );
+
+    }
+
+
+    .nfl-featured-team-logo {
+
+        width:
+            clamp(
+                29px,
+                2.2vw,
+                42px
+            );
+
+        height:
+            clamp(
+                29px,
+                2.2vw,
+                42px
+            );
+
+    }
+
+
+    .nfl-featured-team-name {
+
+        font-size:
+            clamp(
+                15px,
+                1.15vw,
+                27px
+            );
+
+    }
+
+
+    .nfl-featured-score-header {
+
+        grid-template-columns:
+            minmax(
+                0,
+                1fr
+            )
+            repeat(
+                4,
+                clamp(
+                    20px,
+                    1.7vw,
+                    34px
+                )
+            )
+            clamp(
+                36px,
+                2.8vw,
+                54px
+            );
+
+        font-size:
+            clamp(
+                9px,
+                0.58vw,
+                14px
+            );
+
+    }
+
+
+    .nfl-featured-team-row {
+
+        grid-template-columns:
+            minmax(
+                0,
+                1fr
+            )
+            repeat(
+                4,
+                clamp(
+                    20px,
+                    1.7vw,
+                    34px
+                )
+            )
+            clamp(
+                36px,
+                2.8vw,
+                54px
+            );
+
+    }
+
+
+    .nfl-featured-score-line span {
+
+        font-size:
+            clamp(
+                13px,
+                0.95vw,
+                22px
+            );
+
+    }
+
+
+    .nfl-featured-score-line strong {
+
+        font-size:
+            clamp(
+                17px,
+                1.25vw,
+                28px
+            );
+
+    }
+
+
+    .nfl-featured-meta {
+
+        margin-top:
+            4px;
+
+        font-size:
+            clamp(
+                9px,
+                0.58vw,
+                14px
+            );
+
+    }
+
+
+    .nfl-featured-leaders {
+
+        gap:
+            6px;
+
+        margin-top:
+            5px;
+
+        padding-top:
+            5px;
+
+    }
+
+
+    .nfl-featured-leader-title {
+
+        margin-bottom:
+            3px;
+
+        font-size:
+            clamp(
+                9px,
+                0.6vw,
+                14px
+            );
+
+    }
+
+
+    .nfl-featured-leader-row {
+
+        padding:
+            2px 0;
+
+    }
+
+
+    .nfl-featured-leader-team {
+
+        font-size:
+            clamp(
+                10px,
+                0.65vw,
+                15px
+            );
+
+    }
+
+
+    .nfl-featured-leader-name {
+
+        font-size:
+            clamp(
+                10px,
+                0.7vw,
+                16px
+            );
+
+    }
+
+
+    .nfl-featured-leader-stats {
+
+        font-size:
+            clamp(
+                8px,
+                0.55vw,
+                13px
+            );
+
+    }
+
+
+    .nfl-league-games {
+
+        padding:
+            5px 7px 6px;
+
+    }
+
+
+    .nfl-games-grid {
+
+        column-gap:
+            10px;
+
+    }
+
+
+    .nfl-game {
+
+        margin-bottom:
+            2px;
+
+        padding:
+            3px 3px 4px;
+
+    }
+
+
+    .nfl-game-status {
+
+        margin-bottom:
+            2px;
+
+        font-size:
+            clamp(
+                8px,
+                0.52vw,
+                13px
+            );
+
+    }
+
+
+    .nfl-game-row {
+
+        min-height:
+            clamp(
+                22px,
+                1.8vw,
+                32px
+            );
+
+    }
+
+
+    .nfl-game-logo {
+
+        width:
+            clamp(
+                19px,
+                1.4vw,
+                28px
+            );
+
+        height:
+            clamp(
+                19px,
+                1.4vw,
+                28px
+            );
+
+    }
+
+
+    .nfl-game-team {
+
+        gap:
+            6px;
+
+    }
+
+
+    .nfl-game-team span {
+
+        font-size:
+            clamp(
+                13px,
+                0.95vw,
+                22px
+            );
+
+    }
+
+
+    .nfl-game-score {
+
+        min-width:
+            28px;
+
+        padding-left:
+            8px;
+
+        font-size:
+            clamp(
+                14px,
+                1vw,
+                23px
+            );
+
+    }
+
+}

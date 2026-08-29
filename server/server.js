@@ -43,6 +43,10 @@ import {
 } from "../services/sports/nfl-data.js";
 
 import {
+    getNFLScoreboard
+} from "../services/sports/nfl-scoreboard-data.js";
+
+import {
     getPerformanceEvents,
     recordPerformanceEvents,
     clearPerformanceEvents
@@ -939,6 +943,111 @@ const server =
                 }
 
                 return;
+            }
+
+            // =================================================
+            // NFL SCOREBOARD
+            // =================================================
+
+            if (
+                requestUrl.pathname ===
+                    "/api/sports/nfl/scoreboard"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                try {
+
+                    const featured = {
+
+                        left: {
+
+                            team:
+                                requestUrl
+                                    .searchParams
+                                    .get(
+                                        "leftTeam"
+                                    )
+
+                        },
+
+                        right: {
+
+                            team:
+                                requestUrl
+                                    .searchParams
+                                    .get(
+                                        "rightTeam"
+                                    )
+
+                        }
+
+                    };
+
+
+                    const scoreboard =
+                        await getNFLScoreboard(
+                            {
+                                featured
+                            }
+                        );
+
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "application/json",
+
+                            "Access-Control-Allow-Origin":
+                                "*"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify(
+                            scoreboard
+                        )
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "NFL scoreboard error:",
+                        error
+                    );
+
+
+                    response.writeHead(
+                        500,
+                        {
+                            "Content-Type":
+                                "application/json",
+
+                            "Access-Control-Allow-Origin":
+                                "*"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            error:
+                                error.message
+
+                        })
+                    );
+
+                }
+
+
+                return;
+
             }
 
             // =================================================

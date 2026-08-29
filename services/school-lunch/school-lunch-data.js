@@ -188,23 +188,6 @@ const schoolLunchData = {
             );
 
 
-        console.log(
-            "\n============================================================"
-        );
-
-        console.log(
-            "SCHOOL LUNCH"
-        );
-
-        console.log(
-            "============================================================"
-        );
-
-        console.log(
-            `Requested week: ${formatDate(monday)}`
-        );
-
-
         /*
          * ----------------------------------------------------
          * LOAD GOOGLE SHEET
@@ -411,12 +394,6 @@ const schoolLunchData = {
             }
 
         }
-
-
-        console.log(
-            `School lunch parsed: ${elementaryMenus.size} elementary dates, ` +
-            `${highSchoolMenus.size} high school dates`
-        );
 
 
         /*
@@ -660,10 +637,6 @@ async function getPdfMenu(
         cached
     ) {
 
-        console.log(
-            `School lunch cache hit: ${path.relative(process.cwd(), cacheFile)}`
-        );
-
         return cached;
 
     }
@@ -674,11 +647,6 @@ async function getPdfMenu(
      * CACHE MISS
      * --------------------------------------------------------
      */
-
-    console.log(
-        `School lunch cache miss: ${path.relative(process.cwd(), cacheFile)}`
-    );
-
 
     const response =
         await fetch(
@@ -1007,14 +975,6 @@ async function writeCachedMenu(
                 2
             ),
             "utf8"
-        );
-
-
-        console.log(
-            `School lunch cache written: ${path.relative(
-                process.cwd(),
-                cacheFile
-            )}`
         );
 
     }

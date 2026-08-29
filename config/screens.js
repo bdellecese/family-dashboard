@@ -660,62 +660,39 @@ export const screens = {
             "scoreboard": [
 
                 {
-
-                    name:
-                        "sports-scoreboard",
+                    name: "sports-scoreboard",
 
                     config: {
 
-                        rotationSeconds:
-                            20,
+                        rotationSeconds: 30,
 
                         sports: [
 
+
                             {
-
-                                sport:
-                                    "mlb",
-
-                                team:
-                                    "boston-red-sox",
-
-                                season: {
-
-                                    start:
-                                        "03-01",
-
-                                    end:
-                                        "10-31"
-
-                                },
-
-                                priority:
-                                    1,
-
+                                sport: "mlb",
+                                team: "boston-red-sox",
                                 featured: {
+                                    left: { teamId: 111 },
+                                    right: { teamId: 138 }
+                                },
+                                priority: 1
 
-                                    left: {
+                            },
 
-                                        teamId:
-                                            111
-
-                                    },
-
-                                    right: {
-
-                                        teamId:
-                                            138
-
-                                    }
-
-                                }
+                            {
+                                sport: "nfl",
+                                featured: {
+                                    left: { team: "NE" },
+                                    right: { team: "KC" }
+                                },
+                                priority: 2
 
                             }
 
                         ]
 
                     }
-
                 }
 
             ],
@@ -741,7 +718,9 @@ export const screens = {
 
                         sports: [
 
-                            "mlb"
+                            "mlb",
+
+                            "nfl"
 
                         ]
 

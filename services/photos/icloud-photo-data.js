@@ -91,11 +91,6 @@ const icloudPhotoData = {
 
         if (cachedStream) {
 
-            console.log(
-                "iCloud stream cache HIT"
-            );
-
-
             stream =
                 cachedStream.stream;
 
@@ -105,11 +100,6 @@ const icloudPhotoData = {
         }
 
         else {
-
-            console.log(
-                "iCloud stream cache MISS - fetching from iCloud"
-            );
-
 
             // ------------------------------------------------
             // Initial request
@@ -254,13 +244,6 @@ const icloudPhotoData = {
                 );
 
 
-        console.log(
-            `iCloud album: ${stream.photos.length} total, ` +
-            `${availablePhotos.length} photos, ` +
-            `${stream.photos.length - availablePhotos.length} videos`
-        );
-
-
         if (
             availablePhotos.length === 0
         ) {
@@ -322,11 +305,6 @@ const icloudPhotoData = {
         // ====================================================
         // GET ASSET URLS
         // ====================================================
-
-        console.log(
-            `iCloud fetching asset URLs for ${photoGuids.length} photos`
-        );
-
 
         const assetsResponse =
             await fetch(

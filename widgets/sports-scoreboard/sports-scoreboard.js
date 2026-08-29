@@ -9,14 +9,19 @@
 import mlbScoreboard
     from "./mlb/mlb-scoreboard.js";
 
+import nflScoreboard
+    from "./nfl/nfl-scoreboard.js";
+
 
 const SPORT_IMPLEMENTATIONS = {
 
     mlb:
-        mlbScoreboard
+        mlbScoreboard,
+
+    nfl:
+        nflScoreboard
 
 };
-
 
 let activeTimers =
     new Map();
@@ -195,6 +200,32 @@ async function renderSport(
 
     }
 
+
+    /*
+     * --------------------------------------------------------
+     * UPDATE SPORT THEME
+     *
+     * Remove any previously active sport theme before adding
+     * the theme for the sport currently being rendered.
+     * --------------------------------------------------------
+     */
+
+    container.classList.remove(
+        "sports-scoreboard__sport--mlb",
+        "sports-scoreboard__sport--nfl"
+    );
+
+
+    container.classList.add(
+        `sports-scoreboard__sport--${sportConfig.sport}`
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * RENDER SPORT
+     * --------------------------------------------------------
+     */
 
     container.innerHTML =
         "";

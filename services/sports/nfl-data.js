@@ -313,21 +313,8 @@ async function getNFLStandings() {
     if (
         cached
     ) {
-
-        console.log(
-            "NFL standings cache hit"
-        );
-
-
         return cached;
-
     }
-
-
-    console.log(
-        "NFL standings cache miss"
-    );
-
 
     const data =
         await fetchJson(

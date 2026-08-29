@@ -79,18 +79,10 @@ const rssData = {
             cached
         ) {
 
-            console.log(
-                `[RSS] CACHE HIT: ${feedUrl}`
-            );
-
             return cached;
 
         }
 
-
-        console.log(
-            `[RSS] CACHE MISS: ${feedUrl}`
-        );
 
 
         /*
@@ -119,12 +111,6 @@ const rssData = {
                 feedUrl,
                 stories
             );
-
-
-            console.log(
-                `[RSS] CACHE STORE: ${feedUrl} (${stories.length} stories)`
-            );
-
 
             return stories;
 
@@ -161,10 +147,6 @@ const rssData = {
             feedUrl
         ) {
 
-            console.log(
-                `[RSS] CACHE CLEAR: ${feedUrl}`
-            );
-
 
             clearCache(
                 feedUrl
@@ -174,11 +156,6 @@ const rssData = {
             return;
 
         }
-
-
-        console.log(
-            "[RSS] CACHE CLEAR: ALL"
-        );
 
 
         clearCache();
@@ -197,10 +174,6 @@ const rssData = {
 async function fetchFeed(
     feedUrl
 ) {
-
-    console.log(
-        `[RSS] FETCH: ${feedUrl}`
-    );
 
     const isBrowser =
         typeof window !== "undefined";
@@ -278,10 +251,6 @@ async function fetchFeed(
             );
 
         }
-
-        console.log(
-            `[RSS] API SUCCESS: ${feedUrl} (${data.stories.length} stories)`
-        );
 
         return data.stories;
 
@@ -374,10 +343,6 @@ async function fetchFeed(
                     );
 
 
-                console.log(
-                    `[RSS] FETCH SUCCESS: ${feedUrl} (${stories.length} stories)`
-                );
-
 
                 return stories;
 
@@ -405,11 +370,6 @@ async function fetchFeed(
                 story =>
                     story.title
             );
-
-
-    console.log(
-        `[RSS] FETCH SUCCESS: ${feedUrl} (${stories.length} stories)`
-    );
 
 
     return stories;
@@ -447,12 +407,10 @@ function normalizeRssItem(
 
 
     const description =
-        decodeXml(
-            getTagValue(
-                item,
-                "description"
-            ) || ""
-        );
+        getTagValue(
+            item,
+            "description"
+        ) || "";
 
 
     const published =
@@ -1032,6 +990,7 @@ function decodeXml(
             /&#x27;/gi,
             "'"
         )
+
         .replace(
             /&apos;/g,
             "'"
