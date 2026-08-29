@@ -6,8 +6,14 @@
  *
  * Layout:
  *
- * AL EAST       AL CENTRAL       AL WEST       AL WILD CARD
- * NL EAST       NL CENTRAL       NL WEST       NL WILD CARD
+ * AL                         NL                    WILD CARD
+ * EAST                       EAST                  AL
+ * CENTRAL                    CENTRAL               NL
+ * WEST                       WEST
+ *
+ * Each team displays:
+ *
+ * # | LOGO TEAM | W-L | GB | L10
  *
  * ============================================================
  */
@@ -143,6 +149,42 @@ function getTeamName(
 
 /*
  * ============================================================
+ * TEAM LOGO
+ * ============================================================
+ *
+ * MLB team logos are available using the MLB team ID.
+ *
+ * Example:
+ *
+ * https://www.mlbstatic.com/team-logos/111.svg
+ *
+ * ============================================================
+ */
+
+function getTeamLogoUrl(
+    record
+) {
+
+    const teamId =
+        record.team?.id;
+
+
+    if (!teamId) {
+
+        return "";
+
+    }
+
+
+    return (
+        `https://www.mlbstatic.com/team-logos/${teamId}.svg`
+    );
+
+}
+
+
+/*
+ * ============================================================
  * LAST 10
  * ============================================================
  */
@@ -234,15 +276,6 @@ function getWinningPercentage(
  * ============================================================
  * FORMAT GAMES BACK
  * ============================================================
- *
- * Standard formatting:
- *
- * 0       → —
- * 0.5     → 0.5
- * 1       → 1
- * 1.5     → 1.5
- *
- * ============================================================
  */
 
 function formatGamesBack(
@@ -307,13 +340,6 @@ function formatGamesBack(
 /*
  * ============================================================
  * CALCULATE GAMES DIFFERENCE
- * ============================================================
- *
- * Returns how many games record A is ahead of record B.
- *
- * Positive value = A is ahead
- * Negative value = A is behind
- *
  * ============================================================
  */
 
@@ -388,6 +414,7 @@ function getDivisionGamesBack(
 
 }
 
+
 /*
  * ============================================================
  * WILD CARD GAMES BACK
@@ -395,29 +422,7 @@ function getDivisionGamesBack(
  *
  * Use MLB's official wildCardGamesBack value directly.
  *
- * MLB defines this relative to the THIRD Wild Card team,
- * which is the playoff cutoff.
- *
- * Examples:
- *
- * NYY  +7.5
- * BOS  +5.5
- * TEX     -
- * TOR   0.5
- * BAL   0.5
- *
- * NL:
- *
- * CHC    +6
- * PHI      -
- * ARI      -
- * SD       -
- * MIA      3
- *
- * IMPORTANT:
- *
- * Do NOT calculate this ourselves.
- * The MLB API already provides the correct value.
+ * MLB defines this relative to the third Wild Card team.
  *
  * ============================================================
  */
@@ -425,10 +430,6 @@ function getDivisionGamesBack(
 function getWildCardGamesBack(
     record
 ) {
-
-    /*
-     * Primary MLB API field.
-     */
 
     if (
         record.wildCardGamesBack !== undefined &&
@@ -438,13 +439,6 @@ function getWildCardGamesBack(
         const value =
             record.wildCardGamesBack;
 
-
-        /*
-         * MLB returns "+" already for teams ahead
-         * of the Wild Card cutoff.
-         *
-         * Preserve it.
-         */
 
         if (
             typeof value === "string" &&
@@ -456,20 +450,12 @@ function getWildCardGamesBack(
         }
 
 
-        /*
-         * Standard numeric values.
-         */
-
         return formatGamesBack(
             value
         );
 
     }
 
-
-    /*
-     * Defensive fallback.
-     */
 
     if (
         record.wildCard &&
@@ -546,13 +532,35 @@ function createTeamRow(
         0;
 
 
+    const logoUrl =
+        getTeamLogoUrl(
+            record
+        );
+
+
+    const logo =
+        logoUrl
+            ? `
+                <img
+                    class="mlb-standings-team-logo"
+                    src="${logoUrl}"
+                    alt=""
+                    aria-hidden="true"
+                >
+            `
+            : "";
+
+
     row.innerHTML = `
         <span class="mlb-standings-rank">
             ${rank}
         </span>
 
         <span class="mlb-standings-team-name">
-            ${getTeamName(record)}
+            ${logo}
+            <span class="mlb-standings-team-abbreviation">
+                ${getTeamName(record)}
+            </span>
         </span>
 
         <span class="mlb-standings-record">
@@ -711,12 +719,27 @@ function createDivision(
                 );
 
 
-            section.appendChild(
+            const row =
                 createTeamRow(
                     record,
                     index + 1,
                     gamesBack
-                )
+                );
+
+
+            if (
+                index === 0
+            ) {
+
+                row.classList.add(
+                    "mlb-standings-division-leader"
+                );
+
+            }
+
+
+            section.appendChild(
+                row
             );
 
         }
@@ -791,10 +814,6 @@ async function loadStandings() {
     }
 
 
-    /*
-     * Remove duplicate teams.
-     */
-
     const uniqueTeams =
         Array.from(
             new Map(
@@ -807,6 +826,7 @@ async function loadStandings() {
             ).values()
         );
 
+
     return uniqueTeams;
 
 }
@@ -815,13 +835,6 @@ async function loadStandings() {
 /*
  * ============================================================
  * LOAD WILD CARD STANDINGS
- * ============================================================
- *
- * We still load the official Wild Card endpoint because it
- * provides the official Wild Card ordering.
- *
- * We do NOT use wildCardGamesBack for display.
- *
  * ============================================================
  */
 
@@ -881,10 +894,6 @@ async function loadWildCardStandings() {
 
     }
 
-
-    /*
-     * Remove duplicates by team ID.
-     */
 
     const uniqueTeams =
         Array.from(
@@ -949,14 +958,6 @@ function getLeagueRecords(
 /*
  * ============================================================
  * SORT WILD CARD RECORDS
- * ============================================================
- *
- * Official Wild Card ordering:
- *
- * 1. Wild Card rank
- * 2. Winning percentage
- * 3. Wins
- *
  * ============================================================
  */
 
@@ -1034,39 +1035,20 @@ function sortWildCardRecords(
 
 /*
  * ============================================================
- * CREATE WILD CARD
+ * CREATE WILD CARD LEAGUE
  * ============================================================
  *
- * The Wild Card panel displays:
+ * Displays:
  *
- *   1. Division leaders
- *   2. Wild Card teams
+ * AL WILD CARD
+ * NL WILD CARD
  *
- * GB is calculated relative to the best non-division-leading
- * team.
- *
- * Example:
- *
- * AL:
- *
- * NYY   +7.5
- * BOS   +5.5
- * TEX   —
- * TOR    0.5
- * BAL    0.5
- *
- * NL:
- *
- * CHC   +6
- * PHI   —
- * ARI   —
- * SD    —
- * MIA    3
+ * Each displays the top five teams.
  *
  * ============================================================
  */
 
-function createWildCard(
+function createWildCardLeague(
     leagueName,
     records
 ) {
@@ -1074,31 +1056,34 @@ function createWildCard(
     const section =
         createElement(
             "section",
-            "mlb-standings-division mlb-standings-wild-card"
+            "mlb-standings-wild-card-league"
         );
 
 
-    const title =
+    const leagueHeader =
         createElement(
             "div",
-            "mlb-standings-division-title",
+            "mlb-standings-league-title",
             `${leagueName} WILD CARD`
         );
 
 
     section.appendChild(
-        title
+        leagueHeader
     );
 
 
-    section.appendChild(
+    const card =
+        createElement(
+            "div",
+            "mlb-standings-wild-card-card"
+        );
+
+
+    card.appendChild(
         createHeader()
     );
 
-
-    /*
-     * Filter to league.
-     */
 
     const leagueId =
         LEAGUE_IDS[
@@ -1115,34 +1100,11 @@ function createWildCard(
         );
 
 
-    /*
-     * Sort using official Wild Card rank.
-     */
-
     const sorted =
         sortWildCardRecords(
             leagueRecords
         );
 
-
-    /*
-     * Identify division leaders.
-     */
-
-    const divisionLeaders =
-        sorted.filter(
-            record =>
-                Number(
-                    record.divisionRank
-                ) === 1
-        );
-
-
-    /*
-     * Identify the best non-division-leading team.
-     *
-     * This is the Wild Card reference team.
-     */
 
     const wildCardLeader =
         sorted.find(
@@ -1152,11 +1114,6 @@ function createWildCard(
                 ) !== 1
         ) || null;
 
-
-    /*
-     * Display the top five teams from the official
-     * Wild Card standings.
-     */
 
     sorted
         .slice(
@@ -1171,8 +1128,7 @@ function createWildCard(
 
                 const gamesBack =
                     getWildCardGamesBack(
-                        record,
-                        wildCardLeader
+                        record
                     );
 
 
@@ -1183,10 +1139,6 @@ function createWildCard(
                         gamesBack
                     );
 
-
-                /*
-                 * Division leader styling.
-                 */
 
                 if (
                     Number(
@@ -1201,10 +1153,6 @@ function createWildCard(
                 }
 
 
-                /*
-                 * Wild Card leader styling.
-                 */
-
                 if (
                     record.team?.id ===
                     wildCardLeader?.team?.id
@@ -1217,12 +1165,17 @@ function createWildCard(
                 }
 
 
-                section.appendChild(
+                card.appendChild(
                     row
                 );
 
             }
         );
+
+
+    section.appendChild(
+        card
+    );
 
 
     return section;
@@ -1232,7 +1185,141 @@ function createWildCard(
 
 /*
  * ============================================================
- * CREATE COMPLETE 4 × 2 LAYOUT
+ * CREATE LEAGUE COLUMN
+ * ============================================================
+ */
+
+function createLeagueColumn(
+    leagueName,
+    regularSeasonRecords
+) {
+
+    const column =
+        createElement(
+            "section",
+            "mlb-standings-league-column"
+        );
+
+
+    const header =
+        createElement(
+            "div",
+            "mlb-standings-league-header",
+            leagueName
+        );
+
+
+    column.appendChild(
+        header
+    );
+
+
+    const divisionStack =
+        createElement(
+            "div",
+            "mlb-standings-division-stack"
+        );
+
+
+    DIVISIONS[
+        leagueName
+    ].forEach(
+        division => {
+
+            const divisionRecords =
+                getDivisionRecords(
+                    regularSeasonRecords,
+                    division.id
+                );
+
+
+            divisionStack.appendChild(
+                createDivision(
+                    division,
+                    divisionRecords
+                )
+            );
+
+        }
+    );
+
+
+    column.appendChild(
+        divisionStack
+    );
+
+
+    return column;
+
+}
+
+
+/*
+ * ============================================================
+ * CREATE WILD CARD COLUMN
+ * ============================================================
+ */
+
+function createWildCardColumn(
+    wildCardRecords
+) {
+
+    const column =
+        createElement(
+            "section",
+            "mlb-standings-league-column mlb-standings-wild-card-column"
+        );
+
+
+    const header =
+        createElement(
+            "div",
+            "mlb-standings-league-header",
+            "WILD CARD"
+        );
+
+
+    column.appendChild(
+        header
+    );
+
+
+    const wildCardStack =
+        createElement(
+            "div",
+            "mlb-standings-wild-card-stack"
+        );
+
+
+    wildCardStack.appendChild(
+        createWildCardLeague(
+            "AL",
+            wildCardRecords
+        )
+    );
+
+
+    wildCardStack.appendChild(
+        createWildCardLeague(
+            "NL",
+            wildCardRecords
+        )
+    );
+
+
+    column.appendChild(
+        wildCardStack
+    );
+
+
+    return column;
+
+}
+
+
+/*
+ * ============================================================
+ * CREATE COMPLETE 3 COLUMN LAYOUT
  * ============================================================
  */
 
@@ -1249,85 +1336,42 @@ function createLayout(
 
 
     /*
-     * ========================================================
-     * TOP ROW — AMERICAN LEAGUE
-     * ========================================================
+     * Column 1
+     *
+     * American League
      */
 
-    DIVISIONS.AL.forEach(
-        division => {
-
-            const divisionRecords =
-                getDivisionRecords(
-                    regularSeasonRecords,
-                    division.id
-                );
-
-
-            grid.appendChild(
-                createDivision(
-                    division,
-                    divisionRecords
-                )
-            );
-
-        }
-    );
-
-
-    const alWildCardRecords =
-        getLeagueRecords(
-            wildCardRecords,
-            LEAGUE_IDS.AL
-        );
-
-
     grid.appendChild(
-        createWildCard(
+        createLeagueColumn(
             "AL",
-            alWildCardRecords
+            regularSeasonRecords
         )
     );
 
 
     /*
-     * ========================================================
-     * BOTTOM ROW — NATIONAL LEAGUE
-     * ========================================================
+     * Column 2
+     *
+     * National League
      */
 
-    DIVISIONS.NL.forEach(
-        division => {
-
-            const divisionRecords =
-                getDivisionRecords(
-                    regularSeasonRecords,
-                    division.id
-                );
-
-
-            grid.appendChild(
-                createDivision(
-                    division,
-                    divisionRecords
-                )
-            );
-
-        }
+    grid.appendChild(
+        createLeagueColumn(
+            "NL",
+            regularSeasonRecords
+        )
     );
 
 
-    const nlWildCardRecords =
-        getLeagueRecords(
-            wildCardRecords,
-            LEAGUE_IDS.NL
-        );
-
+    /*
+     * Column 3
+     *
+     * Wild Card
+     */
 
     grid.appendChild(
-        createWildCard(
-            "NL",
-            nlWildCardRecords
+        createWildCardColumn(
+            wildCardRecords
         )
     );
 
@@ -1403,10 +1447,6 @@ export default {
 
         try {
 
-            /*
-             * Load both datasets in parallel.
-             */
-
             const [
                 regularSeasonRecords,
                 wildCardRecords
@@ -1417,6 +1457,7 @@ export default {
                         loadWildCardStandings()
                     ]
                 );
+
 
             main.innerHTML =
                 "";

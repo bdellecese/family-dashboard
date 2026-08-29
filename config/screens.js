@@ -737,7 +737,7 @@ export const screens = {
                     config: {
 
                         rotationSeconds:
-                            20,
+                            30,
 
                         sports: [
 

@@ -257,18 +257,10 @@ async function destroyWidgetList(
     for (
         const widget of widgets
     ) {
-            
-        console.log(
-            `[WIDGET] ${widget.name} destroy start`
-        );
 
         await destroyWidget(
             widget.name,
             widget.container
-        );
-
-        console.log(
-            `[WIDGET] ${widget.name} destroy complete`
         );
 
     }
@@ -536,10 +528,6 @@ export async function loadScreen(
      * one operation.
      */
 
-    console.log(
-        `[SCREEN] Committing ${screenName} (${widgetsForScreen.length} widgets)`
-    );
-
     dashboard.innerHTML =
         "";
 
@@ -581,10 +569,6 @@ export async function loadScreen(
      * the previous widgets cannot create a blank period.
      * ====================================================
      */
-
-    console.log(
-        `[SCREEN] Destroying previous screen (${previousWidgets.length} widgets)`
-    );
 
     await destroyWidgetList(
         previousWidgets
@@ -669,10 +653,6 @@ async function showCurrentScreen() {
         ];
 
 
-    console.log(
-        `[SCREEN] Starting transition to ${screenName}`
-    );
-
     const screen =
         screens[screenName];
 
@@ -725,10 +705,6 @@ async function showCurrentScreen() {
             screenName
         );
     
-    console.log(
-        `[SCREEN] ${screenName} load completed: ${loaded}`
-    );
-
     /*
      * Do not schedule rotation if:
      *

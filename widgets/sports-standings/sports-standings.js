@@ -31,10 +31,9 @@ async function loadSport(
 
     }
 
-
     switch (sport) {
 
-        case "mlb": {
+                case "mlb": {
 
             const module =
                 await import(
@@ -50,6 +49,21 @@ async function loadSport(
 
         }
 
+        case "nfl": {
+
+            const module =
+                await import(
+                    "./nfl/nfl-standings.js"
+                );
+
+
+            sports[sport] =
+                module.default;
+
+
+            break;
+
+        }
 
         default:
 
@@ -126,6 +140,10 @@ export default {
                     ];
 
 
+                /*
+                * Destroy the currently rendered sport.
+                */
+
                 if (
                     currentWidget &&
                     typeof currentWidget.destroy ===
@@ -139,14 +157,29 @@ export default {
                 }
 
 
+                /*
+                * Completely reset the shared container.
+                *
+                * Sport-specific widgets add their own classes
+                * (for example --nfl). Those must not survive
+                * when the next sport is rendered.
+                */
+
+                container.innerHTML =
+                    "";
+
+                container.className =
+                    "sports-standings";
+
+
+                /*
+                * Load and render the next sport.
+                */
+
                 currentWidget =
                     await loadSport(
                         sport
                     );
-
-
-                container.innerHTML =
-                    "";
 
 
                 await currentWidget.render(
@@ -175,8 +208,7 @@ export default {
             const rotationSeconds =
                 Number(
                     config.rotationSeconds
-                ) || 20;
-
+                ) || 30;
 
             rotationTimer =
                 setInterval(

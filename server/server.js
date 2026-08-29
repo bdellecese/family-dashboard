@@ -38,6 +38,11 @@ import {
 } from "../services/sports/mlb-data.js";
 
 import {
+    getNFLStandings,
+    normalizeStandings
+} from "../services/sports/nfl-data.js";
+
+import {
     getPerformanceEvents,
     recordPerformanceEvents,
     clearPerformanceEvents
@@ -934,6 +939,89 @@ const server =
                 }
 
                 return;
+            }
+
+            // =================================================
+            // NFL STANDINGS
+            // =================================================
+
+            if (
+                requestUrl.pathname ===
+                    "/api/sports/nfl/standings"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                try {
+
+                    const data =
+                        await getNFLStandings();
+
+
+                    const standings =
+                        normalizeStandings(
+                            data
+                        );
+
+
+                    response.writeHead(
+                        200,
+                        {
+                            "Content-Type":
+                                "application/json",
+                            "Access-Control-Allow-Origin":
+                                "*"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            season:
+                                new Date().getFullYear(),
+
+                            standings
+
+                        })
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "NFL standings error:",
+                        error
+                    );
+
+
+                    response.writeHead(
+                        500,
+                        {
+                            "Content-Type":
+                                "application/json",
+                            "Access-Control-Allow-Origin":
+                                "*"
+                        }
+                    );
+
+
+                    response.end(
+                        JSON.stringify({
+
+                            error:
+                                error.message
+
+                        })
+                    );
+
+                }
+
+
+                return;
+
             }
 
             // =================================================

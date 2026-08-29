@@ -127,19 +127,11 @@ export async function loadWidget(
 
     try {
 
-        console.log(
-            `[WIDGET] ${name} render start`
-        );
-
         const cleanup =
             await widget.render(
                 container,
                 config
             );
-        
-        console.log(
-            `[WIDGET] ${name} render complete`
-        );
 
         /*
          * Widgets may return a cleanup function

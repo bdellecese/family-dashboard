@@ -84,7 +84,7 @@ external API
 | weather-alerts | Active weather alerts | Yes | NWS / Open-Meteo | Complete |
 | calendar | Calendar display | Yes | Google Calendar | Complete |
 | large-calendar | Four-week calendar + weather | Yes | Google Calendar / Open-Meteo | Complete |
-| calendar-list | Multi-calendar event list | Yes | Google Calendar | Complete |
+| calendar-list | Configurable event list for family calendars, sports schedules, etc. | Yes | Google Calendar | Complete |
 | commute | Upcoming commute and leave-by information | Yes | Google Calendar / Google Routes | Complete |
 | countdown | Event countdowns | Yes | Configuration / data | Complete |
 | news | Rotating news headlines | Yes | RSS | Complete |
@@ -95,7 +95,6 @@ external API
 | sonos-status | Current Sonos playback status | Yes | Sonos API | Complete |
 | sports-scoreboard | Live / recent sports scores | Yes | Sports data service | Complete |
 | sports-standings | League standings | Yes | Sports data service | Complete |
-| calendar-list | Upcoming games / schedules on Sports screen | Yes | Google Calendar | Complete |
 | sports-news | Sports news headlines | Yes | RSS | Complete |
 | on-this-day-sports | Historical sports events | TBD | Configuration / data | Complete |
 | sports-trivia | Rotating sports trivia questions | TBD | Local data | Complete |
@@ -1824,9 +1823,11 @@ sports-standings
 
 ## Purpose
 
-Displays league standings for configured sports.
+Displays standings for configured sports.
 
-The widget provides a quick view of team position within the relevant division or league.
+The widget provides a quick view of team position within the relevant league, conference, or division.
+
+Standings are normalized by sport so the shared widget can present different league structures using a consistent visual presentation.
 
 ## Configuration
 
@@ -1843,7 +1844,8 @@ Example:
 
         sports: [
 
-            "mlb"
+            "mlb",
+            "nfl"
 
         ]
 
@@ -1853,21 +1855,51 @@ Example:
 
 ## Data Source
 
-Sports data service / external sports API.
+Sports data is retrieved through server-side sport-specific data services.
+
+The browser does not call external sports APIs directly.
+
+Current standings data services include:
+
+```text
+services/sports/mlb-data.js
+
+services/sports/nfl-data.js
+```
+
+The server exposes normalized standings through sport-specific API endpoints.
+
+For example:
+
+```text
+/api/sports/nfl/standings
+```
+
+The NFL service retrieves data from ESPN and maintains a persistent server-side cache to avoid unnecessary external API requests.
 
 ## Display
 
-Depending on the configured sport, standings may include:
+The standings display is sport-specific but uses a consistent visual presentation.
 
-* Team
-* Wins
-* Losses
-* Winning percentage
-* Games behind
-* Division / conference position
-* Other sport-specific standings information
+Standings may include:
+
+- Team logo
+- Team abbreviation
+- Wins
+- Losses
+- Ties when applicable
+- Division / conference position
+- Winning percentage
+- Games behind
+
+The standings widget uses team logos when provided by the data service.
 
 ## Status
+
+Sport leagues currently supported:
+
+- MLB
+- NFL
 
 Complete.
 
