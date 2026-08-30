@@ -825,7 +825,10 @@ export const screens = {
                             7,
 
                         showCalendarName:
-                            false
+                            false,
+
+                        showLocation:
+                            true
 
                     }
 
