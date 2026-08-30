@@ -24,6 +24,8 @@ let currentScreenIndex = 0;
 
 let rotationTimer = null;
 
+let distractionFreeMode = false;
+
 
 /*
  * ============================================================
@@ -253,7 +255,6 @@ async function destroyWidgetList(
     widgets
 ) {
 
-
     for (
         const widget of widgets
     ) {
@@ -342,6 +343,7 @@ export async function loadScreen(
         return false;
 
     }
+
 
     const previousWidgets =
         activeWidgets;
@@ -515,64 +517,65 @@ export async function loadScreen(
 
         }
 
-    /*
-     * ====================================================
-     * COMMIT SCREEN
-     * ====================================================
-     *
-     * Everything has loaded successfully.
-     *
-     * The old screen is still visible at this point.
-     *
-     * Replace it with the fully-built new screen in
-     * one operation.
-     */
 
-    dashboard.innerHTML =
-        "";
+        /*
+         * ====================================================
+         * COMMIT SCREEN
+         * ====================================================
+         *
+         * Everything has loaded successfully.
+         *
+         * The old screen is still visible at this point.
+         *
+         * Replace it with the fully-built new screen in
+         * one operation.
+         */
 
-
-    dashboard.className =
-        screen.layout;
+        dashboard.innerHTML =
+            "";
 
 
-    dashboard.dataset.theme =
-        screen.theme ||
-        "dark";
+        dashboard.className =
+            screen.layout;
 
 
-    for (
-        const region of screenRegions
-    ) {
+        dashboard.dataset.theme =
+            screen.theme ||
+            "dark";
 
-        dashboard.appendChild(
-            region
+
+        for (
+            const region of screenRegions
+        ) {
+
+            dashboard.appendChild(
+                region
+            );
+
+        }
+
+
+        /*
+         * The new screen is now active.
+         */
+
+        activeWidgets =
+            widgetsForScreen;
+
+
+        /*
+         * ====================================================
+         * DESTROY PREVIOUS SCREEN
+         * ====================================================
+         *
+         * The new screen is already visible, so destroying
+         * the previous widgets cannot create a blank period.
+         * ====================================================
+         */
+
+        await destroyWidgetList(
+            previousWidgets
         );
-
-    }
-
-
-    /*
-     * The new screen is now active.
-     */
-
-    activeWidgets =
-        widgetsForScreen;
-
-
-    /*
-     * ====================================================
-     * DESTROY PREVIOUS SCREEN
-     * ====================================================
-     *
-     * The new screen is already visible, so destroying
-     * the previous widgets cannot create a blank period.
-     * ====================================================
-     */
-
-    await destroyWidgetList(
-        previousWidgets
-    );
 
 
         screenTimer.end({
@@ -632,6 +635,187 @@ export async function loadScreen(
 
 /*
  * ============================================================
+ * UPDATE ACTIVE SCREEN NAVIGATION
+ * ============================================================
+ */
+
+function updateActiveScreenNavigation() {
+
+    const controlRail =
+        document.getElementById(
+            "screen-control-rail"
+        );
+
+
+    if (
+        !controlRail
+    ) {
+
+        return;
+
+    }
+
+
+    const activeScreen =
+        screenOrder[
+            currentScreenIndex
+        ];
+
+
+    const buttons =
+        controlRail.querySelectorAll(
+            "[data-screen]"
+        );
+
+
+    buttons.forEach(
+        button => {
+
+            button.classList.toggle(
+                "screen-control-rail__button--active",
+                button.dataset.screen ===
+                    activeScreen
+            );
+
+        }
+    );
+
+}
+
+/*
+ * ============================================================
+ * UPDATE NAVIGATION MODE
+ * ============================================================
+ */
+
+function updateNavigationMode() {
+
+    const controlRail =
+        document.getElementById(
+            "screen-control-rail"
+        );
+
+
+    const distractionFreeButton =
+        document.getElementById(
+            "distraction-free-toggle"
+        );
+
+
+    const screenButtons =
+        controlRail?.querySelectorAll(
+            "[data-screen]"
+        );
+
+
+    if (
+        screenButtons
+    ) {
+
+        screenButtons.forEach(
+            button => {
+
+                button.disabled =
+                    distractionFreeMode;
+
+                button.classList.toggle(
+                    "screen-control-rail__button--disabled",
+                    distractionFreeMode
+                );
+
+            }
+        );
+
+    }
+
+
+    if (
+        distractionFreeButton
+    ) {
+
+        distractionFreeButton.classList.toggle(
+            "screen-control-rail__button--distraction-free-active",
+            distractionFreeMode
+        );
+
+
+        distractionFreeButton.setAttribute(
+            "aria-label",
+            distractionFreeMode
+                ? "Exit Distraction Free Mode"
+                : "Enter Distraction Free Mode"
+        );
+
+
+        distractionFreeButton.setAttribute(
+            "title",
+            distractionFreeMode
+                ? "Exit Distraction Free Mode"
+                : "Distraction Free Mode"
+        );
+
+
+        const icon =
+            distractionFreeButton.querySelector(
+                ".fas"
+            );
+
+
+        if (
+            icon
+        ) {
+
+            icon.className =
+                distractionFreeMode
+                    ? "fas fa-xmark"
+                    : "fas fa-ban";
+
+        }
+
+    }
+
+
+    /*
+     * Prev / Next are disabled while distraction-free
+     * mode is active.
+     */
+
+    const previousButton =
+        document.getElementById(
+            "prev-screen"
+        );
+
+
+    const nextButton =
+        document.getElementById(
+            "next-screen"
+        );
+
+
+    if (
+        previousButton
+    ) {
+
+        previousButton.disabled =
+            distractionFreeMode;
+
+    }
+
+
+    if (
+        nextButton
+    ) {
+
+        nextButton.disabled =
+            distractionFreeMode;
+
+    }
+
+}
+
+
+/*
+ * ============================================================
  * SHOW CURRENT SCREEN
  * ============================================================
  */
@@ -647,10 +831,17 @@ async function showCurrentScreen() {
 
     }
 
+
     const screenName =
         screenOrder[
             currentScreenIndex
         ];
+
+
+    /*
+     * Keep the control rail's active state synchronized
+     * with automatic rotation and direct navigation.
+     */
 
 
     const screen =
@@ -686,6 +877,7 @@ async function showCurrentScreen() {
 
     }
 
+
     /*
      * Capture the generation BEFORE starting the load.
      *
@@ -704,13 +896,14 @@ async function showCurrentScreen() {
         await loadScreen(
             screenName
         );
-    
+
+
     /*
-     * Do not schedule rotation if:
-     *
-     * 1. The load failed.
-     * 2. Another navigation action started a newer load.
-     */
+    * Do not schedule rotation if:
+    *
+    * 1. The load failed.
+    * 2. Another navigation action started a newer load.
+    */
 
     if (
         !loaded ||
@@ -721,6 +914,16 @@ async function showCurrentScreen() {
         return;
 
     }
+
+    /*
+    * The new screen has now been successfully built
+    * and committed to the dashboard.
+    *
+    * Update the navigation rail only after the
+    * displayed screen has actually changed.
+    */
+
+    updateActiveScreenNavigation();
 
 
     /*
@@ -954,6 +1157,236 @@ export async function nextScreen() {
 
 /*
  * ============================================================
+ * GO TO SCREEN
+ * ============================================================
+ */
+
+export async function goToScreen(
+    screenName
+) {
+
+    if (
+        !screenOrder ||
+        screenOrder.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    const targetIndex =
+        screenOrder.indexOf(
+            screenName
+        );
+
+
+    if (
+        targetIndex === -1
+    ) {
+
+        console.error(
+            "Screen not found:",
+            screenName
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+     * Invalidate the current screen load immediately.
+     */
+
+    ++screenLoadGeneration;
+
+
+    if (rotationTimer) {
+
+        clearTimeout(
+            rotationTimer
+        );
+
+
+        rotationTimer =
+            null;
+
+    }
+
+
+    currentScreenIndex =
+        targetIndex;
+
+
+    await showCurrentScreen();
+
+}
+
+
+/*
+ * ============================================================
+ * ENTER DISTRACTION FREE MODE
+ * ============================================================
+ */
+
+export async function enterDistractionFreeMode() {
+
+    /*
+     * Already in distraction-free mode.
+     */
+
+    if (
+        distractionFreeMode
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+     * Enter the new mode immediately so any in-flight
+     * navigation knows it is no longer operating in normal
+     * mode.
+     */
+
+    distractionFreeMode =
+        true;
+
+
+    /*
+     * Invalidate the current screen load immediately.
+     */
+
+    ++screenLoadGeneration;
+
+
+    /*
+     * Stop normal screen rotation.
+     */
+
+    if (rotationTimer) {
+
+        clearTimeout(
+            rotationTimer
+        );
+
+
+        rotationTimer =
+            null;
+
+    }
+
+
+    /*
+     * Load the dedicated distraction-free screen.
+     *
+     * This requires a screen definition named:
+     *
+     *     distraction-free
+     *
+     * in config/screens.js.
+     */
+
+    const loaded =
+        await loadScreen(
+            "distraction-free"
+        );
+
+
+    if (
+        !loaded
+    ) {
+
+        distractionFreeMode =
+            false;
+
+        updateNavigationMode();
+
+        return;
+
+    }
+
+
+    updateNavigationMode();
+
+}
+
+
+/*
+ * ============================================================
+ * EXIT DISTRACTION FREE MODE
+ * ============================================================
+ */
+
+export async function exitDistractionFreeMode() {
+
+    /*
+     * Already in normal mode.
+     */
+
+    if (
+        !distractionFreeMode
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+     * Leave distraction-free mode immediately.
+     */
+
+    distractionFreeMode =
+        false;
+
+
+    /*
+     * Invalidate the current distraction-free screen load.
+     */
+
+    ++screenLoadGeneration;
+
+
+    /*
+     * Stop any timer that may still exist.
+     */
+
+    if (rotationTimer) {
+
+        clearTimeout(
+            rotationTimer
+        );
+
+
+        rotationTimer =
+            null;
+
+    }
+
+
+    /*
+     * Return to the first normal screen.
+     */
+
+    currentScreenIndex =
+        0;
+
+
+    /*
+     * Rebuild the first normal screen and restart
+     * the normal rotation cycle.
+     */
+
+    await showCurrentScreen();
+
+}
+
+/*
+ * ============================================================
  * SCREEN NAVIGATION UI
  * ============================================================
  */
@@ -978,10 +1411,22 @@ function initializeScreenNavigation() {
         );
 
 
+    const controlRail =
+        document.getElementById(
+            "screen-control-rail"
+        );
+
+    const distractionFreeButton =
+        document.getElementById(
+            "distraction-free-toggle"
+        );
+
     if (
         !dashboardScale ||
         !previousButton ||
-        !nextButton
+        !nextButton ||
+        !controlRail ||
+        !distractionFreeButton
     ) {
 
         console.error(
@@ -1048,6 +1493,10 @@ function initializeScreenNavigation() {
     }
 
 
+    /*
+     * Previous screen.
+     */
+
     previousButton.addEventListener(
         "click",
         async event => {
@@ -1062,6 +1511,10 @@ function initializeScreenNavigation() {
     );
 
 
+    /*
+     * Next screen.
+     */
+
     nextButton.addEventListener(
         "click",
         async event => {
@@ -1071,6 +1524,80 @@ function initializeScreenNavigation() {
             showNavigation();
 
             await nextScreen();
+
+        }
+    );
+
+    /*
+     * Distraction Free Mode toggle.
+     */
+
+    distractionFreeButton.addEventListener(
+        "click",
+        async event => {
+
+            event.preventDefault();
+
+
+            showNavigation();
+
+
+            if (
+                distractionFreeMode
+            ) {
+
+                await exitDistractionFreeMode();
+
+            }
+
+            else {
+
+                await enterDistractionFreeMode();
+
+            }
+
+
+            updateNavigationMode();
+
+            updateActiveScreenNavigation();
+
+        }
+    );
+
+
+    /*
+     * Direct screen buttons.
+     */
+
+    const screenButtons =
+        controlRail.querySelectorAll(
+            "[data-screen]"
+        );
+
+
+    screenButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                async event => {
+
+                    event.preventDefault();
+
+
+                    showNavigation();
+
+
+                    const screenName =
+                        button.dataset.screen;
+
+
+                    await goToScreen(
+                        screenName
+                    );
+
+                }
+            );
 
         }
     );
@@ -1103,6 +1630,15 @@ function initializeScreenNavigation() {
                 true
         }
     );
+
+
+    /*
+     * Set initial active screen.
+     */
+
+    updateActiveScreenNavigation();
+
+    updateNavigationMode();
 
 }
 

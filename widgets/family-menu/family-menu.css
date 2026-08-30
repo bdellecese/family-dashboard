@@ -43,11 +43,11 @@
     margin-bottom: 16px;
 }
 
-.family-menu-widget__chef {
+.family-menu-widget__chef,
+.family-menu-widget__extra {
     font-size: .75vw;
     margin-bottom: 16px;
 }
-
 
 /*
  * ----------------------------------------

@@ -33,6 +33,7 @@
     font-family:
         "Roboto",
         sans-serif;
+
 }
 
 
@@ -46,6 +47,7 @@
 
     margin-bottom:
         20px;
+
 }
 
 
@@ -56,6 +58,7 @@
 
     font-weight:
         300;
+
 }
 
 
@@ -75,6 +78,7 @@
 
     color:
         #A3C1D9;
+
 }
 
 
@@ -97,6 +101,7 @@
 
     gap:
         6px;
+
 }
 
 
@@ -113,7 +118,13 @@
 
     grid-template-columns:
         1fr
-        repeat(5, minmax(0, 1fr));
+        repeat(
+            5,
+            minmax(
+                0,
+                1fr
+            )
+        );
 
     gap:
         6px;
@@ -121,7 +132,9 @@
     min-width:
         0;
 
-    align-items: stretch;
+    align-items:
+        stretch;
+
 }
 
 
@@ -133,27 +146,42 @@
 
 .school-lunch-widget__school-cell {
 
-    display: flex;
+    display:
+        flex;
 
-    align-items: center;
+    align-items:
+        center;
 
-    justify-content: center;
+    justify-content:
+        center;
 
+    min-width:
+        0;
 
-    min-width: 0;
-    min-height: 0;
+    min-height:
+        0;
 
-    padding: 9px 7px;
+    padding:
+        9px 7px;
 
-    box-sizing: border-box;
-    border-radius: 7px;
+    box-sizing:
+        border-box;
 
-    background: #F0F4F8;
+    border-radius:
+        7px;
 
+    background:
+        #F0F4F8;
 
-    color:#222222;
-    font-size: .65vw;
-    font-weight: 300;
+    color:
+        #222222;
+
+    font-size:
+        .65vw;
+
+    font-weight:
+        300;
+
 }
 
 
@@ -185,13 +213,23 @@
 
     border:
         1px solid
-        rgba(163, 193, 217, 0.35);
+        rgba(
+            163,
+            193,
+            217,
+            0.35
+        );
 
     border-radius:
         999px;
 
     background:
-        rgba(163, 193, 217, 0.10);
+        rgba(
+            163,
+            193,
+            217,
+            0.10
+        );
 
     text-align:
         center;
@@ -210,6 +248,7 @@
 
     box-sizing:
         border-box;
+
 }
 
 
@@ -226,6 +265,7 @@
 
     font-weight:
         500;
+
 }
 
 
@@ -263,7 +303,12 @@
 
     border:
         1px solid
-        rgba(240, 244, 248, 0.15);
+        rgba(
+            240,
+            244,
+            248,
+            0.15
+        );
 
     border-radius:
         7px;
@@ -273,6 +318,7 @@
 
     text-align:
         center;
+
 }
 
 
@@ -283,6 +329,7 @@
 
     border-color:
         #c9dcf7;
+
 }
 
 
@@ -311,6 +358,7 @@
 
     color:
         #5F6B76;
+
 }
 
 
@@ -327,6 +375,7 @@
 
     color:
         #222222;
+
 }
 
 
@@ -346,6 +395,7 @@
 
     color:
         #FF5A36;
+
 }
 
 
@@ -356,6 +406,7 @@
 
     color:
         #00875A;
+
 }
 
 
@@ -366,6 +417,7 @@
 
     color:
         #00875A;
+
 }
 
 
@@ -376,6 +428,264 @@
 
     color:
         #00875A;
+
+}
+
+
+/*
+ * ============================================================
+ * ONE-DAY MODE
+ * ============================================================
+ *
+ * One-day mode uses a simple 2 x 2 grid:
+ *
+ *     ELEMENTARY / MIDDLE | HIGH SCHOOL
+ *     --------------------+----------------
+ *     MENU                | MENU
+ *
+ * The weekday is intentionally not repeated here because
+ * it is already displayed elsewhere on the Distraction Free
+ * screen.
+ *
+ * ============================================================
+ */
+
+.school-lunch-widget--one-day {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+}
+
+
+/*
+ * ============================================================
+ * ONE-DAY TABLE
+ * ============================================================
+ */
+
+.school-lunch-widget--one-day
+.school-lunch-widget__one-day-table {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(
+            0,
+            1fr
+        )
+        minmax(
+            0,
+            1fr
+        );
+
+    grid-template-rows:
+        auto
+        minmax(
+            0,
+            1fr
+        );
+
+    gap:
+        6px;
+
+    box-sizing:
+        border-box;
+
+}
+
+
+/*
+ * ============================================================
+ * ONE-DAY SCHOOL HEADERS
+ * ============================================================
+ *
+ * Reuse the existing header/pill styling but allow the
+ * school names to occupy the full width of their column.
+ *
+ * ============================================================
+ */
+
+.school-lunch-widget--one-day
+.school-lunch-widget__one-day-table
+.school-lunch-widget__day-heading {
+
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    justify-self:
+        stretch;
+
+    padding:
+        10px 14px;
+
+    white-space:
+        normal;
+
+    line-height:
+        1.15;
+
+}
+
+
+/*
+ * ============================================================
+ * ONE-DAY MENU CELLS
+ * ============================================================
+ */
+
+.school-lunch-widget--one-day
+.school-lunch-widget__one-day-table
+.school-lunch-widget__day {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        flex-start;
+
+    padding:
+        16px 18px;
+
+    box-sizing:
+        border-box;
+
+}
+
+
+/*
+ * ============================================================
+ * ONE-DAY MENU ITEMS
+ * ============================================================
+ */
+
+.school-lunch-widget--one-day
+.school-lunch-widget__one-day-table
+.school-lunch-widget__item {
+
+    width:
+        100%;
+
+    margin-bottom:
+        8px;
+
+    font-size:
+        .62vw;
+
+    line-height:
+        1.25;
+
+    text-align:
+        left;
+
+}
+
+
+/*
+ * ============================================================
+ * ONE-DAY MAIN ENTREE
+ * ============================================================
+ */
+
+.school-lunch-widget--one-day
+.school-lunch-widget__one-day-table
+.school-lunch-widget__item--main {
+
+    margin-bottom:
+        10px;
+
+    font-size:
+        .75vw;
+
+    font-weight:
+        600;
+
+    text-align:
+        left;
+
+}
+
+
+/*
+ * ============================================================
+ * ONE-DAY SPECIAL ITEMS
+ * ============================================================
+ */
+
+.school-lunch-widget--one-day
+.school-lunch-widget__one-day-table
+.school-lunch-widget__item--no-school {
+
+    font-size:
+        .7vw;
+
+}
+
+
+.school-lunch-widget--one-day
+.school-lunch-widget__one-day-table
+.school-lunch-widget__item--early-release {
+
+    font-size:
+        .7vw;
+
+}
+
+
+.school-lunch-widget--one-day
+.school-lunch-widget__one-day-table
+.school-lunch-widget__item--exam {
+
+    font-size:
+        .7vw;
+
+}
+
+
+.school-lunch-widget--one-day
+.school-lunch-widget__one-day-table
+.school-lunch-widget__item--limited {
+
+    font-size:
+        .7vw;
+
 }
 
 
@@ -392,6 +702,7 @@
 
     color:
         #7A8793;
+
 }
 
 
@@ -414,4 +725,5 @@
 
     color:
         #A3C1D9;
+
 }

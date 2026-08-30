@@ -105,6 +105,12 @@ export async function registerWidgets() {
 
 
         await registerWidget(
+            "greeting",
+            "../widgets/greeting/greeting.js"
+        );
+
+
+        await registerWidget(
             "household-chores",
             "../widgets/household-chores/household-chores.js"
         );

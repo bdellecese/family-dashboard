@@ -835,6 +835,175 @@ export const screens = {
 
         }
 
-    }
+    },
+
+    "distraction-free": {
+
+        layout:
+            "distraction-free-layout",
+
+        theme:
+            "dark",
+
+        regions: {
+
+            /*
+            * ====================================================
+            * HEADER
+            * ====================================================
+            */
+
+            "distraction-free-header": [
+
+                {
+                    name:
+                        "greeting",
+
+                    config: {
+                        familyName:
+                            "Dellecese family"
+                    }
+                }
+
+            ],
+
+
+            /*
+            * ====================================================
+            * WEATHER
+            * ====================================================
+            */
+
+            "distraction-free-weather": [
+
+                {
+                    name:
+                        "weather",
+
+                    config: {
+                        location:
+                            "Holden, MA"
+                    }
+                }
+
+            ],
+
+
+            /*
+            * ====================================================
+            * COMMUTE + CALENDAR
+            * ====================================================
+            */
+
+            "distraction-free-logistics": {
+
+                "distraction-free-commute": [
+
+                    {
+                        name:
+                            "commute"
+                    }
+
+                ],
+
+                "distraction-free-calendar": [
+
+                    {
+                        name:
+                            "calendar-list",
+
+                        config: {
+
+                            calendars: [
+
+                                "family01156229611257150686@group.calendar.google.com", /* Family */
+
+                                "barry.dellecese@gmail.com",
+
+                                "m1tj3sivp5mmipt3f5a0d164cifunqm4@import.calendar.google.com", /* Barry TripIt */
+
+                                "natalie.dellecese@gmail.com",
+
+                                "67jhfpigbnv5n6kuouf5eu3llc@group.calendar.google.com", /* TSC */
+
+                                "james.dellecese@gmail.com",
+
+                                "kkpcjqa95gv87cn0ojj5oi7s6o3h6195@import.calendar.google.com", /* WU U16 */
+
+                                "isabella.c.dellecese@gmail.com",
+
+                                "snu45s689m3sm81dga137mebkmuraoq0@import.calendar.google.com", /* WU Softball - GC */
+
+                                "gvco5trj7a8eip611tr883v8jsbftad6@import.calendar.google.com", /* WU Softball - Energy Athletics */
+
+                                "h9b6sa72im49g27qv0hc09ofird2bm27@import.calendar.google.com", /* Fall softball */
+
+                                "alexander.dellecese@gmail.com",
+
+                                "878vjmvnrhp8soe4g89lmditinvg9tpm@import.calendar.google.com", /* WU U10 */
+
+                                "theodore.dellecese@gmail.com",
+
+                                "en.usa#holiday@group.v.calendar.google.com" /* US Holidays */
+
+                            ],
+
+                            days:
+                                1,
+
+                            showCalendarName:
+                                false,
+
+                            showLocation:
+                                true
+
+                        }
+
+                    }
+
+                ]
+
+            },
+
+
+            /*
+            * ====================================================
+            * SCHOOL LUNCH + FAMILY MENU
+            * ====================================================
+            */
+
+            "distraction-free-food": {
+
+                "distraction-free-school-lunch": [
+
+                    {
+                        name:
+                            "school-lunch",
+
+                        config: {
+                            oneDay:
+                                true
+                        }
+
+                    }
+
+                ],
+
+                "distraction-free-family-menu": [
+
+                    {
+                        name:
+
+                            "family-menu",
+
+                        }
+
+                ],
+
+            }
+
+        }
+
+    },
 
 };

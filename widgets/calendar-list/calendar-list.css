@@ -200,6 +200,20 @@
 
 }
 
+/* EVENT LOCATION */
+
+.calendar-list-widget__content {
+    min-width: 0;
+}
+
+.calendar-list-widget__location {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, .65);
+    font-size: 0.8em;
+}
+
 
 /*
  * SPACE BETWEEN DAYS

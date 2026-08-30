@@ -1,21 +1,25 @@
 import {
     CALENDARS
-} from "../../config/calendars.js";
+}
+from "../../config/calendars.js";
 
 import {
     getCalendars,
     getEventsForRange,
     GoogleCalendarAuthorizationRequiredError
-} from "../../services/google-calendar/calendar-data.js";
+}
+from "../../services/google-calendar/calendar-data.js";
 
 import {
     enableTouchScroll
-} from "../../services/ui/touch-scroll.js";
+}
+from "../../services/ui/touch-scroll.js";
 
 
 const calendarList = {
 
-    name: "calendar-list",
+    name:
+        "calendar-list",
 
 
     async render(
@@ -38,7 +42,9 @@ const calendarList = {
 
 
         /*
+         * ========================================================
          * ENABLE TOUCH SCROLLING
+         * ========================================================
          */
 
         enableTouchScroll(
@@ -47,7 +53,9 @@ const calendarList = {
 
 
         /*
+         * ========================================================
          * CONFIGURATION
+         * ========================================================
          */
 
         const calendarIds =
@@ -56,11 +64,25 @@ const calendarList = {
         const days =
             config.days || 7;
 
+        /*
+         * Location display is opt-in.
+         *
+         * Existing screens therefore retain their current
+         * behavior unless they explicitly set:
+         *
+         *     showLocation: true
+         */
+
+        const showLocation =
+            config.showLocation === true;
+
 
         try {
 
             /*
+             * ====================================================
              * GET CALENDARS
+             * ====================================================
              */
 
             const calendars =
@@ -77,7 +99,9 @@ const calendarList = {
 
 
             /*
+             * ====================================================
              * DATE RANGE
+             * ====================================================
              */
 
             const start =
@@ -100,7 +124,9 @@ const calendarList = {
 
 
             /*
+             * ====================================================
              * GET EVENTS
+             * ====================================================
              */
 
             const eventGroups =
@@ -139,21 +165,72 @@ const calendarList = {
 
 
             /*
+             * ====================================================
              * SORT EVENTS
+             * ====================================================
+             *
+             * All-day events should always appear before timed
+             * events on the same day.
+             *
+             * Within each group, events are sorted chronologically.
+             *
+             * This gives us:
+             *
+             *     All day
+             *     All day
+             *     8:00 AM
+             *     10:30 AM
+             *     3:00 PM
+             * ====================================================
              */
 
             events.sort(
                 (
                     a,
                     b
-                ) =>
-                    new Date(a.start) -
-                    new Date(b.start)
+                ) => {
+
+                    /*
+                     * All-day events first.
+                     */
+
+                    if (
+                        a.allDay &&
+                        !b.allDay
+                    ) {
+
+                        return -1;
+
+                    }
+
+
+                    if (
+                        !a.allDay &&
+                        b.allDay
+                    ) {
+
+                        return 1;
+
+                    }
+
+
+                    /*
+                     * Within the same type, sort by start time.
+                     */
+
+                    return (
+                        new Date(a.start) -
+                        new Date(b.start)
+                    );
+
+                }
             );
 
 
             /*
+             * ====================================================
              * GROUP EVENTS BY DAY
+             * ====================================================
              */
 
             const groupedEvents =
@@ -184,11 +261,13 @@ const calendarList = {
                         groupedEvents.set(
                             key,
                             {
+
                                 date:
                                     eventDate,
 
                                 events:
                                     []
+
                             }
                         );
 
@@ -205,7 +284,9 @@ const calendarList = {
 
 
             /*
+             * ====================================================
              * RENDER EACH DAY
+             * ====================================================
              */
 
             for (
@@ -236,7 +317,9 @@ const calendarList = {
 
 
                 /*
+                 * =================================================
                  * DATE HEADER
+                 * =================================================
                  */
 
                 const dateHeader =
@@ -277,6 +360,7 @@ const calendarList = {
                         "Today";
 
                 }
+
                 else {
 
                     dayName.textContent =
@@ -306,7 +390,9 @@ const calendarList = {
 
 
                 /*
+                 * =================================================
                  * NO EVENTS
+                 * =================================================
                  */
 
                 if (
@@ -337,7 +423,9 @@ const calendarList = {
 
 
                 /*
+                 * =================================================
                  * RENDER EVENTS
+                 * =================================================
                  */
 
                 dayData.events.forEach(
@@ -353,7 +441,9 @@ const calendarList = {
 
 
                         /*
+                         * =================================================
                          * TIME
+                         * =================================================
                          */
 
                         const time =
@@ -373,6 +463,7 @@ const calendarList = {
                                 "All day";
 
                         }
+
                         else {
 
                             const eventStart =
@@ -394,7 +485,9 @@ const calendarList = {
 
 
                         /*
+                         * =================================================
                          * CALENDAR ICON
+                         * =================================================
                          */
 
                         const icon =
@@ -420,7 +513,24 @@ const calendarList = {
 
 
                         /*
+                         * =================================================
+                         * EVENT CONTENT
+                         * =================================================
+                         */
+
+                        const content =
+                            document.createElement(
+                                "div"
+                            );
+
+                        content.className =
+                            "calendar-list-widget__content";
+
+
+                        /*
+                         * =================================================
                          * TITLE
+                         * =================================================
                          */
 
                         const title =
@@ -435,10 +545,53 @@ const calendarList = {
                             event.title;
 
 
+                        content.appendChild(
+                            title
+                        );
+
+
                         /*
+                         * =================================================
+                         * LOCATION
+                         * =================================================
+                         *
+                         * Location display is opt-in.
+                         *
+                         * Google Calendar event locations are expected
+                         * on event.location.
+                         * =================================================
+                         */
+
+                        if (
+                            showLocation &&
+                            event.location
+                        ) {
+
+                            const location =
+                                document.createElement(
+                                    "div"
+                                );
+
+                            location.className =
+                                "calendar-list-widget__location";
+
+                            location.textContent =
+                                event.location;
+
+
+                            content.appendChild(
+                                location
+                            );
+
+                        }
+
+
+                        /*
+                         * =================================================
                          * BUILD EVENT ROW
                          *
-                         * TIME → ICON → TITLE
+                         * TIME → ICON → CONTENT
+                         * =================================================
                          */
 
                         item.appendChild(
@@ -450,7 +603,7 @@ const calendarList = {
                         );
 
                         item.appendChild(
-                            title
+                            content
                         );
 
 
@@ -468,7 +621,9 @@ const calendarList = {
         catch (error) {
 
             /*
+             * ========================================================
              * GOOGLE CALENDAR AUTHORIZATION REQUIRED
+             * ========================================================
              */
 
             if (
@@ -486,7 +641,9 @@ const calendarList = {
 
 
             /*
+             * ========================================================
              * OTHER CALENDAR ERROR
+             * ========================================================
              */
 
             console.error(

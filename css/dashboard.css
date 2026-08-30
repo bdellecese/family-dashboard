@@ -1,112 +1,571 @@
-#dashboard {
+/*
+ * ============================================================
+ * DASHBOARD SHELL
+ * ============================================================
+ *
+ * The dashboard consists of:
+ *
+ *     LEFT                     RIGHT
+ *     -----                    ----------------
+ *     NAV RAIL                 DASHBOARD
+ *     52px                     remaining width
+ *
+ * The rail is a real layout column.
+ * It does NOT overlay the dashboard.
+ * ============================================================
+ */
 
-    width: 100%;
-    height: 100%;
+#dashboard-scale {
 
-    overflow: hidden;
+    display:
+        flex;
+
+    flex-direction:
+        row;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
 
 }
 
 
-.widget {
+/*
+ * ============================================================
+ * SCREEN CONTROL RAIL
+ * ============================================================
+ */
 
-    width:100%;
-    height:100%;
+.screen-control-rail {
 
-    overflow:hidden;
+    flex:
+        0 0 52px;
 
-    border-radius: var(--panel-radius);
+    width:
+        52px;
 
-    background: var(--panel-bg);
+    height:
+        100%;
 
-    padding: var(--panel-padding);
+    min-width:
+        52px;
 
-    box-sizing:border-box;
+    min-height:
+        0;
 
-    user-select: none;
+    padding:
+        10vh 6px 12px;
+
+    box-sizing:
+        border-box;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        flex-start;
+
+    gap:
+        8px;
+
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            .42
+        );
+
+    border-right:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .14
+        );
+
+    z-index:
+        10;
+
+}
+
+
+/*
+ * ============================================================
+ * SCREEN CONTROL RAIL BUTTON
+ * ============================================================
+ */
+
+.screen-control-rail__button {
+
+    width:
+        38px;
+
+    height:
+        38px;
+
+    padding:
+        0;
+
+    flex:
+        0 0 38px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border:
+        0;
+
+    border-radius:
+        9px;
+
+    background:
+        transparent;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            .62
+        );
+
+    font-size:
+        18px;
+
+    cursor:
+        pointer;
+
+    transition:
+        background-color .2s ease,
+        color .2s ease,
+        transform .15s ease;
+
+    user-select:
+        none;
+
+    touch-action:
+        manipulation;
+
+}
+
+
+.screen-control-rail__button:hover {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .12
+        );
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            .95
+        );
+
+}
+
+
+.screen-control-rail__button:active {
+
+    transform:
+        scale(
+            .94
+        );
+
+}
+
+
+.screen-control-rail__button:focus {
+
+    outline:
+        none;
+
 }
 
 /*
+ * ============================================================
+ * ACTIVE SCREEN
+ * ============================================================
+ */
+
+.screen-control-rail__button--active {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .20
+        );
+
+    color:
+        #ffffff;
+
+    box-shadow:
+        inset 3px 0 0 #ffffff;
+
+}
+
+/*
+ * ============================================================
+ * DISTRACTION FREE BUTTON
+ * ============================================================
+ */
+
+.screen-control-rail__button--distraction-free {
+
+    margin-top:
+        10px;
+
+    border-top:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .14
+        );
+
+    border-radius:
+        0;
+
+    padding-top:
+        10px;
+
+}
+
+
+.screen-control-rail__button--distraction-free:hover {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .12
+        );
+
+    color:
+        #ffffff;
+
+}
+
+
+.screen-control-rail__button--distraction-free-active {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .20
+        );
+
+    color:
+        #ffffff;
+
+    box-shadow:
+        inset 3px 0 0 #ffffff;
+
+}
+
+.screen-control-rail__button:disabled {
+
+    opacity:
+        .35;
+
+    cursor:
+        default;
+
+}
+
+
+.screen-navigation:disabled {
+
+    cursor:
+        default;
+
+    pointer-events:
+        none;
+
+}
+
+
+/*
+ * ============================================================
+ * DASHBOARD CONTENT
+ * ============================================================
+ */
+
+#dashboard {
+
+    flex:
+        1 1 auto;
+
+    width:
+        auto;
+
+    height:
+        100%;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * WIDGET
+ * ============================================================
+ */
+
+.widget {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    overflow:
+        hidden;
+
+    border-radius:
+        var(--panel-radius);
+
+    background:
+        var(--panel-bg);
+
+    padding:
+        var(--panel-padding);
+
+    box-sizing:
+        border-box;
+
+    user-select:
+        none;
+
+}
+
+
+/*
+ * ============================================================
  * SCREEN NAVIGATION
+ * ============================================================
+ *
+ * Prev / Next remain independent floating controls.
+ * They are vertically centered.
+ * ============================================================
  */
 
 .screen-navigation {
 
-    position: fixed;
+    position:
+        fixed;
 
-    top: 50%;
+    top:
+        50%;
 
-    transform: translateY(-50%);
+    transform:
+        translateY(
+            -50%
+        );
 
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display:
+        flex;
 
-    padding: 12px 16px;
+    align-items:
+        center;
 
-    border: none;
-    border-radius: 12px;
+    gap:
+        10px;
 
-    background: rgba(0, 0, 0, .55);
+    padding:
+        12px 16px;
 
-    color: rgba(255, 255, 255, .85);
+    border:
+        none;
 
-    font-family: Roboto, Arial, sans-serif;
-    font-size: 24px;
+    border-radius:
+        12px;
 
-    cursor: pointer;
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            .55
+        );
 
-    opacity: 0;
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            .85
+        );
+
+    font-family:
+        Roboto,
+        Arial,
+        sans-serif;
+
+    font-size:
+        24px;
+
+    cursor:
+        pointer;
+
+    opacity:
+        0;
 
     transition:
         opacity .4s ease,
         background-color .2s ease;
 
-    z-index: 1000;
+    z-index:
+        1000;
 
-    user-select: none;
+    user-select:
+        none;
 
-    touch-action: manipulation;
-}
+    touch-action:
+        manipulation;
 
-.screen-navigation:hover {
-
-    background: rgba(0, 0, 0, .75);
-
-    color: #ffffff;
-}
-
-.screen-navigation:focus {
-
-    outline: none;
-}
-
-.screen-navigation--prev {
-
-    left: 24px;
-}
-
-.screen-navigation--next {
-
-    right: 24px;
-}
-
-.screen-navigation__label {
-
-    font-size: 18px;
-
-    font-weight: 300;
-
-    white-space: nowrap;
 }
 
 
 /*
+ * ============================================================
+ * SCREEN NAVIGATION HOVER
+ * ============================================================
+ */
+
+.screen-navigation:hover {
+
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            .75
+        );
+
+    color:
+        #ffffff;
+
+}
+
+
+/*
+ * ============================================================
+ * SCREEN NAVIGATION FOCUS
+ * ============================================================
+ */
+
+.screen-navigation:focus {
+
+    outline:
+        none;
+
+}
+
+
+/*
+ * ============================================================
+ * PREVIOUS SCREEN
+ * ============================================================
+ */
+
+.screen-navigation--prev {
+
+    left:
+        24px;
+
+}
+
+
+/*
+ * ============================================================
+ * NEXT SCREEN
+ * ============================================================
+ */
+
+.screen-navigation--next {
+
+    right:
+        24px;
+
+}
+
+
+/*
+ * ============================================================
+ * SCREEN NAVIGATION LABEL
+ * ============================================================
+ */
+
+.screen-navigation__label {
+
+    font-size:
+        18px;
+
+    font-weight:
+        300;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/*
+ * ============================================================
  * VISIBLE STATE
+ * ============================================================
  */
 
 #dashboard-scale.screen-navigation-visible
 .screen-navigation {
 
-    opacity: 1;
+    opacity:
+        1;
+
 }

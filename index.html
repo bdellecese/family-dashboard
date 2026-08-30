@@ -11,6 +11,8 @@
 <link rel="stylesheet" href="css/layouts/large-calendar-layout.css">
 <link rel="stylesheet" href="css/layouts/chores-fun-layout.css">
 <link rel="stylesheet" href="css/layouts/sports-layout.css">
+<link rel="stylesheet" href="css/layouts/distraction-free-layout.css">
+
 
 /* WIDGET STYLES */
 
@@ -30,6 +32,7 @@
 <link rel="stylesheet" href="widgets/large-calendar/large-calendar.css">
 <link rel="stylesheet" href="widgets/kids-chores/kids-chores.css">
 <link rel="stylesheet" href="widgets/text/text.css">
+<link rel="stylesheet" href="widgets/greeting/greeting.css">
 <link rel="stylesheet" href="widgets/household-chores/household-chores.css">
 <link rel="stylesheet" href="widgets/school-lunch/school-lunch.css">
 <link rel="stylesheet" href="widgets/word-of-day/word-of-day.css">
@@ -47,16 +50,19 @@
 <link rel="stylesheet" href="widgets/sports-legends/sports-legends.css">
 <link rel="stylesheet" href="widgets/sports-trivia/sports-trivia.css">
 
+
 /* IMPORT FONTS */
 
 <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 >
+
 <link
     rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Nanum+Brush+Script&display=swap"
 >
+
 <link
     rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&display=swap"
@@ -65,11 +71,86 @@
 </head>
 
 
-
 <body>
 
     <div id="dashboard-scale">
+
+
+        <!-- ================================================= -->
+        <!-- SCREEN CONTROL RAIL                              -->
+        <!-- ================================================= -->
+
+        <nav
+            id="screen-control-rail"
+            class="screen-control-rail"
+            aria-label="Dashboard screens"
+        >
+
+            <button
+                class="screen-control-rail__button"
+                type="button"
+                data-screen="information"
+                aria-label="Information"
+                title="Information"
+            >
+                <span class="fas fa-house"></span>
+            </button>
+
+
+            <button
+                class="screen-control-rail__button"
+                type="button"
+                data-screen="calendar"
+                aria-label="Calendar"
+                title="Calendar"
+            >
+                <span class="fas fa-calendar-days"></span>
+            </button>
+
+
+            <button
+                class="screen-control-rail__button"
+                type="button"
+                data-screen="chores-fun"
+                aria-label="Chores and Fun"
+                title="Chores + Fun"
+            >
+                <span class="fas fa-list-check"></span>
+            </button>
+
+
+            <button
+                class="screen-control-rail__button"
+                type="button"
+                data-screen="sports"
+                aria-label="Sports"
+                title="Sports"
+            >
+                <span class="fas fa-trophy"></span>
+            </button>
+
+            <button
+                class="screen-control-rail__button screen-control-rail__button--distraction-free"
+                id="distraction-free-toggle"
+                type="button"
+                aria-label="Enter Distraction Free Mode"
+                title="Distraction Free Mode"
+            >
+                <span class="fas fa-ban"></span>
+            </button>
+
+        </nav>
+
+        <!-- ================================================= -->
+        <!-- DASHBOARD                                         -->
+        <!-- ================================================= -->
+
         <div id="dashboard"></div>
+
+
+        <!-- ================================================= -->
+        <!-- PREVIOUS SCREEN                                    -->
+        <!-- ================================================= -->
 
         <button
             id="prev-screen"
@@ -79,8 +160,17 @@
         >
 
             <span class="fas fa-arrow-circle-left"></span>
-            <span class="screen-navigation__label">Prev Screen</span>
+
+            <span class="screen-navigation__label">
+                Prev Screen
+            </span>
+
         </button>
+
+
+        <!-- ================================================= -->
+        <!-- NEXT SCREEN                                       -->
+        <!-- ================================================= -->
 
         <button
             id="next-screen"
@@ -88,18 +178,32 @@
             type="button"
             aria-label="Next screen"
         >
-            <span class="screen-navigation__label">Next Screen</span>
+
+            <span class="screen-navigation__label">
+                Next Screen
+            </span>
+
             <span class="fas fa-arrow-circle-right"></span>
+
         </button>
 
     </div>
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+    ></script>
 
-    <script src="https://accounts.google.com/gsi/client"></script>
 
-    <script type="module" src="app/dashboard.js"></script>
+    <script
+        src="https://accounts.google.com/gsi/client"
+    ></script>
+
+
+    <script
+        type="module"
+        src="app/dashboard.js"
+    ></script>
 
 </body>
 

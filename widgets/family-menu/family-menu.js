@@ -179,6 +179,8 @@ function parseMenu(rows) {
 
     let chef = "";
 
+    let extra = "";
+
 
     /*
      * ----------------------------------------
@@ -228,7 +230,7 @@ function parseMenu(rows) {
 
             /*
              * Chef is currently stored
-             * in the Dinner column.
+             * in the breakfast column.
              */
 
             chef =
@@ -241,6 +243,32 @@ function parseMenu(rows) {
 
         }
 
+       /*
+        * ----------------------------------------
+        * Extra
+        * ----------------------------------------
+        */
+
+        if (
+            day.toLowerCase() ===
+            "extra"
+        ) {
+
+            /*
+             * Extra is currently stored
+             * in the breakfast column.
+             */
+
+
+            extra =
+                getCellValue(
+                    row,
+                    columns.breakfast
+                );
+
+            continue;
+
+        }
 
         /*
          * Ignore non-day rows
@@ -308,6 +336,8 @@ function parseMenu(rows) {
 
         chef,
 
+        extra,
+
         meals
 
     };
@@ -336,16 +366,25 @@ function renderMenu(
             </span>
         </div>
 
-            ${
-                menu.chef
-                    ? `
-                        <div class="family-menu-widget__chef">
-                            Chef: ${menu.chef}
-                        </div>
-                      `
-                    : ""
-            }
-        </div>
+        ${
+            menu.chef
+                ? `
+                    <div class="family-menu-widget__chef">
+                        Chef: ${menu.chef}
+                    </div>
+                `
+                : ""
+        }
+
+        ${
+            menu.extra
+                ? `
+                    <div class="family-menu-widget__extra">
+                        Extra: ${menu.extra}
+                    </div>
+                `
+                : ""
+        }
 
         <div class="
             family-menu-widget__list
