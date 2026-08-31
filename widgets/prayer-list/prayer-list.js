@@ -67,10 +67,8 @@ const prayerList = {
 
         catch (error) {
 
-            console.error(
-                "Unable to load daily verse:",
-                error
-            );
+            // OurManna is optional.
+            // Continue rendering the prayer list without the daily verse.
 
         }
 

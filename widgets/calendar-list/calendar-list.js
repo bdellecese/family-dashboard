@@ -191,8 +191,8 @@ const calendarList = {
                 ) => {
 
                     /*
-                     * All-day events first.
-                     */
+                    * All-day events first.
+                    */
 
                     if (
                         a.allDay &&
@@ -215,8 +215,28 @@ const calendarList = {
 
 
                     /*
-                     * Within the same type, sort by start time.
-                     */
+                    * All-day events should be
+                    * compared as calendar dates,
+                    * not UTC timestamps.
+                    */
+
+                    if (
+                        a.allDay &&
+                        b.allDay
+                    ) {
+
+                        return String(a.start)
+                            .localeCompare(
+                                String(b.start)
+                            );
+
+                    }
+
+
+                    /*
+                    * Timed events use their
+                    * actual timestamps.
+                    */
 
                     return (
                         new Date(a.start) -
@@ -236,22 +256,13 @@ const calendarList = {
             const groupedEvents =
                 new Map();
 
-
             events.forEach(
                 event => {
 
-                    const eventDate =
-                        new Date(
-                            event.start
-                        );
-
-
                     const key =
-                        `${eventDate.getFullYear()}-${String(
-                            eventDate.getMonth() + 1
-                        ).padStart(2, "0")}-${String(
-                            eventDate.getDate()
-                        ).padStart(2, "0")}`;
+                        getEventDateKey(
+                            event
+                        );
 
 
                     if (
@@ -261,13 +272,7 @@ const calendarList = {
                         groupedEvents.set(
                             key,
                             {
-
-                                date:
-                                    eventDate,
-
-                                events:
-                                    []
-
+                                events: []
                             }
                         );
 
@@ -277,7 +282,9 @@ const calendarList = {
                     groupedEvents
                         .get(key)
                         .events
-                        .push(event);
+                        .push(
+                            event
+                        );
 
                 }
             );
@@ -898,6 +905,34 @@ function formatEventLocation(
 
 
     return value;
+
+}
+
+function getEventDateKey(event) {
+
+    if (event.allDay) {
+
+        return String(
+            event.start
+        ).slice(
+            0,
+            10
+        );
+
+    }
+
+
+    const eventDate =
+        new Date(
+            event.start
+        );
+
+
+    return `${eventDate.getFullYear()}-${String(
+        eventDate.getMonth() + 1
+    ).padStart(2, "0")}-${String(
+        eventDate.getDate()
+    ).padStart(2, "0")}`;
 
 }
 
