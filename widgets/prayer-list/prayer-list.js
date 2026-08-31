@@ -32,23 +32,52 @@ const prayerList = {
 
 
         /*
-         * Load both data sources.
+         * ----------------------------------------
+         * Load both data sources
+         * ----------------------------------------
+         *
+         * OurManna is optional.
+         *
+         * If it is unavailable, the prayer list
+         * should still render.
          */
 
-        const [
-            rows,
-            verse
-        ] =
-            await Promise.all([
-                getSheetRows(
-                    SHEET_NAME
-                ),
-                getDailyVerse()
-            ]);
+        const rowsPromise =
+            getSheetRows(
+                SHEET_NAME
+            );
 
+        const versePromise =
+            getDailyVerse();
+
+
+        const rows =
+            await rowsPromise;
+
+
+        let verse = null;
+
+
+        try {
+
+            verse =
+                await versePromise;
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Unable to load daily verse:",
+                error
+            );
+
+        }
 
         /*
+         * ----------------------------------------
          * Today's Prayer
+         * ----------------------------------------
          */
 
         const prayerTitle =
@@ -68,6 +97,12 @@ const prayerList = {
         );
 
 
+        /*
+         * ----------------------------------------
+         * Verse
+         * ----------------------------------------
+         */
+
         const verseText =
             document.createElement("div");
 
@@ -76,8 +111,19 @@ const prayerList = {
             "prayer-list-widget__verse";
 
 
-        verseText.textContent =
-            `"${verse.text}"`;
+        if (verse) {
+
+            verseText.textContent =
+                `"${verse.text}"`;
+
+        }
+
+        else {
+
+            verseText.textContent =
+                "Today's verse is temporarily unavailable.";
+
+        }
 
 
         wrapper.appendChild(
@@ -85,25 +131,37 @@ const prayerList = {
         );
 
 
-        const verseReference =
-            document.createElement("div");
+        /*
+         * ----------------------------------------
+         * Verse reference
+         * ----------------------------------------
+         */
+
+        if (verse) {
+
+            const verseReference =
+                document.createElement("div");
 
 
-        verseReference.className =
-            "prayer-list-widget__reference";
+            verseReference.className =
+                "prayer-list-widget__reference";
 
 
-        verseReference.textContent =
-            `${verse.reference} — ${verse.version}`;
+            verseReference.textContent =
+                `${verse.reference} — ${verse.version}`;
 
 
-        wrapper.appendChild(
-            verseReference
-        );
+            wrapper.appendChild(
+                verseReference
+            );
+
+        }
 
 
         /*
+         * ----------------------------------------
          * Prayer List
+         * ----------------------------------------
          */
 
         const title =
@@ -137,7 +195,9 @@ const prayerList = {
 
 
         /*
-         * Extract names from Google Sheet.
+         * ----------------------------------------
+         * Extract names from Google Sheet
+         * ----------------------------------------
          */
 
         const names = [];
@@ -165,7 +225,9 @@ const prayerList = {
 
 
         /*
-         * Render prayer list.
+         * ----------------------------------------
+         * Render prayer list
+         * ----------------------------------------
          */
 
         names.forEach(
