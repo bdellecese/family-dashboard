@@ -7,6 +7,7 @@
  * Responsibilities:
  * - Manage rotation between sports
  * - Load the appropriate sport-specific standings widget
+ * - Use the centralized sports preferences
  * - Pass configuration through to the sport widget
  *
  * Sport-specific rendering lives under:
@@ -14,6 +15,10 @@
  * widgets/sports-standings/<sport>/
  * ============================================================
  */
+
+import {
+    sportsPreferences
+} from "../../config/sports-preferences.js";
 
 
 const sports = {};
@@ -31,9 +36,10 @@ async function loadSport(
 
     }
 
+
     switch (sport) {
 
-                case "mlb": {
+        case "mlb": {
 
             const module =
                 await import(
@@ -48,6 +54,7 @@ async function loadSport(
             break;
 
         }
+
 
         case "nfl": {
 
@@ -64,6 +71,7 @@ async function loadSport(
             break;
 
         }
+
 
         default:
 
@@ -95,12 +103,39 @@ export default {
         );
 
 
+        /*
+         * ====================================================
+         * CENTRAL SPORTS CONFIGURATION
+         * ====================================================
+         *
+         * Use the same sport configuration and priority order
+         * as the scoreboard.
+         *
+         * Only the sport names are passed to the standings
+         * widgets.
+         * ====================================================
+         */
+
         const configuredSports =
-            Array.isArray(
-                config.sports
-            )
-                ? config.sports
-                : [];
+            (sportsPreferences.sports || [])
+                .slice()
+                .sort(
+                    (
+                        a,
+                        b
+                    ) =>
+                        (
+                            a.priority ?? 999
+                        )
+                        -
+                        (
+                            b.priority ?? 999
+                        )
+                )
+                .map(
+                    sport =>
+                        sport.sport
+                );
 
 
         if (
@@ -141,8 +176,8 @@ export default {
 
 
                 /*
-                * Destroy the currently rendered sport.
-                */
+                 * Destroy the currently rendered sport.
+                 */
 
                 if (
                     currentWidget &&
@@ -158,12 +193,12 @@ export default {
 
 
                 /*
-                * Completely reset the shared container.
-                *
-                * Sport-specific widgets add their own classes
-                * (for example --nfl). Those must not survive
-                * when the next sport is rendered.
-                */
+                 * Completely reset the shared container.
+                 *
+                 * Sport-specific widgets add their own classes
+                 * (for example --nfl). Those must not survive
+                 * when the next sport is rendered.
+                 */
 
                 container.innerHTML =
                     "";
@@ -173,8 +208,8 @@ export default {
 
 
                 /*
-                * Load and render the next sport.
-                */
+                 * Load and render the next sport.
+                 */
 
                 currentWidget =
                     await loadSport(
@@ -197,8 +232,13 @@ export default {
 
 
         /*
-         * Only rotate when there is more than
-         * one configured sport.
+         * ====================================================
+         * ROTATION
+         * ====================================================
+         *
+         * Use the same centralized rotation setting as the
+         * scoreboard.
+         * ====================================================
          */
 
         if (
@@ -207,8 +247,9 @@ export default {
 
             const rotationSeconds =
                 Number(
-                    config.rotationSeconds
+                    sportsPreferences.rotationSeconds
                 ) || 30;
+
 
             rotationTimer =
                 setInterval(

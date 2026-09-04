@@ -431,7 +431,7 @@
         5px;
 
     padding:
-        5px 5px;
+        5px;
 
     border-bottom:
         1px solid
@@ -525,14 +525,7 @@
  * ============================================================
  */
 
-.mlb-standings-columns span:nth-child(1) {
-
-    text-align:
-        left;
-
-}
-
-
+.mlb-standings-columns span:nth-child(1),
 .mlb-standings-columns span:nth-child(2) {
 
     text-align:
@@ -819,7 +812,7 @@
 .mlb-standings-team-name {
 
     font-weight:
-        500;
+        300;
 
 }
 
@@ -831,7 +824,7 @@
         var(--mlb-gold);
 
     font-weight:
-        500;
+        300;
 
 }
 
@@ -840,7 +833,7 @@
 .mlb-standings-record {
 
     font-weight:
-        500;
+        300;
 
 }
 
@@ -1009,7 +1002,7 @@
 .mlb-standings-team-name {
 
     font-weight:
-        500;
+        300;
 
 }
 
@@ -1021,7 +1014,7 @@
         var(--mlb-gold);
 
     font-weight:
-        500;
+        300;
 
 }
 
@@ -1221,4 +1214,1019 @@
 
     }
 
+}
+
+
+/* ============================================================
+   MLB POSTSEASON BRACKET
+   ============================================================ */
+
+.mlb-postseason {
+
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   MAIN BRACKET
+   ============================================================ */
+
+.mlb-postseason-bracket {
+
+    --postseason-card-height: 230px;
+
+    flex: 1 1 auto;
+
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+
+    box-sizing: border-box;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr)
+        minmax(0, 1fr)
+        minmax(0, 1.15fr)
+        minmax(0, 1fr)
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+
+    grid-template-rows:
+        auto
+        1fr;
+
+    column-gap: 10px;
+    row-gap: 5px;
+
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   LEAGUE SIDES
+   ============================================================ */
+
+.mlb-postseason-side {
+
+    display: contents;
+}
+
+
+/* ============================================================
+   LEAGUE HEADERS
+   ============================================================ */
+
+.mlb-postseason-side--al
+.mlb-postseason-league {
+
+    grid-column: 1 / 4;
+    grid-row: 1;
+
+    text-align: left;
+}
+
+
+.mlb-postseason-side--nl
+.mlb-postseason-league {
+
+    grid-column: 5 / 8;
+    grid-row: 1;
+
+    text-align: right;
+}
+
+
+.mlb-postseason-league {
+
+    align-self: start;
+
+    margin: 0;
+    padding: 0;
+
+    font-size:
+        clamp(
+            13px,
+            0.95vw,
+            22px
+        );
+
+    font-weight: 600;
+
+    letter-spacing: 0.12em;
+
+    line-height: 1;
+}
+
+
+/* ============================================================
+   ROUND COLUMNS
+   ============================================================ */
+
+.mlb-postseason-round {
+
+    grid-row: 2;
+
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: visible;
+}
+
+
+/* ============================================================
+   ROUND HEADERS
+   ============================================================ */
+
+.mlb-postseason-round-title {
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    margin: 0 0 6px;
+    padding: 0;
+
+    text-align: center;
+
+    font-size:
+        clamp(
+            9px,
+            0.65vw,
+            14px
+        );
+
+    font-weight: 600;
+
+    letter-spacing: 0.08em;
+
+    line-height: 1;
+
+    opacity: 0.65;
+}
+
+
+/* ============================================================
+   ROUND CARD AREA
+   ============================================================ */
+
+.mlb-postseason-round-cards {
+
+    position: relative;
+
+    flex: 1 1 auto;
+
+    width: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    display: block;
+
+    overflow: visible;
+}
+
+
+/* ============================================================
+   ROUND POSITIONS
+   ============================================================ */
+
+.mlb-postseason-side--al
+.mlb-postseason-round--wild-card {
+
+    grid-column: 1;
+}
+
+
+.mlb-postseason-side--al
+.mlb-postseason-round--division {
+
+    grid-column: 2;
+}
+
+
+.mlb-postseason-side--al
+.mlb-postseason-round--championship {
+
+    grid-column: 3;
+}
+
+
+.mlb-postseason-side--nl
+.mlb-postseason-round--championship {
+
+    grid-column: 5;
+}
+
+
+.mlb-postseason-side--nl
+.mlb-postseason-round--division {
+
+    grid-column: 6;
+}
+
+
+.mlb-postseason-side--nl
+.mlb-postseason-round--wild-card {
+
+    grid-column: 7;
+}
+
+
+/* ============================================================
+   SERIES CARDS
+   ============================================================ */
+
+.mlb-postseason-round-cards
+.mlb-postseason-series {
+
+    position: absolute;
+
+    left: 0;
+
+    width: 100%;
+
+    overflow: visible;
+}
+
+
+/* ============================================================
+   AMERICAN LEAGUE
+   ============================================================ */
+
+/*
+ * Wild Card:
+ *
+ * Two cards spread vertically.
+ */
+
+.mlb-postseason-side--al
+.mlb-postseason-round--wild-card
+.mlb-postseason-round-cards
+.mlb-postseason-series:nth-child(1) {
+
+    top: 0;
+}
+
+
+.mlb-postseason-side--al
+.mlb-postseason-round--wild-card
+.mlb-postseason-round-cards
+.mlb-postseason-series:nth-child(2) {
+
+    top: 50%;
+}
+
+
+/*
+ * Division:
+ *
+ * Cards move toward the center.
+ */
+
+.mlb-postseason-side--al
+.mlb-postseason-round--division
+.mlb-postseason-round-cards
+.mlb-postseason-series:nth-child(1) {
+
+    top: 12.5%;
+}
+
+
+.mlb-postseason-side--al
+.mlb-postseason-round--division
+.mlb-postseason-round-cards
+.mlb-postseason-series:nth-child(2) {
+
+    top: 62.5%;
+}
+
+
+/*
+ * ALCS:
+ *
+ * Centered vertically between the two Division Series.
+ */
+
+.mlb-postseason-side--al
+.mlb-postseason-round--championship
+.mlb-postseason-round-cards
+.mlb-postseason-series {
+
+    top: 37.5%;
+}
+
+
+/* ============================================================
+   NATIONAL LEAGUE
+   ============================================================ */
+
+/*
+ * NLCS
+ */
+
+.mlb-postseason-side--nl
+.mlb-postseason-round--championship
+.mlb-postseason-round-cards
+.mlb-postseason-series {
+
+    top: 37.5%;
+}
+
+
+/*
+ * Division
+ */
+
+.mlb-postseason-side--nl
+.mlb-postseason-round--division
+.mlb-postseason-round-cards
+.mlb-postseason-series:nth-child(1) {
+
+    top: 12.5%;
+}
+
+
+.mlb-postseason-side--nl
+.mlb-postseason-round--division
+.mlb-postseason-round-cards
+.mlb-postseason-series:nth-child(2) {
+
+    top: 62.5%;
+}
+
+
+/*
+ * Wild Card
+ */
+
+.mlb-postseason-side--nl
+.mlb-postseason-round--wild-card
+.mlb-postseason-round-cards
+.mlb-postseason-series:nth-child(1) {
+
+    top: 0;
+}
+
+
+.mlb-postseason-side--nl
+.mlb-postseason-round--wild-card
+.mlb-postseason-round-cards
+.mlb-postseason-series:nth-child(2) {
+
+    top: 50%;
+}
+
+
+/* ============================================================
+   WORLD SERIES
+   ============================================================ */
+
+.mlb-postseason-center {
+
+    grid-column: 4;
+    grid-row: 2;
+
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: stretch;
+
+    justify-content: flex-start;
+}
+
+
+.mlb-postseason-center
+.mlb-postseason-league {
+
+    margin: 0 0 6px;
+
+    text-align: center;
+
+    font-size:
+        clamp(
+            11px,
+            0.8vw,
+            18px
+        );
+}
+
+
+.mlb-postseason-center
+.mlb-postseason-league--center {
+
+    width: 100%;
+
+    text-align: center;
+}
+
+
+.mlb-postseason-center
+.mlb-postseason-series {
+
+    margin-top: 37.5%;
+}
+
+
+/* ============================================================
+   SERIES CARD
+   ============================================================ */
+
+.mlb-postseason-series {
+
+    box-sizing: border-box;
+
+    min-width: 0;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.04
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.14
+        );
+
+    border-radius: 4px;
+
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   SERIES TITLE
+   ============================================================ */
+
+.mlb-postseason-series-title {
+
+    padding: 5px 7px;
+
+    font-size:
+        clamp(
+            9px,
+            0.65vw,
+            13px
+        );
+
+    font-weight: 600;
+
+    letter-spacing: 0.06em;
+
+    line-height: 1;
+
+    opacity: 0.55;
+}
+
+
+/* ============================================================
+   POSTSEASON TEAM
+   ============================================================ */
+
+.mlb-postseason-team {
+
+    width: 100%;
+    min-width: 0;
+    height: 103px;
+    min-height: 103px;
+
+    padding: 0 7px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+
+.mlb-postseason-team + .mlb-postseason-team {
+
+    border-top:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.10
+        );
+}
+
+
+/* ============================================================
+   SEED / WINS
+   ============================================================ */
+
+.mlb-postseason-team-seed,
+.mlb-postseason-team-wins {
+
+    flex: 0 0 18px;
+    min-width: 18px;
+
+    text-align: center;
+
+    font-size:
+        clamp(
+            12px,
+            0.8vw,
+            16px
+        );
+
+    font-weight: 700;
+
+    font-variant-numeric:
+        tabular-nums;
+}
+
+
+/* ============================================================
+   LOGO
+   ============================================================ */
+
+.mlb-postseason-team-logo {
+
+    width: 100px;
+    height: 100px;
+    flex: 0 0 100px;
+
+    object-fit: contain;
+}
+
+
+/* ============================================================
+   TBD / PLACEHOLDER
+   ============================================================ */
+
+.mlb-postseason-team-tbd {
+
+    width: 100%;
+
+    text-align: center;
+
+    font-size:
+        clamp(
+            13px,
+            0.9vw,
+            18px
+        );
+
+    font-weight: 600;
+
+    letter-spacing: 0.08em;
+
+    opacity: 0.45;
+}
+
+
+.mlb-postseason-team--placeholder {
+
+    justify-content: center;
+
+    opacity: 0.35;
+}
+
+
+/* ============================================================
+ * AL TEAM ROW
+ *
+ * SEED | LOGO ---------------- | WINS
+ * ============================================================ */
+
+.mlb-postseason-side--al
+.mlb-postseason-team {
+
+    justify-content: flex-start;
+}
+
+
+.mlb-postseason-side--al
+.mlb-postseason-team-wins {
+
+    margin-left: auto;
+}
+
+
+/* ============================================================
+ * NL TEAM ROW
+ *
+ * WINS | ---------------- LOGO | SEED
+ * ============================================================ */
+
+.mlb-postseason-side--nl
+.mlb-postseason-team {
+
+    justify-content: flex-end;
+}
+
+
+.mlb-postseason-side--nl
+.mlb-postseason-team-wins {
+
+    margin-right: auto;
+}
+
+
+/* ============================================================
+ * WORLD SERIES TEAM ROW
+ * ============================================================ */
+
+.mlb-postseason-series--world
+.mlb-postseason-team-wins {
+
+    margin-left: auto;
+}
+
+
+/* ============================================================
+   SMALLER DASHBOARD HEIGHTS
+   ============================================================ */
+
+@media (
+    max-height: 700px
+) {
+
+    .mlb-postseason-bracket {
+
+        column-gap: 7px;
+
+        row-gap: 4px;
+    }
+
+
+    .mlb-postseason-round-title {
+
+        margin-bottom: 4px;
+
+        font-size:
+            clamp(
+                8px,
+                0.6vw,
+                12px
+            );
+    }
+
+
+    .mlb-postseason-team {
+
+        min-height: 23px;
+
+        padding: 2px 4px;
+    }
+
+
+    .mlb-postseason-team-logo {
+
+        width: 15px;
+        height: 15px;
+
+        flex-basis: 15px;
+    }
+
+
+    .mlb-postseason-team-wins {
+
+        font-size:
+            clamp(
+                8px,
+                0.6vw,
+                12px
+            );
+    }
+
+}
+
+
+/* ============================================================
+   MLB POSTSEASON BRACKET CONNECTOR LINES
+   ============================================================ */
+
+/*
+ * Connector geometry
+ *
+ * WILD CARD cards:
+ *   card 1 = top: 0
+ *   card 2 = top: 50%
+ *
+ * DIVISION cards:
+ *   card 1 = top: 12.5%
+ *   card 2 = top: 62.5%
+ *
+ * The vertical connectors therefore need to run through
+ * the CENTER of those cards, not simply 25%-75% of the
+ * available container.
+ */
+
+
+/* ============================================================
+   HORIZONTAL CONNECTORS
+   ============================================================ */
+
+/*
+ * AL connectors point right.
+ */
+
+.mlb-postseason-side--al
+.mlb-postseason-round-cards
+.mlb-postseason-series::after {
+
+    right: -10px;
+}
+
+
+/*
+ * NL connectors point left.
+ */
+
+.mlb-postseason-side--nl
+.mlb-postseason-round-cards
+.mlb-postseason-series::after {
+
+    left: -10px;
+}
+
+
+/*
+ * Shared horizontal connector styling.
+ */
+
+.mlb-postseason-round-cards
+.mlb-postseason-series::after {
+
+    content: "";
+
+    position: absolute;
+
+    top: 50%;
+
+    width: 10px;
+    height: 0;
+
+    border-top:
+        1px solid
+        rgba(
+            243,
+            235,
+            211,
+            0.35
+        );
+
+    transform:
+        translateY(-50%);
+
+    z-index: 1;
+}
+
+
+/* ============================================================
+   AL WILD CARD → DIVISION
+   ============================================================ */
+
+/*
+ * Vertical connector joining the two Wild Card cards.
+ *
+ * First card center  = 25px
+ * Second card center = 50% + 25px
+ */
+
+.mlb-postseason-side--al
+.mlb-postseason-round--wild-card
+.mlb-postseason-round-cards::after {
+
+    content: "";
+
+    position: absolute;
+
+    top:
+        calc(
+            var(--postseason-card-height) / 2
+        );
+
+    right: -10px;
+
+    width: 10px;
+
+    height: 50%;
+
+    border-right:
+        1px solid
+        rgba(
+            243,
+            235,
+            211,
+            0.35
+        );
+
+    z-index: 0;
+}
+
+
+/* ============================================================
+   AL DIVISION → CHAMPIONSHIP
+   ============================================================ */
+
+/*
+ * Vertical connector joining the two Division Series cards.
+ *
+ * First card center  = 12.5% + 25px
+ * Second card center = 62.5% + 25px
+ */
+
+.mlb-postseason-side--al
+.mlb-postseason-round--division
+.mlb-postseason-round-cards::after {
+
+    content: "";
+
+    position: absolute;
+
+    top:
+        calc(
+            12.5% +
+            var(--postseason-card-height) / 2
+        );
+
+    right: -10px;
+
+    width: 10px;
+
+    height: 50%;
+
+    border-right:
+        1px solid
+        rgba(
+            243,
+            235,
+            211,
+            0.35
+        );
+
+    z-index: 0;
+}
+
+
+/* ============================================================
+   ALCS → WORLD SERIES
+   ============================================================ */
+
+.mlb-postseason-side--al
+.mlb-postseason-round--championship
+.mlb-postseason-round-cards
+.mlb-postseason-series::after {
+
+    right: -10px;
+}
+
+
+/* ============================================================
+   NL CHAMPIONSHIP → WORLD SERIES
+   ============================================================ */
+
+.mlb-postseason-side--nl
+.mlb-postseason-round--championship
+.mlb-postseason-round-cards
+.mlb-postseason-series::after {
+
+    left: -10px;
+}
+
+
+/* ============================================================
+   NL DIVISION → CHAMPIONSHIP
+   ============================================================ */
+
+/*
+ * Vertical connector joining the two Division Series cards.
+ */
+
+.mlb-postseason-side--nl
+.mlb-postseason-round--division
+.mlb-postseason-round-cards::after {
+
+    content: "";
+
+    position: absolute;
+
+    top:
+        calc(
+            12.5% +
+            var(--postseason-card-height) / 2
+        );
+
+    left: -10px;
+
+    width: 10px;
+
+    height: 50%;
+
+    border-left:
+        1px solid
+        rgba(
+            243,
+            235,
+            211,
+            0.35
+        );
+
+    z-index: 0;
+}
+
+
+/* ============================================================
+   NL WILD CARD → DIVISION
+   ============================================================ */
+
+/*
+ * Vertical connector joining the two Wild Card cards.
+ */
+
+.mlb-postseason-side--nl
+.mlb-postseason-round--wild-card
+.mlb-postseason-round-cards::after {
+
+    content: "";
+
+    position: absolute;
+
+    top:
+        calc(
+            var(--postseason-card-height) / 2
+        );
+
+    left: -10px;
+
+    width: 10px;
+
+    height: 50%;
+
+    border-left:
+        1px solid
+        rgba(
+            243,
+            235,
+            211,
+            0.35
+        );
+
+    z-index: 0;
+}
+
+
+/* ============================================================
+   DIVISION / CHAMPIONSHIP CARD INSET
+   ============================================================ */
+
+.mlb-postseason-round--division
+.mlb-postseason-round-cards
+.mlb-postseason-series,
+
+.mlb-postseason-round--championship
+.mlb-postseason-round-cards
+.mlb-postseason-series {
+
+    width:
+        calc(
+            100% - 10px
+        );
+}
+
+
+.mlb-postseason-side--al
+.mlb-postseason-round--division
+.mlb-postseason-round-cards
+.mlb-postseason-series,
+
+.mlb-postseason-side--al
+.mlb-postseason-round--championship
+.mlb-postseason-round-cards
+.mlb-postseason-series {
+
+    margin-left:
+        10px;
 }

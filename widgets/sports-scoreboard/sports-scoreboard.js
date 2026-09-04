@@ -3,6 +3,15 @@
  * SPORTS SCOREBOARD
  *
  * Orchestrates sport-specific scoreboards.
+ *
+ * Responsibilities:
+ * - Determine which sports are currently in season
+ * - Order active sports by priority
+ * - Rotate between active sports
+ * - Apply sport-specific styling
+ * - Pass sport configuration to the sport implementation
+ *
+ * Sport-specific logic belongs in the individual widgets.
  * ============================================================
  */
 
@@ -11,6 +20,10 @@ import mlbScoreboard
 
 import nflScoreboard
     from "./nfl/nfl-scoreboard.js";
+
+import {
+    sportsPreferences
+} from "../../config/sports-preferences.js";
 
 
 const SPORT_IMPLEMENTATIONS = {
@@ -23,14 +36,24 @@ const SPORT_IMPLEMENTATIONS = {
 
 };
 
+
 let activeTimers =
     new Map();
 
 
-function getTodayMonthDay() {
+function getTodayDate(
+    testDate
+) {
 
     const now =
-        new Date();
+        testDate
+            ? new Date(
+                `${testDate}T12:00:00`
+            )
+            : new Date();
+
+    const year =
+        now.getFullYear();
 
 
     const month =
@@ -51,92 +74,100 @@ function getTodayMonthDay() {
         );
 
 
-    return `${month}-${day}`;
+    return `${year}-${month}-${day}`;
 
 }
 
 
-function isSeasonActive(
-    season,
-    monthDay
+function getSportPhase(
+    sport,
+    date
 ) {
 
+    const phases =
+        sport.phases || [];
+
+
+    /*
+     * --------------------------------------------------------
+     * No phase configuration
+     *
+     * A sport without explicit phases is disabled.
+     * --------------------------------------------------------
+     */
+
     if (
-        !season?.start ||
-        !season?.end
+        phases.length === 0
     ) {
 
-        return true;
+        return "disabled";
 
     }
 
 
-    const start =
-        season.start;
-
-
-    const end =
-        season.end;
-
-
-    /*
-     * Normal season:
-     *
-     * 03-01 → 10-31
-     */
-
-    if (
-        start <= end
-    ) {
-
-        return (
-            monthDay >= start &&
-            monthDay <= end
+    const phase =
+        phases.find(
+            phase =>
+                date >= phase.start &&
+                date <= phase.end
         );
 
-    }
-
-
-    /*
-     * Cross-year season:
-     *
-     * 08-01 → 02-15
-     */
 
     return (
-        monthDay >= start ||
-        monthDay <= end
+        phase?.phase ||
+        "disabled"
     );
 
 }
 
-
-function getActiveSports(
-    config
-) {
+function getActiveSports() {
 
     const sports =
-        config.sports || [];
-
-
-    const monthDay =
-        getTodayMonthDay();
+        sportsPreferences.sports || [];
 
 
     return sports
+
+        .map(
+            sport => {
+
+                const today =
+                    getTodayDate(
+                        sport.testDate
+                    );
+
+
+                const currentPhase =
+                    getSportPhase(
+                        sport,
+                        today
+                    );
+
+
+                return {
+
+                    ...sport,
+
+                    currentPhase
+
+                };
+
+            }
+        )
+
         .filter(
             sport =>
-                isSeasonActive(
-                    sport.season,
-                    monthDay
-                )
+                sport.currentPhase !==
+                "disabled"
         )
+
         .filter(
             sport =>
                 SPORT_IMPLEMENTATIONS[
                     sport.sport
                 ]
         )
+
         .sort(
             (
                 a,
@@ -172,6 +203,7 @@ function clearTimers(
             timer
         );
 
+
         activeTimers.delete(
             container
         );
@@ -204,9 +236,6 @@ async function renderSport(
     /*
      * --------------------------------------------------------
      * UPDATE SPORT THEME
-     *
-     * Remove any previously active sport theme before adding
-     * the theme for the sport currently being rendered.
      * --------------------------------------------------------
      */
 
@@ -224,6 +253,20 @@ async function renderSport(
     /*
      * --------------------------------------------------------
      * RENDER SPORT
+     *
+     * Pass the complete sport configuration through.
+     *
+     * Example:
+     *
+     * {
+     *     sport: "mlb",
+     *     priority: 1,
+     *     favoriteTeams: ["BOS", "STL"],
+     *     phases: [...],
+     *     currentPhase: "regularSeason"
+     * }
+     *
+     * The sport implementation decides how to use it.
      * --------------------------------------------------------
      */
 
@@ -246,6 +289,12 @@ export default {
         config = {}
     ) {
 
+        /*
+         * ----------------------------------------------------
+         * CLEAN UP ANY EXISTING ROTATION
+         * ----------------------------------------------------
+         */
+
         clearTimers(
             container
         );
@@ -260,11 +309,20 @@ export default {
         );
 
 
-        const activeSports =
-            getActiveSports(
-                config
-            );
+        /*
+         * ----------------------------------------------------
+         * GET ACTIVE SPORTS
+         * ----------------------------------------------------
+         */
 
+        const activeSports =
+            getActiveSports();
+
+        /*
+         * ----------------------------------------------------
+         * NO ACTIVE SPORTS
+         * ----------------------------------------------------
+         */
 
         if (
             activeSports.length === 0
@@ -282,6 +340,12 @@ export default {
         }
 
 
+        /*
+         * ----------------------------------------------------
+         * RENDER FIRST SPORT
+         * ----------------------------------------------------
+         */
+
         let currentIndex =
             0;
 
@@ -294,13 +358,20 @@ export default {
         );
 
 
+        /*
+         * ----------------------------------------------------
+         * ROTATE BETWEEN SPORTS
+         * ----------------------------------------------------
+         */
+
         if (
             activeSports.length > 1
         ) {
 
             const rotationSeconds =
-                config.rotationSeconds ||
-                20;
+                Number(
+                    sportsPreferences.rotationSeconds
+                ) || 30;
 
 
             const timer =

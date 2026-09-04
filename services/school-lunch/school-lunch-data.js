@@ -2145,8 +2145,8 @@ function normalizeMenuText(
         ],
 
         [
-            /Bag\s\*el/gi,
-            "Bagel"
+            /Gar\s\*den/gi,
+            "Garden"
         ],
 
         [

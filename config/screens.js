@@ -428,13 +428,13 @@ export const screens = {
 
                             "snu45s689m3sm81dga137mebkmuraoq0@import.calendar.google.com", /* WU Softball - GC */
 
-                            "gvco5trj7a8eip611tr883v8jsbftad6@import.calendar.google.com", /* WU Softball - Energy Athletics */
-
                             "h9b6sa72im49g27qv0hc09ofird2bm27@import.calendar.google.com", /* Fall softball */
 
                             "alexander.dellecese@gmail.com",
 
                             "878vjmvnrhp8soe4g89lmditinvg9tpm@import.calendar.google.com", /* WU U10 */
+
+                            "qbmd682o66ou6r7ki53cabl84tkoqtqh@import.calendar.google.com", /* HYS U10 */
 
                             "theodore.dellecese@gmail.com",
 
@@ -657,42 +657,12 @@ export const screens = {
              * ====================================================
              */
 
+
             "scoreboard": [
 
                 {
-                    name: "sports-scoreboard",
-
-                    config: {
-
-                        rotationSeconds: 30,
-
-                        sports: [
-
-
-                            {
-                                sport: "mlb",
-                                team: "boston-red-sox",
-                                featured: {
-                                    left: { teamId: 111 },
-                                    right: { teamId: 138 }
-                                },
-                                priority: 1
-
-                            },
-
-                            {
-                                sport: "nfl",
-                                featured: {
-                                    left: { team: "NE" },
-                                    right: { team: "KC" }
-                                },
-                                priority: 2
-
-                            }
-
-                        ]
-
-                    }
+                    name:
+                        "sports-scoreboard"
                 }
 
             ],
@@ -704,32 +674,17 @@ export const screens = {
              * ====================================================
              */
 
+
             "standings": [
 
                 {
 
                     name:
-                        "sports-standings",
-
-                    config: {
-
-                        rotationSeconds:
-                            30,
-
-                        sports: [
-
-                            "mlb",
-
-                            "nfl"
-
-                        ]
-
-                    }
+                        "sports-standings"
 
                 }
 
             ],
-
 
             /*
              * ====================================================
@@ -937,13 +892,13 @@ export const screens = {
 
                                 "snu45s689m3sm81dga137mebkmuraoq0@import.calendar.google.com", /* WU Softball - GC */
 
-                                "gvco5trj7a8eip611tr883v8jsbftad6@import.calendar.google.com", /* WU Softball - Energy Athletics */
-
                                 "h9b6sa72im49g27qv0hc09ofird2bm27@import.calendar.google.com", /* Fall softball */
 
                                 "alexander.dellecese@gmail.com",
 
                                 "878vjmvnrhp8soe4g89lmditinvg9tpm@import.calendar.google.com", /* WU U10 */
+
+                                "qbmd682o66ou6r7ki53cabl84tkoqtqh@import.calendar.google.com", /* HYS U10 */
 
                                 "theodore.dellecese@gmail.com",
 

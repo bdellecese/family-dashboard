@@ -618,6 +618,175 @@
 
 /*
  * ============================================================
+ * POSTSEASON
+ * ============================================================
+ *
+ * Postseason uses the entire scoreboard area rather than the
+ * regular-season four-panel layout.
+ *
+ * With three games:
+ *
+ *     GAME 1       GAME 2
+ *
+ *           GAME 3
+ *
+ * ============================================================
+ */
+
+.mlb-scoreboard--postseason .mlb-main {
+
+    display:
+        block;
+
+    height:
+        calc(
+            100% - 55px
+        );
+
+}
+
+
+.mlb-scoreboard--postseason .mlb-postseason {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    overflow:
+        hidden;
+
+}
+
+
+.mlb-scoreboard--postseason .mlb-postseason-grid {
+
+    height:
+        calc(
+            100% - 35px
+        );
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    grid-template-rows:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    column-gap:
+        48px;
+
+    row-gap:
+        28px;
+
+    overflow:
+        hidden;
+
+}
+
+
+.mlb-scoreboard--postseason .mlb-postseason-game {
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * POSTSEASON GAME SPACING
+ * ============================================================
+ */
+
+.mlb-scoreboard--postseason
+.mlb-postseason-game
+.mlb-inning-row {
+
+    padding:
+        4px 0;
+
+}
+
+
+.mlb-scoreboard--postseason
+.mlb-postseason-game
+.mlb-decisions {
+
+    margin-top:
+        10px;
+
+}
+
+
+.mlb-scoreboard--postseason
+.mlb-postseason-game
+.mlb-game-length {
+
+    margin-bottom:
+        5px;
+
+}
+
+
+.mlb-scoreboard--postseason
+.mlb-postseason-game
+.mlb-home-runs {
+
+    margin-top:
+        6px;
+
+}
+
+
+/*
+ * ============================================================
+ * POSTSEASON MODE
+ * ============================================================
+ *
+ * Hide the regular-season four-panel layout when postseason
+ * games are being displayed.
+ * ============================================================
+ */
+
+.mlb-scoreboard--postseason
+.mlb-al-featured,
+.mlb-scoreboard--postseason
+.mlb-al-scores,
+.mlb-scoreboard--postseason
+.mlb-nl-featured,
+.mlb-scoreboard--postseason
+.mlb-nl-scores {
+
+    display:
+        none;
+
+}
+
+
+/*
+ * ============================================================
  * LOADING / EMPTY STATES
  * ============================================================
  */
@@ -681,6 +850,49 @@
 
         margin-bottom:
             5px;
+
+    }
+
+
+    /*
+     * Postseason gets slightly tighter on short displays.
+     */
+
+    .mlb-scoreboard--postseason
+    .mlb-postseason-grid {
+
+        row-gap:
+            16px;
+
+    }
+
+
+    .mlb-scoreboard--postseason
+    .mlb-postseason-game
+    .mlb-inning-row {
+
+        padding:
+            2px 0;
+
+    }
+
+
+    .mlb-scoreboard--postseason
+    .mlb-postseason-game
+    .mlb-decisions {
+
+        margin-top:
+            6px;
+
+    }
+
+
+    .mlb-scoreboard--postseason
+    .mlb-postseason-game
+    .mlb-home-runs {
+
+        margin-top:
+            3px;
 
     }
 

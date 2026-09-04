@@ -18,6 +18,9 @@
  * ============================================================
  */
 
+import {
+    sportsPreferences
+} from "../../../config/sports-preferences.js";
 
 const MLB_API =
     "https://statsapi.mlb.com/api/v1";
@@ -89,6 +92,108 @@ function getCurrentSeason() {
 
 }
 
+function getMLBTestDate() {
+
+    const mlbConfig =
+        sportsPreferences.sports?.find(
+            sport =>
+                sport.sport === "mlb"
+        );
+
+
+    return (
+        mlbConfig?.testDate ||
+        new Intl.DateTimeFormat(
+            "en-CA",
+            {
+                timeZone:
+                    "America/New_York"
+            }
+        ).format(
+            new Date()
+        )
+    );
+
+}
+
+
+function getMLBSeason() {
+
+    return Number(
+        getMLBTestDate().slice(
+            0,
+            4
+        )
+    );
+
+}
+
+function getMLBPhase() {
+
+    const mlbConfig =
+        sportsPreferences.sports?.find(
+            sport =>
+                sport.sport === "mlb"
+        );
+
+
+    if (
+        !mlbConfig
+    ) {
+
+        return "disabled";
+
+    }
+
+
+    const dateString =
+        mlbConfig.testDate ||
+        new Intl.DateTimeFormat(
+            "en-CA",
+            {
+                timeZone:
+                    "America/New_York"
+            }
+        ).format(
+            new Date()
+        );
+
+
+    const currentDate =
+        new Date(
+            `${dateString}T00:00:00`
+        );
+
+
+    const phase =
+        mlbConfig.phases?.find(
+            phase => {
+
+                const start =
+                    new Date(
+                        `${phase.start}T00:00:00`
+                    );
+
+                const end =
+                    new Date(
+                        `${phase.end}T23:59:59`
+                    );
+
+                return (
+                    currentDate >= start &&
+                    currentDate <= end
+                );
+
+            }
+        );
+
+
+    return (
+        phase?.phase ||
+        "disabled"
+    );
+
+}
 
 function createElement(
     tag,
@@ -750,7 +855,6 @@ function createDivision(
 
 }
 
-
 /*
  * ============================================================
  * LOAD REGULAR SEASON STANDINGS
@@ -760,7 +864,7 @@ function createDivision(
 async function loadStandings() {
 
     const season =
-        getCurrentSeason();
+        getMLBSeason();
 
 
     const url =
@@ -796,13 +900,13 @@ async function loadStandings() {
 
 
     for (
-        const divisionRecord
+        const standingsRecord
         of data.records || []
     ) {
 
         for (
             const teamRecord
-            of divisionRecord.teamRecords || []
+            of standingsRecord.teamRecords || []
         ) {
 
             teamRecords.push(
@@ -834,6 +938,55 @@ async function loadStandings() {
 
 /*
  * ============================================================
+ * LOAD POSTSEASON
+ * ============================================================
+ */
+
+async function loadPostseason() {
+
+    const mlbConfig =
+        sportsPreferences.sports?.find(
+            sport =>
+                sport.sport === "mlb"
+        );
+
+
+    const date =
+        mlbConfig?.testDate ||
+        new Intl.DateTimeFormat(
+            "en-CA",
+            {
+                timeZone:
+                    "America/New_York"
+            }
+        ).format(
+            new Date()
+        );
+
+
+    const response =
+        await fetch(
+            `/api/sports/mlb/postseason?date=${date}`
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        throw new Error(
+            `MLB postseason request failed: ${response.status}`
+        );
+
+    }
+
+
+    return response.json();
+
+}
+
+/*
+ * ============================================================
  * LOAD WILD CARD STANDINGS
  * ============================================================
  */
@@ -841,8 +994,7 @@ async function loadStandings() {
 async function loadWildCardStandings() {
 
     const season =
-        getCurrentSeason();
-
+        getMLBSeason();
 
     const url =
         `${MLB_API}/standings?` +
@@ -1316,6 +1468,1174 @@ function createWildCardColumn(
 
 }
 
+/*
+ * ============================================================
+ * POSTSEASON BRACKET
+ * ============================================================
+ */
+
+function getPostseasonTeamLogoUrl(
+    team
+) {
+
+    if (
+        !team?.id
+    ) {
+
+        return "";
+
+    }
+
+    return (
+        `https://www.mlbstatic.com/team-logos/${team.id}.svg`
+    );
+
+}
+
+
+/*
+ * ============================================================
+ * CREATE POSTSEASON TEAM
+ * ============================================================
+ */
+
+function createPostseasonTeam(
+    team,
+    isLoser
+) {
+
+    const row =
+        createElement(
+            "div",
+            "mlb-postseason-team"
+        );
+
+
+    if (
+        isLoser
+    ) {
+
+        row.classList.add(
+            "mlb-postseason-team--loser"
+        );
+
+    }
+
+
+    const logoUrl =
+        getPostseasonTeamLogoUrl(
+            team
+        );
+
+
+    const logo =
+        logoUrl
+            ? `
+                <img
+                    class="mlb-postseason-team-logo"
+                    src="${logoUrl}"
+                    alt=""
+                    aria-hidden="true"
+                >
+            `
+            : "";
+
+
+    row.innerHTML = `
+        <span class="mlb-postseason-team-name">
+            ${logo}
+            <span>
+                ${team?.name || "TBD"}
+            </span>
+        </span>
+
+        <span class="mlb-postseason-team-wins">
+            ${team?.wins ?? 0}
+        </span>
+    `;
+
+
+    return row;
+
+}
+
+
+/*
+ * ============================================================
+ * CREATE POSTSEASON SERIES
+ * ============================================================
+ */
+
+function createPostseasonSeries(
+    series
+) {
+
+    const card =
+        createElement(
+            "div",
+            "mlb-postseason-series"
+        );
+
+
+    const teams =
+        series?.teams || [];
+
+
+    /*
+     * --------------------------------------------------------
+     * Determine whether the series has been completed.
+     * --------------------------------------------------------
+     */
+
+    const winnerId =
+        series?.winner || null;
+
+
+    /*
+     * --------------------------------------------------------
+     * Team order
+     *
+     * Winner first for completed series.
+     * Otherwise preserve the API order.
+     * --------------------------------------------------------
+     */
+
+    let orderedTeams =
+        [...teams];
+
+
+    if (
+        winnerId
+    ) {
+
+        orderedTeams.sort(
+            (
+                a,
+                b
+            ) => {
+
+                if (
+                    a.id === winnerId
+                ) {
+
+                    return -1;
+
+                }
+
+                if (
+                    b.id === winnerId
+                ) {
+
+                    return 1;
+
+                }
+
+                return 0;
+
+            }
+        );
+
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * Render both teams.
+     * --------------------------------------------------------
+     */
+
+    orderedTeams
+        .slice(
+            0,
+            2
+        )
+        .forEach(
+            team => {
+
+                const isLoser =
+                    Boolean(
+                        winnerId &&
+                        team.id !== winnerId
+                    );
+
+
+                card.appendChild(
+                    createPostseasonTeam(
+                        team,
+                        isLoser
+                    )
+                );
+
+            }
+        );
+
+
+    /*
+     * --------------------------------------------------------
+     * Future / unknown series.
+     *
+     * Ensure the card always has two rows.
+     * --------------------------------------------------------
+     */
+
+    while (
+        card.children.length < 2
+    ) {
+
+        card.appendChild(
+            createPostseasonTeam(
+                {
+                    name:
+                        "TBD",
+
+                    wins:
+                        0
+                },
+                false
+            )
+        );
+
+    }
+
+
+    return card;
+
+}
+
+
+/*
+ * ============================================================
+ * CREATE POSTSEASON ROUND
+ * ============================================================
+ */
+
+function createPostseasonRound(
+    title,
+    series
+) {
+
+    const column =
+        createElement(
+            "section",
+            "mlb-postseason-round"
+        );
+
+
+    const header =
+        createElement(
+            "div",
+            "mlb-postseason-round-title",
+            title
+        );
+
+
+    column.appendChild(
+        header
+    );
+
+
+    const seriesStack =
+        createElement(
+            "div",
+            "mlb-postseason-round-cards"
+        );
+
+
+    (series || [])
+        .forEach(
+            currentSeries => {
+
+                seriesStack.appendChild(
+                    createPostseasonSeries(
+                        currentSeries
+                    )
+                );
+
+            }
+        );
+
+
+    column.appendChild(
+        seriesStack
+    );
+
+
+    return column;
+
+}
+
+
+/*
+ * ============================================================
+ * CREATE LEAGUE BRACKET
+ * ============================================================
+ */
+
+function createPostseasonLeagueBracket(
+    league,
+    bracket
+) {
+
+    const leagueSection =
+        createElement(
+            "section",
+            `mlb-postseason-league mlb-postseason-league--${league.toLowerCase()}`
+        );
+
+
+    const title =
+        createElement(
+            "div",
+            "mlb-postseason-league-title",
+            league
+        );
+
+
+    leagueSection.appendChild(
+        title
+    );
+
+
+    const grid =
+        createElement(
+            "div",
+            "mlb-postseason-bracket"
+        );
+
+
+    const wildCard =
+        (bracket.wildCard || [])
+            .filter(
+                series =>
+                    series.league === league
+            );
+
+
+    const divisionSeries =
+        (bracket.divisionSeries || [])
+            .filter(
+                series =>
+                    series.league === league
+            );
+
+
+    const leagueChampionship =
+        (bracket.leagueChampionship || [])
+            .filter(
+                series =>
+                    series.league === league
+            );
+
+
+    grid.appendChild(
+        createPostseasonRound(
+            "WILD CARD",
+            wildCard
+        )
+    );
+
+
+    grid.appendChild(
+        createPostseasonRound(
+            "DIVISION",
+            divisionSeries
+        )
+    );
+
+
+    grid.appendChild(
+        createPostseasonRound(
+            "CHAMPIONSHIP",
+            leagueChampionship
+        )
+    );
+
+
+    leagueSection.appendChild(
+        grid
+    );
+
+
+    return leagueSection;
+
+}
+
+
+/*
+ * ============================================================
+ * CREATE WORLD SERIES
+ * ============================================================
+ */
+
+function createWorldSeries(
+    bracket
+) {
+
+    const section =
+        createElement(
+            "section",
+            "mlb-postseason-world-series"
+        );
+
+
+    const title =
+        createElement(
+            "div",
+            "mlb-postseason-world-series-title",
+            "WORLD SERIES"
+        );
+
+
+    section.appendChild(
+        title
+    );
+
+
+    const series =
+        bracket.worldSeries?.[0] ||
+        null;
+
+
+    if (
+        series
+    ) {
+
+        section.appendChild(
+            createPostseasonSeries(
+                series
+            )
+        );
+
+    }
+    else {
+
+        section.appendChild(
+            createPostseasonSeries(
+                {
+                    teams: []
+                }
+            )
+        );
+
+    }
+
+
+    return section;
+
+}
+
+
+/*
+ * ============================================================
+ * CREATE COMPLETE POSTSEASON BRACKET
+ * ============================================================
+ */
+
+function createPostseasonBracket(
+    bracket
+) {
+
+    const root =
+        createElement(
+            "div",
+            "mlb-postseason-bracket"
+        );
+
+
+    /*
+     * ========================================================
+     * HELPERS
+     * ========================================================
+     */
+
+    function getSeries(
+        collection,
+        id
+    ) {
+
+        return (
+            collection || []
+        ).find(
+            series =>
+                series.id === id
+        ) || null;
+
+    }
+
+    function createTeam(
+        team,
+        league = null,
+        forceLeftAligned = false
+    ) {
+        const row =
+            createElement(
+                "div",
+                "mlb-postseason-team"
+            );
+
+
+        if (
+            !team
+        ) {
+            row.classList.add(
+                "mlb-postseason-team--placeholder"
+            );
+
+            row.appendChild(
+                createElement(
+                    "div",
+                    "mlb-postseason-team-tbd",
+                    "TBD"
+                )
+            );
+
+            return row;
+        }
+
+        const seed =
+            team.seed;
+
+        const wins =
+            team.wins ?? 0;
+
+        const logo =
+            document.createElement(
+                "img"
+            );
+
+        logo.className =
+            "mlb-postseason-team-logo";
+
+        logo.src =
+            getPostseasonTeamLogoUrl(
+                team
+            );
+
+        logo.alt =
+            team.name || "";
+
+        const seedElement =
+            createElement(
+                "div",
+                "mlb-postseason-team-seed",
+                seed
+                    ? `(${seed})`
+                    : ""
+                );
+
+        const winsElement =
+            createElement(
+                "div",
+                "mlb-postseason-team-wins",
+                String(wins)
+            );
+
+        if (
+            forceLeftAligned
+        ) {
+            winsElement.style.marginLeft =
+                "auto";
+        }
+
+        if (
+            league === "NL" &&
+            !forceLeftAligned
+        ) {
+                row.appendChild(
+                winsElement
+            );
+
+            row.appendChild(
+                logo
+            );
+
+            row.appendChild(
+                seedElement
+            );
+        }
+        else {
+            row.appendChild(
+                seedElement
+            );
+
+            row.appendChild(
+                logo
+            );
+
+            row.appendChild(
+                winsElement
+            );
+        }
+
+        return row;
+    }
+
+
+    function createSeriesCard(
+        series,
+        title
+    ) {
+
+        const card =
+            createElement(
+                "div",
+                "mlb-postseason-series"
+            );
+
+        const isWorldSeries =
+            series?.round ===
+            "worldSeries";
+
+        const heading =
+            createElement(
+                "div",
+                "mlb-postseason-series-title",
+                title
+            );
+
+        if (
+            isWorldSeries
+        ) {
+            card.classList.add(
+                "mlb-postseason-series--world"
+            );
+        }
+
+        card.appendChild(
+            heading
+        );
+
+
+        /*
+        * ---------------------------------------------------------
+        * Teams
+        *
+        * A series can have:
+        *
+        *   0 teams = completely TBD
+        *   1 team  = known bye team + TBD opponent
+        *   2 teams = both teams known
+        * ---------------------------------------------------------
+        */
+
+        const teams =
+            series?.teams || [];
+
+        /*
+        * ---------------------------------------------------------
+        * No teams known yet.
+        * ---------------------------------------------------------
+        */
+
+        if (
+            teams.length === 0
+        ) {
+
+            card.appendChild(
+                createTeam(
+                    null,
+                    series?.league,
+                    isWorldSeries
+                )
+            );
+
+            card.appendChild(
+                createTeam(
+                    null,
+                    series?.league,
+                    isWorldSeries
+                )
+            );
+
+            return card;
+
+        }
+
+
+        /*
+        * ---------------------------------------------------------
+        * One team known.
+        *
+        * This is the important case for a Division Series
+        * before the Wild Card winner is known.
+        *
+        * Example:
+        *
+        *     (1) [Dodgers logo]  TBD
+        *
+        * ---------------------------------------------------------
+        */
+
+        if (
+            teams.length === 1
+        ) {
+
+            /*
+             * The TBD slot represents the Wild Card winner
+             * and therefore occupies the top bracket position.
+             *
+             * The known bye team occupies the bottom position.
+             */
+
+            card.appendChild(
+                createTeam(
+                    null,
+                    series?.league,
+                    isWorldSeries
+                )
+            );
+
+            card.appendChild(
+                createTeam(
+                    teams[0],
+                    series.league,
+                    isWorldSeries
+                )
+            );
+
+            return card;
+
+        }
+
+        /*
+        * ---------------------------------------------------------
+        * Both teams known.
+        *
+        * Sort by series wins so the team currently leading
+        * appears first.
+        * ---------------------------------------------------------
+        */
+
+        const sortedTeams =
+            [...teams]
+                .sort(
+                    (
+                        a,
+                        b
+                    ) =>
+                        (
+                            b.wins ?? 0
+                        ) -
+                        (
+                            a.wins ?? 0
+                        )
+                );
+
+
+        sortedTeams.forEach(
+            team => {
+
+                card.appendChild(
+                    createTeam(
+                        team,
+                        series.league,
+                        isWorldSeries
+                    )
+                );
+
+            }
+        );
+
+
+        return card;
+
+    }
+
+
+    function createRound(
+        className,
+        title,
+        cards
+    ) {
+
+        const round =
+            createElement(
+                "section",
+                `mlb-postseason-round ${className}`
+            );
+
+
+        const heading =
+            createElement(
+                "div",
+                "mlb-postseason-round-title",
+                title
+            );
+
+
+        round.appendChild(
+            heading
+        );
+
+
+        const cardsContainer =
+            createElement(
+                "div",
+                "mlb-postseason-round-cards"
+            );
+
+
+        cards.forEach(
+            card => {
+
+                cardsContainer.appendChild(
+                    card
+                );
+
+            }
+        );
+
+
+        round.appendChild(
+            cardsContainer
+        );
+
+
+        return round;
+
+    }
+
+
+    /*
+     * ========================================================
+     * BUILD AL
+     * ========================================================
+     */
+
+    const al =
+        createElement(
+            "section",
+            "mlb-postseason-side mlb-postseason-side--al"
+        );
+
+
+    al.appendChild(
+        createElement(
+            "div",
+            "mlb-postseason-league",
+            "AMERICAN LEAGUE"
+        )
+    );
+
+
+    const alDivision =
+        [
+            getSeries(bracket.divisionSeries, "D_1"),
+            getSeries(bracket.divisionSeries, "D_2")
+        ];
+
+
+    /*
+     * Order Wild Card series to match the
+     * Division Series slots.
+     *
+     * D_1 participant comes from whichever
+     * Wild Card series produced that team.
+     * D_2 participant does the same.
+     */
+    const alWildCard =
+        alDivision.map(
+            divisionSeries => {
+
+                if (
+                    !divisionSeries ||
+                    !divisionSeries.teams?.length
+                ) {
+                    return null;
+                }
+
+                /*
+                * MLB playoff structure:
+                *
+                *   #1 seed → winner of #4 vs #5
+                *   #2 seed → winner of #3 vs #6
+                *
+                * This lets us identify the Wild Card series
+                * even when the ALDS opponent is still TBD.
+                */
+
+                const byeTeam =
+                    divisionSeries.teams.find(
+                        team =>
+                            team.seed === 1 ||
+                            team.seed === 2
+                    );
+
+                if (
+                    !byeTeam
+                ) {
+                    return null;
+                }
+
+                const opponentSeeds =
+                    byeTeam.seed === 1
+                        ? [4, 5]
+                        : [3, 6];
+
+                return (
+                    (bracket.wildCard || [])
+                        .find(
+                            wc =>
+                                wc.league === "AL" &&
+                                wc.teams?.some(
+                                    team =>
+                                        opponentSeeds.includes(
+                                            team.seed
+                                        )
+                                )
+                        )
+                    || null
+                );
+
+            }
+        );
+
+    const alChampionship =
+        getSeries(
+            bracket.leagueChampionship,
+            "L_1"
+        );
+
+
+    al.appendChild(
+        createRound(
+            "mlb-postseason-round--wild-card",
+            "WILD CARD",
+            alWildCard.map(
+                series =>
+                    createSeriesCard(
+                        series,
+                        "WILD CARD"
+                    )
+            )
+        )
+    );
+
+
+    al.appendChild(
+        createRound(
+            "mlb-postseason-round--division",
+            "DIVISION",
+            alDivision.map(
+                series =>
+                    createSeriesCard(
+                        series,
+                        "ALDS"
+                    )
+            )
+        )
+    );
+
+
+    al.appendChild(
+        createRound(
+            "mlb-postseason-round--championship",
+            "CHAMPIONSHIP",
+            [
+                createSeriesCard(
+                    alChampionship,
+                    "ALCS"
+                )
+            ]
+        )
+    );
+
+
+    /*
+     * ========================================================
+     * WORLD SERIES
+     * ========================================================
+     */
+
+    const center =
+        createElement(
+            "section",
+            "mlb-postseason-center"
+        );
+
+
+    center.appendChild(
+        createElement(
+            "div",
+            "mlb-postseason-league mlb-postseason-league--center",
+            "WORLD SERIES"
+        )
+    );
+
+
+    const worldSeries =
+        bracket.worldSeries?.[0] ||
+        null;
+
+
+    center.appendChild(
+        createSeriesCard(
+            worldSeries,
+            "WORLD SERIES"
+        )
+    );
+
+
+    /*
+     * ========================================================
+     * BUILD NL
+     * ========================================================
+     */
+
+    const nl =
+        createElement(
+            "section",
+            "mlb-postseason-side mlb-postseason-side--nl"
+        );
+
+
+    nl.appendChild(
+        createElement(
+            "div",
+            "mlb-postseason-league",
+            "NATIONAL LEAGUE"
+        )
+    );
+
+
+    const nlChampionship =
+        getSeries(
+            bracket.leagueChampionship,
+            "L_2"
+        );
+
+
+    const nlDivision =
+        [
+            getSeries(bracket.divisionSeries, "D_3"),
+            getSeries(bracket.divisionSeries, "D_4")
+        ];
+
+
+    const nlWildCard =
+        nlDivision.map(
+            divisionSeries => {
+
+                if (
+                    !divisionSeries ||
+                    !divisionSeries.teams?.length
+                ) {
+                    return null;
+                }
+
+                /*
+                * MLB playoff structure:
+                *
+                *   #1 seed → winner of #4 vs #5
+                *   #2 seed → winner of #3 vs #6
+                *
+                * This lets us identify the Wild Card series
+                * even when the NLDS opponent is still TBD.
+                */
+
+                const byeTeam =
+                    divisionSeries.teams.find(
+                        team =>
+                            team.seed === 1 ||
+                            team.seed === 2
+                    );
+
+                if (
+                    !byeTeam
+                ) {
+                    return null;
+                }
+
+                const opponentSeeds =
+                    byeTeam.seed === 1
+                        ? [4, 5]
+                        : [3, 6];
+
+                return (
+                    (bracket.wildCard || [])
+                        .find(
+                            wc =>
+                                wc.league === "NL" &&
+                                wc.teams?.some(
+                                    team =>
+                                        opponentSeeds.includes(
+                                            team.seed
+                                        )
+                                )
+                        )
+                    || null
+                );
+
+            }
+        );
+
+
+    nl.appendChild(
+        createRound(
+            "mlb-postseason-round--championship",
+            "CHAMPIONSHIP",
+            [
+                createSeriesCard(
+                    nlChampionship,
+                    "NLCS"
+                )
+            ]
+        )
+    );
+
+
+    nl.appendChild(
+        createRound(
+            "mlb-postseason-round--division",
+            "DIVISION",
+            nlDivision.map(
+                series =>
+                    createSeriesCard(
+                        series,
+                        "NLDS"
+                    )
+            )
+        )
+    );
+
+
+    nl.appendChild(
+        createRound(
+            "mlb-postseason-round--wild-card",
+            "WILD CARD",
+            nlWildCard.map(
+                series =>
+                    createSeriesCard(
+                        series,
+                        "WILD CARD"
+                    )
+            )
+        )
+    );
+
+
+    /*
+     * ========================================================
+     * FINAL BRACKET
+     * ========================================================
+     */
+
+    root.appendChild(
+        al
+    );
+
+    root.appendChild(
+        center
+    );
+
+    root.appendChild(
+        nl
+    );
+
+
+    return root;
+
+}
 
 /*
  * ============================================================
@@ -1325,7 +2645,8 @@ function createWildCardColumn(
 
 function createLayout(
     regularSeasonRecords,
-    wildCardRecords
+    wildCardRecords,
+    postseasonBracket
 ) {
 
     const grid =
@@ -1419,7 +2740,15 @@ export default {
                 </div>
 
                 <div class="mlb-standings-date">
-                    ${getCurrentSeason()} SEASON
+                    ${sportsPreferences.sports
+                        ?.find(
+                            sport =>
+                                sport.sport === "mlb"
+                        )
+                        ?.testDate
+                            ?.slice(0, 4) ||
+                        getCurrentSeason()
+                    } SEASON
                 </div>
 
             </header>
@@ -1438,53 +2767,148 @@ export default {
             root
         );
 
+        const phase =
+            getMLBPhase();
+
+        const title =
+            root.querySelector(
+                ".mlb-standings-title"
+            );
+
+        if (
+            title
+        ) {
+
+            title.textContent =
+                phase === "postseason"
+                    ? "MLB POSTSEASON"
+                    : "MLB STANDINGS";
+
+        }
 
         const main =
             root.querySelector(
                 ".mlb-standings-main"
             );
 
-
         try {
 
-            const [
-                regularSeasonRecords,
-                wildCardRecords
-            ] =
-                await Promise.all(
-                    [
-                        loadStandings(),
-                        loadWildCardStandings()
-                    ]
-                );
+            const phase =
+                getMLBPhase();
 
-
-            main.innerHTML =
-                "";
-
+            /*
+            * ========================================================
+            * REGULAR SEASON
+            * ========================================================
+            */
 
             if (
-                regularSeasonRecords.length === 0
+                phase === "regularSeason"
             ) {
 
+                const [
+                    regularSeasonRecords,
+                    wildCardRecords
+                ] =
+                    await Promise.all(
+                        [
+                            loadStandings(),
+                            loadWildCardStandings()
+                        ]
+                    );
+
+
                 main.innerHTML =
-                    `
-                    <div class="mlb-standings-message">
-                        NO STANDINGS AVAILABLE
-                    </div>
-                    `;
+                    "";
+
+
+                if (
+                    regularSeasonRecords.length === 0
+                ) {
+
+                    main.innerHTML =
+                        `
+                        <div class="mlb-standings-message">
+                            NO STANDINGS AVAILABLE
+                        </div>
+                        `;
+
+                    return;
+
+                }
+
+
+                main.appendChild(
+                    createLayout(
+                        regularSeasonRecords,
+                        wildCardRecords
+                    )
+                );
+
 
                 return;
 
             }
 
 
-            main.appendChild(
-                createLayout(
-                    regularSeasonRecords,
-                    wildCardRecords
-                )
-            );
+            /*
+            * ========================================================
+            * POSTSEASON
+            * ========================================================
+            */
+
+            if (
+                phase === "postseason"
+            ) {
+
+                const postseason =
+                    await loadPostseason();
+
+
+                main.innerHTML =
+                    "";
+
+
+                if (
+                    !postseason?.bracket
+                ) {
+
+                    main.innerHTML =
+                        `
+                        <div class="mlb-standings-message">
+                            NO POSTSEASON DATA AVAILABLE
+                        </div>
+                        `;
+
+                    return;
+
+                }
+
+
+                main.appendChild(
+                    createPostseasonBracket(
+                        postseason.bracket
+                    )
+                );
+
+
+                return;
+
+            }
+
+
+            /*
+            * ========================================================
+            * DISABLED
+            * ========================================================
+            */
+
+            main.innerHTML =
+                `
+                <div class="mlb-standings-message">
+                    MLB STANDINGS UNAVAILABLE
+                </div>
+                `;
 
         }
         catch (error) {

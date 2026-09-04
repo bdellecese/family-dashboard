@@ -69,7 +69,7 @@ export const CALENDARS = {
 
     /* WU Softball - GC */
     "snu45s689m3sm81dga137mebkmuraoq0@import.calendar.google.com": {
-        name: "WU Softball (GC)",
+        name: "WU Softball",
         icon: "fa-fw fas fa-baseball",
         color: "rgb(228, 196, 65)"
     },
@@ -97,5 +97,11 @@ export const CALENDARS = {
         name: "Fall ball Softball",
         icon: "fa-fw fas fa-baseball",
         color: "rgb(228, 196, 65)"
+    },
+
+    "qbmd682o66ou6r7ki53cabl84tkoqtqh@import.calendar.google.com": {
+        name: "HYS U10 Travel",
+        icon:"fa-fw fas fa-futbol",
+        color: "rgb(213, 0, 0)"
     }
 };

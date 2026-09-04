@@ -7,16 +7,31 @@
  * Responsibilities:
  * - Load yesterday's MLB games through the local server
  * - Display AL / NL out-of-town scores
- * - Display one featured AL game
- * - Display one featured NL game
+ * - Display the first configured favorite as primary
+ * - Display the second configured favorite as secondary
  * - Display inning-by-inning scoring
  * - Display R / H / E
  * - Display pitching decisions
  * - Display home runs
+ *
+ * Configuration:
+ *
+ *     favoriteTeams: [
+ *         "BOS",   // primary
+ *         "STL"    // secondary
+ *     ]
+ *
+ * The order of favoriteTeams determines display priority.
+ *
+ * The widget does NOT need MLB team IDs.
+ * The server resolves team abbreviations to the appropriate
+ * game and MLB data.
  * ============================================================
  */
 
+
 const AL_TEAMS = new Set([
+
     "LAA",
     "BAL",
     "BOS",
@@ -32,9 +47,12 @@ const AL_TEAMS = new Set([
     "TB",
     "TEX",
     "TOR"
+
 ]);
 
+
 const TEAM_ABBR = {
+
     108: "LAA",
     109: "ARI",
     110: "BAL",
@@ -65,6 +83,7 @@ const TEAM_ABBR = {
     146: "MIA",
     147: "NYY",
     158: "MIL"
+
 };
 
 
@@ -74,12 +93,17 @@ const TEAM_ABBR = {
  * ============================================================
  */
 
+
 function getTeamCode(team) {
 
     return (
+
         TEAM_ABBR[team.id] ||
+
         team.abbreviation ||
+
         team.name
+
     );
 
 }
@@ -88,9 +112,13 @@ function getTeamCode(team) {
 function getLeague(team) {
 
     return AL_TEAMS.has(
+
         getTeamCode(team)
+
     )
+
         ? "American League"
+
         : "National League";
 
 }
@@ -109,63 +137,110 @@ function getLeague(team) {
  * ============================================================
  */
 
+
 function getYesterday() {
 
     const now =
         new Date();
 
+
     const eastern =
         new Intl.DateTimeFormat(
+
             "en-US",
+
             {
+
                 timeZone:
                     "America/New_York",
+
                 year:
                     "numeric",
+
                 month:
                     "2-digit",
+
                 day:
                     "2-digit"
+
             }
+
         ).formatToParts(now);
+
 
     const values = {};
 
+
     eastern.forEach(
+
         part => {
+
             values[part.type] =
                 part.value;
+
         }
+
     );
+
 
     const date =
         new Date(
+
             Number(values.year),
+
             Number(values.month) - 1,
+
             Number(values.day)
+
         );
 
+
     date.setDate(
+
         date.getDate() - 1
+
     );
+
 
     const year =
         date.getFullYear();
 
+
     const month =
         String(
+
             date.getMonth() + 1
-        ).padStart(2, "0");
+
+        ).padStart(
+
+            2,
+
+            "0"
+
+        );
+
 
     const day =
         String(
+
             date.getDate()
-        ).padStart(2, "0");
+
+        ).padStart(
+
+            2,
+
+            "0"
+
+        );
+
 
     return {
+
         apiDate:
             `${year}-${month}-${day}`,
+
         date
+
     };
 
 }
@@ -174,21 +249,32 @@ function getYesterday() {
 function formatDate(date) {
 
     return date
+
         .toLocaleDateString(
+
             "en-US",
+
             {
+
                 weekday:
                     "long",
+
                 month:
                     "long",
+
                 day:
                     "numeric",
+
                 year:
                     "numeric",
+
                 timeZone:
                     "America/New_York"
+
             }
+
         )
+
         .toUpperCase();
 
 }
@@ -200,21 +286,33 @@ function formatDate(date) {
  * ============================================================
  */
 
+
 function splitIntoColumns(games) {
 
     const midpoint =
         Math.ceil(
+
             games.length / 2
+
         );
 
+
     return [
+
         games.slice(
+
             0,
+
             midpoint
+
         ),
+
         games.slice(
+
             midpoint
+
         )
+
     ];
 
 }
@@ -225,58 +323,94 @@ function createGame(game) {
     const away =
         game.teams.away;
 
+
     const home =
         game.teams.home;
 
+
     const card =
         document.createElement(
+
             "div"
+
         );
+
 
     card.className =
         "mlb-game";
 
+
     const awayRow =
         document.createElement(
+
             "div"
+
         );
+
 
     awayRow.className =
         "mlb-team-row";
 
+
     awayRow.innerHTML = `
+
         <span class="mlb-team">
+
             ${getTeamCode(away.team)}
+
         </span>
+
         <span class="mlb-score">
+
             ${away.score ?? "-"}
+
         </span>
+
     `;
+
 
     const homeRow =
         document.createElement(
+
             "div"
+
         );
+
 
     homeRow.className =
         "mlb-team-row";
 
+
     homeRow.innerHTML = `
+
         <span class="mlb-team">
+
             ${getTeamCode(home.team)}
+
         </span>
+
         <span class="mlb-score">
+
             ${home.score ?? "-"}
+
         </span>
+
     `;
 
-    card.appendChild(
-        awayRow
-    );
 
     card.appendChild(
-        homeRow
+
+        awayRow
+
     );
+
+
+    card.appendChild(
+
+        homeRow
+
+    );
+
 
     return card;
 
@@ -284,56 +418,84 @@ function createGame(game) {
 
 
 function renderLeagueScores(
+
     container,
+
     games
+
 ) {
 
     if (!container) {
+
         return;
+
     }
+
 
     container.innerHTML =
         "";
 
+
     const columns =
         splitIntoColumns(
+
             games
+
         );
 
+
     columns.forEach(
+
         columnGames => {
 
             const column =
                 document.createElement(
+
                     "div"
+
                 );
+
 
             column.className =
                 "mlb-game-column";
 
+
             columnGames.forEach(
+
                 game => {
 
                     column.appendChild(
+
                         createGame(game)
+
                     );
 
                 }
+
             );
 
+
             container.appendChild(
+
                 column
+
             );
 
         }
+
     );
+
 
     if (games.length === 0) {
 
         container.innerHTML = `
+
             <div class="mlb-no-games">
+
                 NO GAMES
+
             </div>
+
         `;
 
     }
@@ -347,57 +509,89 @@ function renderLeagueScores(
  * ============================================================
  */
 
+
 function getDisplayInnings(
+
     linescore,
+
     side
+
 ) {
 
     const innings =
         linescore?.innings || [];
 
+
     const regulation =
         innings.filter(
+
             inning =>
                 inning.num <= 9
+
         );
+
 
     const extras =
         innings.filter(
+
             inning =>
                 inning.num > 9
+
         );
+
 
     const display =
         regulation.map(
+
             inning => ({
+
                 label:
                     inning.num,
+
                 runs:
                     inning[side]?.runs ?? "-"
+
             })
+
         );
+
 
     if (extras.length > 0) {
 
         display.push({
+
             label:
                 "X",
+
             runs:
                 extras.reduce(
+
                     (
+
                         total,
+
                         inning
+
                     ) =>
+
                         total +
+
                         (
+
                             inning[side]?.runs ??
+
                             0
+
                         ),
+
                     0
+
                 )
+
         });
 
     }
+
 
     return display;
 
@@ -410,19 +604,28 @@ function getDisplayInnings(
  * ============================================================
  */
 
+
 function getDisplayName(
+
     fullName
+
 ) {
 
     const parts =
         fullName
+
             .trim()
+
             .split(
+
                 /\s+/
+
             );
+
 
     const suffixes =
         new Set([
+
             "JR",
             "JR.",
             "SR",
@@ -431,135 +634,211 @@ function getDisplayName(
             "III",
             "IV",
             "V"
+
         ]);
+
 
     const last =
         parts[
+
             parts.length - 1
+
         ].toUpperCase();
 
+
     if (
+
         suffixes.has(last) &&
+
         parts.length >= 2
+
     ) {
 
         return (
+
             `${parts[parts.length - 2]} ` +
+
             `${parts[parts.length - 1]}`
+
         );
 
     }
 
+
     return parts[
+
         parts.length - 1
+
     ];
 
 }
 
 
 function renderHomeRuns(
+
     allPlays
+
 ) {
 
     const homeRuns =
         new Map();
 
+
     allPlays.forEach(
+
         play => {
 
             if (
+
                 play.result?.event !==
+
                 "Home Run"
+
             ) {
+
                 return;
+
             }
+
 
             const batter =
                 play.matchup?.batter;
 
+
             if (!batter) {
+
                 return;
+
             }
+
 
             const playerId =
                 batter.id;
 
+
             const displayName =
                 getDisplayName(
+
                     batter.fullName
+
                 );
+
 
             const match =
                 play.result
+
                     ?.description
+
                     ?.match(
+
                         /\((\d+)\)/
+
                     );
+
 
             const seasonTotal =
                 match
+
                     ? parseInt(
+
                         match[1],
+
                         10
+
                     )
+
                     : null;
 
+
             if (
+
                 !homeRuns.has(
+
                     playerId
+
                 )
+
             ) {
 
                 homeRuns.set(
+
                     playerId,
+
                     {
+
                         displayName,
+
                         gameTotal: 0,
+
                         seasonTotal
+
                     }
+
                 );
 
             }
 
+
             const player =
                 homeRuns.get(
+
                     playerId
+
                 );
 
+
             player.gameTotal++;
+
 
             player.seasonTotal =
                 seasonTotal;
 
         }
+
     );
 
+
     return Array.from(
+
         homeRuns.values()
+
     )
+
         .map(
+
             player => {
 
                 const total =
                     player.seasonTotal ??
+
                     "?";
 
+
                 if (
+
                     player.gameTotal === 1
+
                 ) {
 
                     return (
+
                         `${player.displayName} (${total})`
+
                     );
 
                 }
 
+
                 return (
+
                     `${player.displayName} ` +
+
                     `${player.gameTotal} (${total})`
+
                 );
 
             }
+
         );
 
 }
@@ -571,39 +850,61 @@ function renderHomeRuns(
  * ============================================================
  */
 
+
 function sortGames(
+
     a,
+
     b
+
 ) {
 
     const aHome =
         getTeamCode(
+
             a.teams.home.team
+
         );
+
 
     const bHome =
         getTeamCode(
+
             b.teams.home.team
+
         );
+
 
     /*
      * Keep Boston first when present.
      */
 
     if (
+
         aHome === "BOS"
+
     ) {
+
         return -1;
+
     }
+
 
     if (
+
         bHome === "BOS"
+
     ) {
+
         return 1;
+
     }
 
+
     return aHome.localeCompare(
+
         bHome
+
     );
 
 }
@@ -614,61 +915,85 @@ function sortGames(
  * LOAD SCOREBOARD
  * ============================================================
  *
- * The server now owns all MLB API calls.
+ * The server owns all MLB API calls.
  *
  * The widget makes ONE request:
  *
  *     /api/sports/mlb/scoreboard
  *
- * The response contains:
+ * Configuration supplies favorite team ABBREVIATIONS only.
  *
- *     games
- *     featured.left
- *     featured.right
+ * Example:
  *
- * Each featured item contains:
+ *     favoriteTeams: [
+ *         "BOS",
+ *         "STL"
+ *     ]
  *
- *     game
- *     feed
- *     pitcherRecords
- *
- * This avoids duplicate MLB API requests from the browser.
+ * The server resolves those teams to the appropriate games.
  * ============================================================
  */
 
+
 async function loadGames(
+
     apiDate,
+
     config
+
 ) {
 
-    const featured =
-        config.featured || {};
+    const favoriteTeams =
+        Array.isArray(
 
-    const leftTeamId =
-        featured.left?.teamId || "";
+            config.favoriteTeams
 
-    const rightTeamId =
-        featured.right?.teamId || "";
+        )
+
+            ? config.favoriteTeams
+
+            : [];
+
+
+    const primaryTeam =
+        favoriteTeams[0] || "";
+
+
+    const secondaryTeam =
+        favoriteTeams[1] || "";
+
 
     const params =
         new URLSearchParams({
-            date: apiDate,
-            leftTeamId,
-            rightTeamId
+
+            date:
+                apiDate,
+
+            primaryTeam,
+
+            secondaryTeam
+
         });
+
 
     const response =
         await fetch(
+
             `/api/sports/mlb/scoreboard?${params}`
+
         );
+
 
     if (!response.ok) {
 
         throw new Error(
+
             `MLB scoreboard request failed: ${response.status}`
+
         );
 
     }
+
 
     return await response.json();
 
@@ -681,26 +1006,43 @@ async function loadGames(
  * ============================================================
  */
 
+
 function renderLeague(
+
     container,
+
     games
+
 ) {
 
     const finalGames =
         games
+
             .filter(
+
                 game =>
+
                     game.status
+
                         ?.abstractGameState ===
+
                     "Final"
+
             )
+
             .sort(
+
                 sortGames
+
             );
 
+
     renderLeagueScores(
+
         container,
+
         finalGames
+
     );
 
 }
@@ -711,90 +1053,127 @@ function renderLeague(
  * RENDER FEATURED GAME
  * ============================================================
  *
- * IMPORTANT:
+ * Receives already-loaded featured data from the server.
  *
- * This function does NOT call MLB directly.
- *
- * It receives the already-loaded featured data from the
- * server response.
+ * No additional MLB API request is made here.
  * ============================================================
  */
 
+
 function renderFeaturedGame(
+
     featuredData,
+
     container
+
 ) {
 
     if (!container) {
+
         return;
+
     }
 
+
     container.innerHTML = `
+
         <div class="mlb-featured-message">
+
             LOADING...
+
         </div>
+
     `;
+
 
     if (!featuredData) {
 
         container.innerHTML = `
+
             <div class="mlb-featured-message">
+
                 NO GAME
+
             </div>
+
         `;
 
         return;
 
     }
 
+
     try {
 
         const game =
             featuredData.game;
 
+
         const feed =
             featuredData.feed;
+
 
         const pitcherRecords =
             featuredData.pitcherRecords || {};
 
+
+        const seriesStatus =
+            featuredData.seriesStatus || "";
+
+
         if (!game || !feed) {
 
             container.innerHTML = `
+
                 <div class="mlb-featured-message">
+
                     NO GAME
+
                 </div>
+
             `;
 
             return;
 
         }
 
+
         const linescore =
             feed.liveData?.linescore;
+
 
         if (!linescore) {
 
             throw new Error(
+
                 "Featured game has no linescore."
+
             );
 
         }
 
+
         const awayTeam =
             feed.gameData.teams.away;
+
 
         const homeTeam =
             feed.gameData.teams.home;
 
+
         const awayCode =
             getTeamCode(
+
                 awayTeam
+
             );
+
 
         const homeCode =
             getTeamCode(
+
                 homeTeam
+
             );
 
 
@@ -804,40 +1183,66 @@ function renderFeaturedGame(
          * --------------------------------------------------------
          */
 
+
         const awayInnings =
             getDisplayInnings(
+
                 linescore,
+
                 "away"
+
             );
+
 
         const homeInnings =
             getDisplayInnings(
+
                 linescore,
+
                 "home"
+
             );
+
 
         const inningHeaders =
             awayInnings
+
                 .map(
+
                     inning =>
+
                         `<span>${inning.label}</span>`
+
                 )
+
                 .join("");
+
 
         const awayRuns =
             awayInnings
+
                 .map(
+
                     inning =>
+
                         `<span>${inning.runs}</span>`
+
                 )
+
                 .join("");
+
 
         const homeRunsByInning =
             homeInnings
+
                 .map(
+
                     inning =>
+
                         `<span>${inning.runs}</span>`
+
                 )
+
                 .join("");
 
 
@@ -847,16 +1252,26 @@ function renderFeaturedGame(
          * --------------------------------------------------------
          */
 
+
         const awayTotals = `
+
             <span>${linescore.teams.away.runs}</span>
+
             <span>${linescore.teams.away.hits}</span>
+
             <span>${linescore.teams.away.errors}</span>
+
         `;
 
+
         const homeTotals = `
+
             <span>${linescore.teams.home.runs}</span>
+
             <span>${linescore.teams.home.hits}</span>
+
             <span>${linescore.teams.home.errors}</span>
+
         `;
 
 
@@ -866,56 +1281,85 @@ function renderFeaturedGame(
          * --------------------------------------------------------
          */
 
+
         const decisions =
             feed.liveData?.decisions;
+
 
         const decisionLines =
             [];
 
+
         if (
+
             decisions?.winner
+
         ) {
 
             const record =
                 pitcherRecords[
+
                     decisions.winner.id
+
                 ];
 
+
             decisionLines.push(
+
                 `WP ${decisions.winner.fullName}` +
+
                 `${record ? ` (${record})` : ""}`
+
             );
 
         }
 
+
         if (
+
             decisions?.loser
+
         ) {
 
             const record =
                 pitcherRecords[
+
                     decisions.loser.id
+
                 ];
 
+
             decisionLines.push(
+
                 `LP ${decisions.loser.fullName}` +
+
                 `${record ? ` (${record})` : ""}`
+
             );
 
         }
 
+
         if (
+
             decisions?.save
+
         ) {
 
             const record =
                 pitcherRecords[
+
                     decisions.save.id
+
                 ];
 
+
             decisionLines.push(
+
                 `SV ${decisions.save.fullName}` +
+
                 `${record ? ` (${record})` : ""}`
+
             );
 
         }
@@ -927,9 +1371,12 @@ function renderFeaturedGame(
          * --------------------------------------------------------
          */
 
+
         const homeRunList =
             renderHomeRuns(
+
                 feed.liveData?.plays?.allPlays || []
+
             );
 
 
@@ -939,12 +1386,16 @@ function renderFeaturedGame(
          * --------------------------------------------------------
          */
 
+
         const inningsPlayed =
             linescore.innings?.length || 0;
 
+
         const gameLength =
             inningsPlayed > 9
+
                 ? `FINAL • ${inningsPlayed} INNINGS`
+
                 : "FINAL";
 
 
@@ -953,6 +1404,7 @@ function renderFeaturedGame(
          * Render
          * --------------------------------------------------------
          */
+
 
         container.innerHTML = `
 
@@ -965,7 +1417,9 @@ function renderFeaturedGame(
                     ${inningHeaders}
 
                     <span>R</span>
+
                     <span>H</span>
+
                     <span>E</span>
 
                 </div>
@@ -974,7 +1428,9 @@ function renderFeaturedGame(
                 <div class="mlb-inning-row">
 
                     <span class="mlb-team">
+
                         ${awayCode}
+
                     </span>
 
                     ${awayRuns}
@@ -987,7 +1443,9 @@ function renderFeaturedGame(
                 <div class="mlb-inning-row">
 
                     <span class="mlb-team">
+
                         ${homeCode}
+
                     </span>
 
                     ${homeRunsByInning}
@@ -1002,45 +1460,77 @@ function renderFeaturedGame(
             <div class="mlb-decisions">
 
                 <div class="mlb-game-length">
+
                     ${gameLength}
+
+                    ${
+                        seriesStatus
+                            ? ` • ${seriesStatus}`
+                            : ""
+                    }
+
                 </div>
 
                 ${
+
                     decisionLines.length
+
                         ? decisionLines.join(
+
                             "&nbsp;&nbsp;&nbsp;"
+
                         )
+
                         : ""
+
                 }
 
             </div>
 
 
             ${
+
                 homeRunList.length
+
                     ? `
+
                         <div class="mlb-home-runs">
+
                             HR&nbsp;&nbsp;
+
                             ${homeRunList.join(", ")}
+
                         </div>
+
                     `
+
                     : ""
+
             }
 
         `;
 
     }
+
     catch (error) {
 
         console.error(
+
             "Unable to render featured MLB game:",
+
             error
+
         );
 
+
         container.innerHTML = `
+
             <div class="mlb-featured-message">
+
                 UNABLE TO LOAD GAME
+
             </div>
+
         `;
 
     }
@@ -1052,34 +1542,98 @@ function renderFeaturedGame(
  * ============================================================
  * RENDER FEATURED GAMES
  * ============================================================
+ *
+ * The first configured favorite is primary.
+ * The second configured favorite is secondary.
+ *
+ * The visual MLB panels remain AL FEATURED / NL FEATURED
+ * for now, preserving the existing dashboard layout.
+ * ============================================================
  */
 
+
 function renderFeaturedGames(
-    alContainer,
-    nlContainer,
-    scoreboard,
-    config
+    primaryContainer,
+    secondaryContainer,
+    scoreboard
 ) {
 
     const featured =
         scoreboard.featured || {};
 
-    const alFeatured =
-        featured.left || null;
-
-    const nlFeatured =
-        featured.right || null;
 
     renderFeaturedGame(
-        alFeatured,
-        alContainer
+        featured.primary || null,
+        primaryContainer
     );
 
     renderFeaturedGame(
-        nlFeatured,
-        nlContainer
+        featured.secondary || null,
+        secondaryContainer
     );
 
+}
+
+/*
+ * ============================================================
+ * RENDER POSTSEASON GAMES
+ * ============================================================
+ *
+ * Postseason ignores favorite teams.
+ *
+ * Games are displayed in the order supplied by the server,
+ * with up to four games occupying a 2x2 grid.
+ * ============================================================
+ */
+
+function renderPostseasonGames(
+    container,
+    postseasonGames
+) {
+
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = "";
+
+    const games =
+        Array.isArray(postseasonGames)
+            ? postseasonGames.slice(0, 4)
+            : [];
+
+    if (games.length === 0) {
+
+        container.innerHTML = `
+            <div class="mlb-featured-message">
+                NO POSTSEASON GAMES
+            </div>
+        `;
+
+        return;
+    }
+
+    games.forEach(
+        featuredData => {
+
+            const gameContainer =
+                document.createElement(
+                    "div"
+                );
+
+            gameContainer.className =
+                "mlb-postseason-game";
+
+            container.appendChild(
+                gameContainer
+            );
+
+            renderFeaturedGame(
+                featuredData,
+                gameContainer
+            );
+        }
+    );
 }
 
 
@@ -1096,12 +1650,20 @@ export default {
         config = {}
     ) {
 
+        const currentPhase =
+            config.currentPhase ||
+            "regularSeason";
+
         container.innerHTML =
             "";
 
+
         container.classList.add(
+
             "sports-scoreboard__sport",
+
             "sports-scoreboard__sport--mlb"
+
         );
 
 
@@ -1109,7 +1671,47 @@ export default {
             apiDate,
             date
         } =
-            getYesterday();
+            config.testDate
+                ? (() => {
+
+                    const testDate =
+                        new Date(
+                            `${config.testDate}T12:00:00`
+                        );
+
+                    testDate.setDate(
+                        testDate.getDate() - 1
+                    );
+
+                    const year =
+                        testDate.getFullYear();
+
+                    const month =
+                        String(
+                            testDate.getMonth() + 1
+                        ).padStart(
+                            2,
+                            "0"
+                        );
+
+                    const day =
+                        String(
+                            testDate.getDate()
+                        ).padStart(
+                            2,
+                            "0"
+                        );
+
+                    return {
+                        apiDate:
+                            `${year}-${month}-${day}`,
+
+                        date:
+                            testDate
+                    };
+
+                })()
+                : getYesterday();
 
 
         /*
@@ -1118,24 +1720,33 @@ export default {
          * --------------------------------------------------------
          */
 
+
         const root =
             document.createElement(
+
                 "div"
+
             );
+
 
         root.className =
             "mlb-scoreboard";
+
 
         root.innerHTML = `
 
             <header class="mlb-header">
 
                 <div class="mlb-title">
+
                     MLB SCOREBOARD
+
                 </div>
 
                 <div class="mlb-date">
+
                     ${formatDate(date)}
+
                 </div>
 
             </header>
@@ -1143,18 +1754,36 @@ export default {
 
             <main class="mlb-main">
 
-
-                <!-- AL FEATURED -->
+                <!-- POSTSEASON 2x2 -->
 
                 <section
+                    class="mlb-panel mlb-postseason"
+                >
+                    <div class="mlb-panel-title">
+                        MLB POSTSEASON
+                    </div>
+
+                    <div class="mlb-postseason-grid">
+                    </div>
+                </section>
+
+
+                <!-- PRIMARY FEATURED -->
+
+                <section
+
                     class="mlb-panel mlb-al-featured"
+
                 >
 
                     <div class="mlb-panel-title">
-                        AL FEATURED
+
+                        PRIMARY
+
                     </div>
 
                     <div class="mlb-featured-game">
+
                     </div>
 
                 </section>
@@ -1163,30 +1792,40 @@ export default {
                 <!-- AL SCORES -->
 
                 <section
+
                     class="mlb-panel mlb-al-scores"
+
                 >
 
                     <div class="mlb-panel-title">
+
                         AMERICAN LEAGUE
+
                     </div>
 
                     <div class="mlb-league-games">
+
                     </div>
 
                 </section>
 
 
-                <!-- NL FEATURED -->
+                <!-- SECONDARY FEATURED -->
 
                 <section
+
                     class="mlb-panel mlb-nl-featured"
+
                 >
 
                     <div class="mlb-panel-title">
-                        NL FEATURED
+
+                        SECONDARY
+
                     </div>
 
                     <div class="mlb-featured-game">
+
                     </div>
 
                 </section>
@@ -1195,14 +1834,19 @@ export default {
                 <!-- NL SCORES -->
 
                 <section
+
                     class="mlb-panel mlb-nl-scores"
+
                 >
 
                     <div class="mlb-panel-title">
+
                         NATIONAL LEAGUE
+
                     </div>
 
                     <div class="mlb-league-games">
+
                     </div>
 
                 </section>
@@ -1212,18 +1856,34 @@ export default {
 
         `;
 
+
         container.appendChild(
             root
         );
 
 
         /*
-         * --------------------------------------------------------
-         * Find containers
-         * --------------------------------------------------------
-         */
+        * --------------------------------------------------------
+        * Find containers
+        * --------------------------------------------------------
+        */
 
-        const alFeatured =
+        const postseason =
+            root.querySelector(
+                ".mlb-postseason"
+            );
+
+        postseason.style.display =
+            currentPhase === "postseason"
+                ? ""
+                : "none";
+
+        const postseasonGrid =
+            root.querySelector(
+                ".mlb-postseason-grid"
+            );
+
+        const primaryFeatured =
             root.querySelector(
                 ".mlb-al-featured .mlb-featured-game"
             );
@@ -1233,7 +1893,7 @@ export default {
                 ".mlb-al-scores .mlb-league-games"
             );
 
-        const nlFeatured =
+        const secondaryFeatured =
             root.querySelector(
                 ".mlb-nl-featured .mlb-featured-game"
             );
@@ -1254,18 +1914,25 @@ export default {
          * The server provides:
          *
          *     games
-         *     featured.left
-         *     featured.right
+         *     featured.primary
+         *     featured.secondary
+         *
+         * favoriteTeams[0] = primary
+         * favoriteTeams[1] = secondary
          *
          * --------------------------------------------------------
          */
+
 
         try {
 
             const scoreboard =
                 await loadGames(
+
                     apiDate,
+
                     config
+
                 );
 
 
@@ -1275,15 +1942,51 @@ export default {
              * ----------------------------------------------------
              */
 
+
             const games =
                 scoreboard.games || [];
 
 
             /*
-             * ----------------------------------------------------
-             * Final games only
-             * ----------------------------------------------------
-             */
+            * ------------------------------------------------------------
+            * POSTSEASON
+            * ------------------------------------------------------------
+            *
+            * Postseason does not use favorite teams or AL/NL score
+            * sections. The server has already identified the games
+            * actually played.
+            * ------------------------------------------------------------
+            */
+
+            if (
+                currentPhase === "postseason"
+            ) {
+                /*
+                * Hide regular-season layout.
+                */
+
+                root.classList.add(
+                    "mlb-scoreboard--postseason"
+                );
+
+                /*
+                * Render actual postseason games.
+                */
+
+                renderPostseasonGames(
+                    postseasonGrid,
+                    scoreboard.postseasonGames || []
+                );
+
+                return;
+            }
+
+
+            /*
+            * ------------------------------------------------------------
+            * REGULAR SEASON
+            * ------------------------------------------------------------
+            */
 
             const finalGames =
                 games.filter(
@@ -1295,10 +1998,10 @@ export default {
 
 
             /*
-             * ----------------------------------------------------
-             * American League
-             * ----------------------------------------------------
-             */
+            * ------------------------------------------------------------
+            * American League
+            * ------------------------------------------------------------
+            */
 
             const americanLeague =
                 finalGames
@@ -1315,10 +2018,10 @@ export default {
 
 
             /*
-             * ----------------------------------------------------
-             * National League
-             * ----------------------------------------------------
-             */
+            * ------------------------------------------------------------
+            * National League
+            * ------------------------------------------------------------
+            */
 
             const nationalLeague =
                 finalGames
@@ -1335,10 +2038,10 @@ export default {
 
 
             /*
-             * ----------------------------------------------------
-             * Render AL / NL scores
-             * ----------------------------------------------------
-             */
+            * ------------------------------------------------------------
+            * Render AL / NL scores
+            * ------------------------------------------------------------
+            */
 
             renderLeague(
                 alScores,
@@ -1352,52 +2055,70 @@ export default {
 
 
             /*
-             * ----------------------------------------------------
-             * Render featured games
-             * ----------------------------------------------------
-             *
-             * No additional API requests.
-             * ----------------------------------------------------
-             */
+            * ------------------------------------------------------------
+            * Render favorite games
+            * ------------------------------------------------------------
+            */
 
             renderFeaturedGames(
-                alFeatured,
-                nlFeatured,
-                scoreboard,
-                config
+                primaryFeatured,
+                secondaryFeatured,
+                scoreboard
             );
-
         }
+
         catch (error) {
 
             console.error(
+
                 "Unable to load MLB scoreboard:",
+
                 error
+
             );
 
 
             alScores.innerHTML = `
+
                 <div class="mlb-no-games">
+
                     UNABLE TO LOAD SCORES
+
                 </div>
+
             `;
+
 
             nlScores.innerHTML = `
+
                 <div class="mlb-no-games">
+
                     UNABLE TO LOAD SCORES
+
                 </div>
+
             `;
 
-            alFeatured.innerHTML = `
+
+            primaryFeatured.innerHTML = `
+
                 <div class="mlb-featured-message">
+
                     UNABLE TO LOAD GAME
+
                 </div>
+
             `;
 
-            nlFeatured.innerHTML = `
+
+            secondaryFeatured.innerHTML = `
+
                 <div class="mlb-featured-message">
+
                     UNABLE TO LOAD GAME
+
                 </div>
+
             `;
 
         }
@@ -1406,7 +2127,9 @@ export default {
 
 
     async destroy(
+
         container
+
     ) {
 
         container.innerHTML =

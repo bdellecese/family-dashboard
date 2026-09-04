@@ -34,7 +34,12 @@ import {
     getGameFeed,
     getPitcherRecord,
     getStandings,
-    getWildCardStandings
+    getWildCardStandings,
+    getPostseasonGames,
+    getPostseasonSeries,
+    getPostseasonSeeds,
+    normalizePostseasonBracket,
+    filterPostseasonBracketByDate
 } from "../services/sports/mlb-data.js";
 
 import {
@@ -75,6 +80,36 @@ const ROOT_DIR =
         __dirname,
         ".."
     );
+
+
+// ============================================================
+// JSON RESPONSE HELPER
+// ============================================================
+
+function sendJson(
+    response,
+    statusCode,
+    data
+) {
+
+    response.writeHead(
+        statusCode,
+        {
+            "Content-Type":
+                "application/json; charset=utf-8",
+
+            "Access-Control-Allow-Origin":
+                "*"
+        }
+    );
+
+    response.end(
+        JSON.stringify(
+            data
+        )
+    );
+
+}
 
 
 // ============================================================
@@ -328,7 +363,7 @@ function normalizeTask(
 
 }
 
-// =================================================
+
 // ============================================================
 // GET TODOIST TASKS
 // ============================================================
@@ -721,6 +756,431 @@ function serveStaticFile(
 
 
 // ============================================================
+// MLB TEAM ABBREVIATIONS
+// ============================================================
+//
+// MLB team IDs are converted server-side so the browser can
+// continue using simple abbreviations such as BOS/STL.
+//
+// ============================================================
+
+const TEAM_ABBR = {
+
+    108: "LAA",
+    109: "ARI",
+    110: "BAL",
+    111: "BOS",
+    112: "CHC",
+    113: "CIN",
+    114: "CLE",
+    115: "COL",
+    116: "DET",
+    117: "HOU",
+    118: "KC",
+    119: "LAD",
+    120: "WSH",
+    133: "ATH",
+    134: "PIT",
+    135: "SD",
+    136: "SEA",
+    137: "SF",
+    138: "STL",
+    139: "TB",
+    140: "TEX",
+    141: "TOR",
+    142: "MIN",
+    143: "PHI",
+    144: "ATL",
+    145: "CWS",
+    146: "MIA",
+    147: "NYY",
+    158: "MIL"
+
+};
+
+
+// ============================================================
+// MLB TEAM ABBREVIATION HELPER
+// ============================================================
+
+function getTeamAbbreviation(
+    team
+) {
+
+    if (
+        !team
+    ) {
+
+        return "";
+
+    }
+
+
+    return (
+        TEAM_ABBR[team.id] ||
+        team.abbreviation ||
+        team.teamName ||
+        team.name ||
+        ""
+    )
+        .toUpperCase();
+
+}
+
+
+// ============================================================
+// MLB POSTSEASON TEAM CODE
+// ============================================================
+//
+// Returns the short MLB abbreviation used by the dashboard.
+//
+// ============================================================
+
+function getPostseasonTeamCode(
+    team
+) {
+
+    if (
+        !team
+    ) {
+
+        return "";
+
+    }
+
+
+    return getTeamAbbreviation({
+        id:
+            team.id,
+
+        name:
+            team.name
+    }) ||
+    (
+        team.name ||
+        ""
+    )
+        .toUpperCase();
+
+}
+
+
+// ============================================================
+// MLB POSTSEASON SERIES STATUS
+// ============================================================
+//
+// Determines the current state of the series containing a game.
+//
+// Examples:
+//
+//     BOS LEADS 2-1
+//     BOS WINS 3-1
+//     TIED 2-2
+//
+// ============================================================
+
+function getSeriesStatusForGame(
+    game,
+    bracket,
+    apiDate
+) {
+
+    if (
+        !game ||
+        !bracket
+    ) {
+
+        return "";
+
+    }
+
+
+    const gameType =
+        game.gameType;
+
+
+    const round =
+        gameType === "F"
+            ? bracket.wildCard
+            : gameType === "D"
+                ? bracket.divisionSeries
+                : gameType === "L"
+                    ? bracket.leagueChampionship
+                    : gameType === "W"
+                        ? bracket.worldSeries
+                        : [];
+
+
+    if (
+        !round ||
+        !round.length
+    ) {
+
+        return "";
+
+    }
+
+
+    const series =
+        round.find(
+            entry =>
+                entry.games?.some(
+                    seriesGame =>
+                        seriesGame.gamePk ===
+                        game.gamePk
+                )
+        );
+
+
+    if (
+        !series ||
+        !series.teams ||
+        series.teams.length !== 2
+    ) {
+
+        return "";
+
+    }
+
+
+    const teams =
+        series.teams;
+
+
+    const teamA =
+        teams[0];
+
+
+    const teamB =
+        teams[1];
+
+
+    if (
+        !teamA ||
+        !teamB
+    ) {
+
+        return "";
+
+    }
+
+
+    // --------------------------------------------------------
+    // Calculate the series record AS OF THIS GAME.
+    //
+    // Do NOT use teamA.wins / teamB.wins because those may
+    // represent the eventual completed series.
+    //
+    // Use seriesGameNumber so a future game cannot affect the
+    // series status of an earlier game.
+    // --------------------------------------------------------
+
+    const currentSeriesGame =
+        series.games?.find(
+            seriesGame =>
+                seriesGame.gamePk ===
+                game.gamePk
+        );
+
+
+    if (
+        !currentSeriesGame
+    ) {
+
+        return "";
+
+    }
+
+
+    const currentSeriesGameNumber =
+        currentSeriesGame.seriesGameNumber;
+
+
+    const completedGames =
+        (series.games || [])
+            .filter(
+                seriesGame =>
+                    seriesGame.seriesGameNumber <=
+                    currentSeriesGameNumber
+            )
+            .filter(
+                seriesGame =>
+                    seriesGame.status?.abstractGameState ===
+                    "Final"
+            );
+
+
+    let teamAWins = 0;
+    let teamBWins = 0;
+
+
+    completedGames.forEach(
+        seriesGame => {
+
+            const awayTeam =
+                seriesGame.teams?.away;
+
+
+            const homeTeam =
+                seriesGame.teams?.home;
+
+
+            if (
+                awayTeam?.isWinner
+            ) {
+
+                if (
+                    awayTeam.team?.id ===
+                    teamA.id
+                ) {
+
+                    teamAWins++;
+
+                }
+                else if (
+                    awayTeam.team?.id ===
+                    teamB.id
+                ) {
+
+                    teamBWins++;
+
+                }
+
+            }
+
+
+            if (
+                homeTeam?.isWinner
+            ) {
+
+                if (
+                    homeTeam.team?.id ===
+                    teamA.id
+                ) {
+
+                    teamAWins++;
+
+                }
+                else if (
+                    homeTeam.team?.id ===
+                    teamB.id
+                ) {
+
+                    teamBWins++;
+
+                }
+
+            }
+
+        }
+    );
+
+
+    // --------------------------------------------------------
+    // No completed games yet.
+    // --------------------------------------------------------
+
+    if (
+        teamAWins === 0 &&
+        teamBWins === 0
+    ) {
+
+        return "";
+
+    }
+
+
+    // --------------------------------------------------------
+    // Series tied.
+    // --------------------------------------------------------
+
+    if (
+        teamAWins ===
+        teamBWins
+    ) {
+
+        return (
+            `TIED ${teamAWins}-${teamBWins}`
+        );
+
+    }
+
+
+    const leader =
+        teamAWins >
+        teamBWins
+            ? teamA
+            : teamB;
+
+
+    const trailing =
+        teamAWins >
+        teamBWins
+            ? teamB
+            : teamA;
+
+
+    const leaderWins =
+        Math.max(
+            teamAWins,
+            teamBWins
+        );
+
+
+    const trailingWins =
+        Math.min(
+            teamAWins,
+            teamBWins
+        );
+
+
+    // --------------------------------------------------------
+    // Determine whether the series is complete.
+    //
+    // Wild Card: best of 3  -> 2 wins
+    // Division:  best of 5  -> 3 wins
+    // LCS:       best of 7  -> 4 wins
+    // World:     best of 7  -> 4 wins
+    // --------------------------------------------------------
+
+    const seriesComplete =
+        leaderWins >=
+        (
+            gameType === "F"
+                ? 2
+                : gameType === "D"
+                    ? 3
+                    : 4
+        );
+
+
+    const leaderName =
+        getPostseasonTeamCode(
+            leader
+        );
+
+
+    if (
+        seriesComplete
+    ) {
+
+        return (
+            `${leaderName} WINS ` +
+            `${leaderWins}-${trailingWins}`
+        );
+
+    }
+
+
+    return (
+        `${leaderName} LEADS ` +
+        `${leaderWins}-${trailingWins}`
+    );
+
+}
+
+
+// ============================================================
 // HTTP SERVER
 // ============================================================
 
@@ -739,7 +1199,7 @@ const server =
 
             response.setHeader(
                 "Access-Control-Allow-Methods",
-                "GET, POST, OPTIONS"
+                "GET, POST, DELETE, OPTIONS"
             );
 
 
@@ -772,10 +1232,10 @@ const server =
                 );
 
 
-
-            // =================================================
+            // =============================================================
             // MLB SCOREBOARD
-            // =================================================
+            // =============================================================
+
             if (
                 requestUrl.pathname ===
                     "/api/sports/mlb/scoreboard"
@@ -783,82 +1243,372 @@ const server =
                 request.method ===
                     "GET"
             ) {
+
                 try {
+
+                    // -----------------------------------------------------
+                    // Determine MLB date.
+                    //
+                    // Production:
+                    //     yesterday
+                    //
+                    // Testing:
+                    //     ?date=YYYY-MM-DD
+                    // -----------------------------------------------------
+
                     const apiDate =
+                        requestUrl.searchParams.get("date") ||
                         getYesterday();
+
+
+                    if (
+                        !/^\d{4}-\d{2}-\d{2}$/.test(
+                            apiDate
+                        )
+                    ) {
+
+                        return sendJson(
+                            response,
+                            400,
+                            {
+                                error:
+                                    "Invalid date. Expected YYYY-MM-DD."
+                            }
+                        );
+
+                    }
+
+
+                    // -----------------------------------------------------
+                    // Load games.
+                    // -----------------------------------------------------
 
                     const games =
                         await getSchedule(
                             apiDate
                         );
 
-                    const featured = {};
 
-                    const configuredTeams = [
-                        {
-                            key: "left",
-                            teamId:
-                                Number(
-                                    requestUrl.searchParams.get(
-                                        "leftTeamId"
-                                    )
+                    // -----------------------------------------------------
+                    // Determine whether the date contains postseason games
+                    //
+                    // Postseason does not use favorite teams.
+                    // Each postseason game becomes a featured card.
+                    // -----------------------------------------------------
+
+                    const postseasonGames =
+                        games.filter(
+                            game =>
+                                ["F", "D", "L", "W"].includes(
+                                    game.gameType
                                 )
-                        },
-                        {
-                            key: "right",
-                            teamId:
-                                Number(
-                                    requestUrl.searchParams.get(
-                                        "rightTeamId"
-                                    )
-                                )
-                        }
-                    ];
-                    for (
-                        const item of configuredTeams
+                        );
+
+                    if (
+                        postseasonGames.length > 0
                     ) {
-                        if (
-                            !item.teamId
-                        ) {
-                            continue;
+
+                        // -------------------------------------------------
+                        // Load the postseason bracket so that each game
+                        // can receive current series status.
+                        // -------------------------------------------------
+
+                        const season =
+                            Number(
+                                apiDate.slice(
+                                    0,
+                                    4
+                                )
+                            );
+
+
+                        let bracket =
+                            null;
+
+
+                        try {
+
+                            const postseasonData =
+                                await getPostseasonSeries(
+                                    season
+                                );
+
+                            const postseasonSeeds =
+                                await getPostseasonSeeds(
+                                    season
+                                );
+
+                                bracket =
+                                normalizePostseasonBracket(
+                                    postseasonData,
+                                    postseasonSeeds
+                                );
+
                         }
+
+                        catch (
+                            bracketError
+                        ) {
+
+                            console.error(
+                                "MLB postseason bracket error:",
+                                bracketError
+                            );
+
+                        }
+
+
+                        const postseasonFeatured =
+                            [];
+
+
+                        for (
+                            const game of postseasonGames.slice(
+                                0,
+                                4
+                            )
+                        ) {
+
+                            const feed =
+                                await getGameFeed(
+                                    game.gamePk
+                                );
+
+
+                            const decisions =
+                                feed.liveData?.decisions;
+
+
+                            const pitcherRecords =
+                                {};
+
+
+                            if (
+                                decisions?.winner?.id
+                            ) {
+
+                                pitcherRecords[
+                                    decisions.winner.id
+                                ] =
+                                    await getPitcherRecord(
+                                        decisions.winner.id,
+                                        season
+                                    );
+
+                            }
+
+
+                            if (
+                                decisions?.loser?.id
+                            ) {
+
+                                pitcherRecords[
+                                    decisions.loser.id
+                                ] =
+                                    await getPitcherRecord(
+                                        decisions.loser.id,
+                                        season
+                                    );
+
+                            }
+
+
+                            if (
+                                decisions?.save?.id
+                            ) {
+
+                                pitcherRecords[
+                                    decisions.save.id
+                                ] =
+                                    await getPitcherRecord(
+                                        decisions.save.id,
+                                        season
+                                    );
+
+                            }
+
+
+                            postseasonFeatured.push({
+
+                                game,
+
+                                feed,
+
+                                pitcherRecords,
+
+                                seriesStatus:
+                                    getSeriesStatusForGame(
+                                        game,
+                                        bracket,
+                                        apiDate
+                                    )
+
+                            });
+
+                        }
+
+
+                        return sendJson(
+                            response,
+                            200,
+                            {
+
+                                date:
+                                    apiDate,
+
+                                games,
+
+                                postseason:
+                                    true,
+
+                                postseasonGames:
+                                    postseasonFeatured
+
+                            }
+                        );
+
+                    }
+
+
+                    // -----------------------------------------------------
+                    // Read configured favorite teams.
+                    //
+                    // Example:
+                    //
+                    //     primaryTeam=BOS
+                    //     secondaryTeam=STL
+                    //
+                    // -----------------------------------------------------
+
+                    const primaryTeam =
+                        (
+                            requestUrl.searchParams.get(
+                                "primaryTeam"
+                            ) ||
+                            ""
+                        )
+                            .trim()
+                            .toUpperCase();
+
+
+                    const secondaryTeam =
+                        (
+                            requestUrl.searchParams.get(
+                                "secondaryTeam"
+                            ) ||
+                            ""
+                        )
+                            .trim()
+                            .toUpperCase();
+
+
+                    // -----------------------------------------------------
+                    // Find the game containing a configured team.
+                    // -----------------------------------------------------
+
+                    function findTeamGame(
+                        teamCode
+                    ) {
+
+                        if (
+                            !teamCode
+                        ) {
+
+                            return null;
+
+                        }
+
+
+                        return (
+                            games.find(
+                                game => {
+
+                                    const awayCode =
+                                        getTeamAbbreviation(
+                                            game.teams?.away?.team
+                                        );
+
+
+                                    const homeCode =
+                                        getTeamAbbreviation(
+                                            game.teams?.home?.team
+                                        );
+
+
+                                    return (
+                                        awayCode ===
+                                            teamCode ||
+                                        homeCode ===
+                                            teamCode
+                                    );
+
+                                }
+                            ) ||
+                            null
+                        );
+
+                    }
+
+
+                    // -----------------------------------------------------
+                    // Build featured game data.
+                    // -----------------------------------------------------
+
+                    async function buildFeaturedGame(
+                        teamCode
+                    ) {
+
+                        if (
+                            !teamCode
+                        ) {
+
+                            return null;
+
+                        }
+
 
                         const game =
-                            games.find(
-                                game =>
-                                    game.teams.home.team.id ===
-                                        item.teamId
-                                    ||
-                                    game.teams.away.team.id ===
-                                        item.teamId
+                            findTeamGame(
+                                teamCode
                             );
+
 
                         if (
                             !game
                         ) {
-                            featured[item.key] =
-                                null;
 
-                            continue;
+                            return null;
+
                         }
+
 
                         const feed =
                             await getGameFeed(
                                 game.gamePk
                             );
 
+
                         const decisions =
                             feed.liveData?.decisions;
 
+
                         const season =
-                            new Date().getFullYear();
+                            Number(
+                                apiDate.slice(
+                                    0,
+                                    4
+                                )
+                            );
+
 
                         const pitcherRecords =
                             {};
 
+
                         if (
                             decisions?.winner?.id
                         ) {
+
                             pitcherRecords[
                                 decisions.winner.id
                             ] =
@@ -866,11 +1616,14 @@ const server =
                                     decisions.winner.id,
                                     season
                                 );
+
                         }
+
 
                         if (
                             decisions?.loser?.id
                         ) {
+
                             pitcherRecords[
                                 decisions.loser.id
                             ] =
@@ -878,11 +1631,14 @@ const server =
                                     decisions.loser.id,
                                     season
                                 );
+
                         }
+
 
                         if (
                             decisions?.save?.id
                         ) {
+
                             pitcherRecords[
                                 decisions.save.id
                             ] =
@@ -890,59 +1646,254 @@ const server =
                                     decisions.save.id,
                                     season
                                 );
+
                         }
 
-                        featured[item.key] = {
+
+                        return {
+
                             game,
+
                             feed,
+
                             pitcherRecords
+
                         };
+
                     }
 
-                    response.writeHead(
+
+                    // -----------------------------------------------------
+                    // Resolve both configured favorites.
+                    //
+                    // IMPORTANT:
+                    //
+                    // These names are expected by mlb-scoreboard.js:
+                    //
+                    //     featured.primary
+                    //     featured.secondary
+                    // -----------------------------------------------------
+
+                    const featured = {
+
+                        primary:
+                            await buildFeaturedGame(
+                                primaryTeam
+                            ),
+
+                        secondary:
+                            await buildFeaturedGame(
+                                secondaryTeam
+                            )
+
+                    };
+
+
+                    return sendJson(
+                        response,
                         200,
                         {
-                            "Content-Type":
-                                "application/json",
-                            "Access-Control-Allow-Origin":
-                                "*"
+
+                            date:
+                                apiDate,
+
+                            games,
+
+                            featured
+
                         }
                     );
 
-                    response.end(
-                        JSON.stringify({
-                            date:
-                                apiDate,
-                            games,
-                            featured
-                        })
-                    );
                 }
-                catch (error) {
+
+                catch (
+                    error
+                ) {
+
                     console.error(
                         "MLB scoreboard error:",
                         error
                     );
 
-                    response.writeHead(
+
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json",
-                            "Access-Control-Allow-Origin":
-                                "*"
+
+                            error:
+                                error.message
+
                         }
                     );
 
-                    response.end(
-                        JSON.stringify({
-                            error:
-                                error.message
-                        })
-                    );
                 }
 
-                return;
+            }
+
+            // =================================================
+            // MLB POSTSEASON
+            // =================================================
+
+            if (
+                requestUrl.pathname ===
+                    "/api/sports/mlb/postseason"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                try {
+
+                    const apiDate =
+                        requestUrl.searchParams.get("date") ||
+                        getYesterday();
+
+
+                    if (
+                        !/^\d{4}-\d{2}-\d{2}$/.test(
+                            apiDate
+                        )
+                    ) {
+
+                        return sendJson(
+                            response,
+                            400,
+                            {
+                                error:
+                                    "Invalid date. Expected YYYY-MM-DD."
+                            }
+                        );
+
+                    }
+
+                    const season =
+                        Number(
+                            requestUrl.searchParams.get(
+                                "season"
+                            )
+                        ) ||
+                        Number(
+                            apiDate.slice(
+                                0,
+                                4
+                            )
+                        );
+
+
+                    // -------------------------------------------------
+                    // Postseason bracket
+                    // -------------------------------------------------
+
+                    const postseasonData =
+                        await getPostseasonSeries(
+                            season
+                        );
+
+                    const postseasonSeeds =
+                        await getPostseasonSeeds(
+                            season
+                        );
+
+                    const bracket =
+                        filterPostseasonBracketByDate(
+                            normalizePostseasonBracket(
+                                postseasonData,
+                                postseasonSeeds
+                            ),
+                            apiDate,
+                            postseasonSeeds
+                        );
+
+                    // -------------------------------------------------
+                    // Postseason games for requested date
+                    // -------------------------------------------------
+
+                    const games =
+                        await getPostseasonGames(
+                            season,
+                            apiDate
+                        );
+
+
+                    const gameFeeds =
+                        [];
+
+
+                    for (
+                        const game of games
+                    ) {
+
+                        const feed =
+                            await getGameFeed(
+                                game.gamePk
+                            );
+
+
+                        gameFeeds.push({
+
+                            game,
+
+                            feed,
+
+                            seriesStatus:
+                                getSeriesStatusForGame(
+                                    game,
+                                    bracket
+                                )
+
+                        });
+
+                    }
+
+
+                    // -------------------------------------------------
+                    // Response
+                    // -------------------------------------------------
+
+                    return sendJson(
+                        response,
+                        200,
+                        {
+
+                            season,
+
+                            date:
+                                apiDate,
+
+                            games:
+                                gameFeeds,
+
+                            bracket
+
+                        }
+                    );
+
+                }
+
+                catch (
+                    error
+                ) {
+
+                    console.error(
+                        "MLB postseason error:",
+                        error
+                    );
+
+
+                    return sendJson(
+                        response,
+                        500,
+                        {
+
+                            error:
+                                error.message
+
+                        }
+                    );
+
+                }
+
             }
 
             // =================================================
@@ -994,27 +1945,17 @@ const server =
                         );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
-                        {
-                            "Content-Type":
-                                "application/json",
-
-                            "Access-Control-Allow-Origin":
-                                "*"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify(
-                            scoreboard
-                        )
+                        scoreboard
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "NFL scoreboard error:",
@@ -1022,33 +1963,21 @@ const server =
                     );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json",
-
-                            "Access-Control-Allow-Origin":
-                                "*"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 error.message
 
-                        })
+                        }
                     );
 
                 }
 
-
-                return;
-
             }
+
 
             // =================================================
             // NFL STANDINGS
@@ -1074,31 +2003,24 @@ const server =
                         );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
                         {
-                            "Content-Type":
-                                "application/json",
-                            "Access-Control-Allow-Origin":
-                                "*"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             season:
                                 new Date().getFullYear(),
 
                             standings
 
-                        })
+                        }
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "NFL standings error:",
@@ -1106,32 +2028,21 @@ const server =
                     );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json",
-                            "Access-Control-Allow-Origin":
-                                "*"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 error.message
 
-                        })
+                        }
                     );
 
                 }
 
-
-                return;
-
             }
+
 
             // =================================================
             // SCHOOL LUNCH
@@ -1170,24 +2081,17 @@ const server =
                             );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
-                        {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify(
-                            data
-                        )
+                        data
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "School lunch error:",
@@ -1195,28 +2099,18 @@ const server =
                     );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 error.message
 
-                        })
+                        }
                     );
 
                 }
-
-
-                return;
 
             }
 
@@ -1239,24 +2133,17 @@ const server =
                         await getCommute();
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
-                        {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify(
-                            commute
-                        )
+                        commute
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "Commute error:",
@@ -1264,30 +2151,21 @@ const server =
                     );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 error.message
 
-                        })
+                        }
                     );
 
                 }
 
-
-                return;
-
             }
+
 
             // =================================================
             // HEALTH CHECK
@@ -1298,26 +2176,16 @@ const server =
                     "/api/health"
             ) {
 
-                response.writeHead(
+                return sendJson(
+                    response,
                     200,
                     {
-                        "Content-Type":
-                            "application/json"
-                    }
-                );
-
-
-                response.end(
-                    JSON.stringify({
 
                         status:
                             "ok"
 
-                    })
+                    }
                 );
-
-
-                return;
 
             }
 
@@ -1363,26 +2231,21 @@ const server =
                         );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             photos
 
-                        })
+                        }
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "iCloud photo API error:",
@@ -1390,28 +2253,18 @@ const server =
                     );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 "Unable to load photos"
 
-                        })
+                        }
                     );
 
                 }
-
-
-                return;
 
             }
 
@@ -1455,24 +2308,17 @@ const server =
                         );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
-                        {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify(
-                            status
-                        )
+                        status
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "Sonos status error:",
@@ -1480,28 +2326,18 @@ const server =
                     );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 error.message
 
-                        })
+                        }
                     );
 
                 }
-
-
-                return;
 
             }
 
@@ -1620,7 +2456,9 @@ const server =
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "Google Calendar OAuth error:",
@@ -1648,6 +2486,7 @@ const server =
 
             }
 
+
             // =================================================
             // GOOGLE CALENDAR AUTHORIZATION STATUS
             // =================================================
@@ -1663,22 +2502,15 @@ const server =
                 const status =
                     getGoogleCalendarAuthorizationStatus();
 
-                response.writeHead(
+
+                return sendJson(
+                    response,
                     200,
-                    {
-                        "Content-Type":
-                            "application/json"
-                    }
+                    status
                 );
 
-                response.end(
-                    JSON.stringify(
-                        status
-                    )
-                );
-
-                return;
             }
+
 
             // =================================================
             // GOOGLE CALENDARS
@@ -1698,45 +2530,33 @@ const server =
                         await getCalendars();
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
-                        {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify(
-                            calendars
-                        )
+                        calendars
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "Google Calendar calendars error:",
                         error
                     );
 
+
                     if (
                         error.message ===
                         "Google Calendar authorization required. Reauthorize Google Calendar."
                     ) {
 
-                        response.writeHead(
+                        return sendJson(
+                            response,
                             401,
                             {
-                                "Content-Type":
-                                    "application/json"
-                            }
-                        );
-
-                        response.end(
-                            JSON.stringify({
 
                                 error:
                                     "authorization_required",
@@ -1744,33 +2564,24 @@ const server =
                                 message:
                                     "Google Calendar authorization is required. Please reauthorize Google Calendar."
 
-                            })
+                            }
                         );
-
-                        return;
 
                     }
 
-                    response.writeHead(
+
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 error.message
 
-                        })
+                        }
                     );
 
                 }
-
-                return;
 
             }
 
@@ -1834,45 +2645,33 @@ const server =
                         );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
-                        {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify(
-                            events
-                        )
+                        events
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "Google Calendar events error:",
                         error
                     );
 
+
                     if (
                         error.message ===
                         "Google Calendar authorization required. Reauthorize Google Calendar."
                     ) {
 
-                        response.writeHead(
+                        return sendJson(
+                            response,
                             401,
                             {
-                                "Content-Type":
-                                    "application/json"
-                            }
-                        );
-
-                        response.end(
-                            JSON.stringify({
 
                                 error:
                                     "authorization_required",
@@ -1880,33 +2679,24 @@ const server =
                                 message:
                                     "Google Calendar authorization is required. Please reauthorize Google Calendar."
 
-                            })
+                            }
                         );
-
-                        return;
 
                     }
 
-                    response.writeHead(
+
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 error.message
 
-                        })
+                        }
                     );
 
                 }
-
-                return;
 
             }
 
@@ -1939,24 +2729,17 @@ const server =
                         );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
-                        {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify(
-                            data
-                        )
+                        data
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "Todoist error:",
@@ -1964,28 +2747,18 @@ const server =
                     );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 error.message
 
-                        })
+                        }
                     );
 
                 }
-
-
-                return;
 
             }
 
@@ -2025,24 +2798,17 @@ const server =
                         );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
-                        {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify(
-                            result
-                        )
+                        result
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "Todoist complete task error:",
@@ -2050,30 +2816,21 @@ const server =
                     );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 error.message
 
-                        })
+                        }
                     );
 
                 }
 
-
-                return;
-
             }
+
 
             // ============================================================
             // PERFORMANCE DATA
@@ -2103,17 +2860,10 @@ const server =
                         );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             count:
                                 performanceEvents.length,
@@ -2121,12 +2871,14 @@ const server =
                             events:
                                 performanceEvents
 
-                        })
+                        }
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "Performance data request failed:",
@@ -2134,28 +2886,18 @@ const server =
                     );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 error.message
 
-                        })
+                        }
                     );
 
                 }
-
-
-                return;
 
             }
 
@@ -2218,17 +2960,10 @@ const server =
                         );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             success:
                                 true,
@@ -2236,12 +2971,14 @@ const server =
                             totalEvents:
                                 count
 
-                        })
+                        }
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "Performance data recording failed:",
@@ -2249,28 +2986,18 @@ const server =
                     );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         400,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 error.message
 
-                        })
+                        }
                     );
 
                 }
-
-
-                return;
 
             }
 
@@ -2292,27 +3019,22 @@ const server =
                     clearPerformanceEvents();
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             success:
                                 true
 
-                        })
+                        }
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "Performance data clear failed:",
@@ -2320,30 +3042,21 @@ const server =
                     );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 error.message
 
-                        })
+                        }
                     );
 
                 }
 
-
-                return;
-
             }
+
 
             // =================================================
             // RSS FEED
@@ -2384,26 +3097,21 @@ const server =
                         );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         200,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             stories
 
-                        })
+                        }
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "RSS API error:",
@@ -2411,30 +3119,21 @@ const server =
                     );
 
 
-                    response.writeHead(
+                    return sendJson(
+                        response,
                         500,
                         {
-                            "Content-Type":
-                                "application/json"
-                        }
-                    );
-
-
-                    response.end(
-                        JSON.stringify({
 
                             error:
                                 error.message
 
-                        })
+                        }
                     );
 
                 }
 
-
-                return;
-
             }
+
 
             // =================================================
             // STATIC DASHBOARD FILES
@@ -2442,7 +3141,7 @@ const server =
 
             if (
                 request.method ===
-                    "GET"
+                "GET"
             ) {
 
                 const served =
@@ -2467,22 +3166,15 @@ const server =
             // 404
             // =================================================
 
-            response.writeHead(
+            return sendJson(
+                response,
                 404,
                 {
-                    "Content-Type":
-                        "application/json"
-                }
-            );
-
-
-            response.end(
-                JSON.stringify({
 
                     error:
                         "Not found"
 
-                })
+                }
             );
 
         }

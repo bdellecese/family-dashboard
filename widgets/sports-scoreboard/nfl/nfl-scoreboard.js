@@ -7,6 +7,18 @@
  *
  *     /api/sports/nfl/scoreboard
  *
+ * Configuration comes from:
+ *
+ *     config.favoriteTeams
+ *
+ * The convention is intentionally simple:
+ *
+ *     favoriteTeams[0] = primary / left featured team
+ *     favoriteTeams[1] = secondary / right featured team
+ *
+ * No separate primary / secondary / left / right configuration
+ * is required.
+ *
  * Layout:
  *
  *     NFL SCOREBOARD                         WEEK 1
@@ -17,17 +29,7 @@
  *
  *     OTHER GAMES
  *
- *     COLUMN 1          COLUMN 2          COLUMN 3
- *     --------          --------          --------
- *     Game 1            Game 5            Game 9
- *     Game 2            Game 6            Game 10
- *     Game 3            Game 7            Game 11
- *     Game 4            Game 8            Game 12
- *
- * Physical display:
- *
- *     3 columns
- *     4 games maximum per column
+ *     COLUMN 1          COLUMN 2          COLUMN 3          COLUMN 4
  *
  * ============================================================
  */
@@ -248,15 +250,6 @@ function getGameStatus(
     }
 
 
-    /*
-     * Upcoming game:
-     *
-     * Show the same short date + time format used by the
-     * featured game, for example:
-     *
-     *     SUN, SEP 13 • 1:00 PM
-     */
-
     return {
 
         state:
@@ -363,10 +356,11 @@ function getQuarterScores(
 /*
  * ============================================================
  * LEADER HELPERS
+ * ============================================================
  *
  * Supports both:
  *
- * 1. Our normalized structure:
+ * 1. Normalized:
  *
  *    leaders: {
  *        passing: {...},
@@ -374,7 +368,7 @@ function getQuarterScores(
  *        receiving: {...}
  *    }
  *
- * 2. ESPN-style nested leader structures:
+ * 2. ESPN-style:
  *
  *    leaders: [
  *        {
@@ -382,8 +376,6 @@ function getQuarterScores(
  *            leaders: [...]
  *        }
  *    ]
- *
- * This keeps the widget resilient to either data source.
  * ============================================================
  */
 
@@ -425,15 +417,6 @@ function getLeader(
             direct
         ) {
 
-            /*
-             * Already normalized:
-             *
-             * {
-             *     name,
-             *     displayValue
-             * }
-             */
-
             if (
                 direct.name ||
                 direct.displayValue
@@ -443,14 +426,6 @@ function getLeader(
 
             }
 
-
-            /*
-             * ESPN-style nested leader:
-             *
-             * {
-             *     leaders: [...]
-             * }
-             */
 
             if (
                 Array.isArray(
@@ -466,15 +441,6 @@ function getLeader(
             }
 
 
-            /*
-             * Another common ESPN shape:
-             *
-             * {
-             *     athlete: {...},
-             *     displayValue: "..."
-             * }
-             */
-
             return direct;
 
         }
@@ -489,7 +455,7 @@ function getLeader(
      * --------------------------------------------------------
      * ESPN ARRAY
      * --------------------------------------------------------
-     */
+ */
 
     const category =
         leaders.find(
@@ -626,13 +592,11 @@ function createFeaturedTeamRow(
     const logo =
         team?.logo
             ? `
-
                 <img
                     class="nfl-featured-team-logo"
                     src="${team.logo}"
                     alt="${getTeamName(team)}"
                 >
-
             `
             : "";
 
@@ -877,7 +841,6 @@ function renderFeaturedGame(
         `nfl-featured-game nfl-featured-game--${status.state}`;
 
 
-
     /*
      * --------------------------------------------------------
      * SCORE HEADER
@@ -949,7 +912,7 @@ function renderFeaturedGame(
      * --------------------------------------------------------
      * GAME META
      * --------------------------------------------------------
-     */
+ */
 
     const venue =
         game.venue?.fullName ||
@@ -979,13 +942,11 @@ function renderFeaturedGame(
         ${
             venue
                 ? `
-
                     <div class="nfl-featured-venue">
 
                         ${venue}
 
                     </div>
-
                 `
                 : ""
         }
@@ -1153,13 +1114,11 @@ function createGame(
                 ${
                     game.away?.logo
                         ? `
-
                             <img
                                 class="nfl-game-logo"
                                 src="${game.away.logo}"
                                 alt=""
                             >
-
                         `
                         : ""
                 }
@@ -1194,13 +1153,11 @@ function createGame(
                 ${
                     game.home?.logo
                         ? `
-
                             <img
                                 class="nfl-game-logo"
                                 src="${game.home.logo}"
                                 alt=""
                             >
-
                         `
                         : ""
                 }
@@ -1238,22 +1195,6 @@ function createGame(
 /*
  * ============================================================
  * SPLIT GAMES INTO FOUR COLUMNS
- *
- * Target layout:
- *
- *     COL 1       COL 2       COL 3       COL 4
- *     -----       -----       -----       -----
- *     Game 1      Game 5      Game 9      Game 13
- *     Game 2      Game 6      Game 10     Game 14
- *     Game 3      Game 7      Game 11
- *     Game 4      Game 8      Game 12
- *
- * For a normal 16-game NFL week with two featured games:
- *
- *     14 remaining games
- *     4 + 4 + 4 + 2
- *
- * The physical display has room for four games per column.
  * ============================================================
  */
 
@@ -1268,7 +1209,7 @@ function splitIntoColumns(
         );
 
 
-    const columns = [
+    return [
 
         displayGames.slice(
             0,
@@ -1291,9 +1232,6 @@ function splitIntoColumns(
         )
 
     ];
-
-
-    return columns;
 
 }
 
@@ -1404,40 +1342,65 @@ function renderGames(
  * ============================================================
  * LOAD SCOREBOARD
  * ============================================================
+ *
+ * Configuration convention:
+ *
+ *     favoriteTeams[0] -> primary / left
+ *     favoriteTeams[1] -> secondary / right
+ *
+ * The server still receives the parameters it already expects:
+ *
+ *     leftTeam
+ *     rightTeam
+ *
+ * This keeps the configuration simple while avoiding a need to
+ * change the server contract at this stage.
+ * ============================================================
  */
 
 async function loadScoreboard(
     config
 ) {
 
+    const favoriteTeams =
+        Array.isArray(
+            config?.favoriteTeams
+        )
+            ? config.favoriteTeams
+            : [];
+
+
+    const primaryTeam =
+        favoriteTeams[0] || "";
+
+
+    const secondaryTeam =
+        favoriteTeams[1] || "";
+
+
     const params =
         new URLSearchParams();
 
 
-    const featured =
-        config?.featured ||
-        {};
-
-
     if (
-        featured.left?.team
+        primaryTeam
     ) {
 
         params.set(
             "leftTeam",
-            featured.left.team
+            primaryTeam
         );
 
     }
 
 
     if (
-        featured.right?.team
+        secondaryTeam
     ) {
 
         params.set(
             "rightTeam",
-            featured.right.team
+            secondaryTeam
         );
 
     }
@@ -1546,7 +1509,7 @@ export default {
 
                         <div
                             class="nfl-featured-slot"
-                            data-featured="left"
+                            data-featured="primary"
                         >
 
                             <div class="nfl-featured-message">
@@ -1560,7 +1523,7 @@ export default {
 
                         <div
                             class="nfl-featured-slot"
-                            data-featured="right"
+                            data-featured="secondary"
                         >
 
                             <div class="nfl-featured-message">
@@ -1613,15 +1576,15 @@ export default {
             );
 
 
-        const leftFeatured =
+        const primaryFeatured =
             root.querySelector(
-                '[data-featured="left"]'
+                '[data-featured="primary"]'
             );
 
 
-        const rightFeatured =
+        const secondaryFeatured =
             root.querySelector(
-                '[data-featured="right"]'
+                '[data-featured="secondary"]'
             );
 
 
@@ -1652,7 +1615,7 @@ export default {
                     ?.game ||
                     null,
 
-                leftFeatured
+                primaryFeatured
 
             );
 
@@ -1665,7 +1628,7 @@ export default {
                     ?.game ||
                     null,
 
-                rightFeatured
+                secondaryFeatured
 
             );
 
@@ -1695,7 +1658,7 @@ export default {
                 "";
 
 
-            leftFeatured.innerHTML = `
+            primaryFeatured.innerHTML = `
 
                 <div class="nfl-featured-message">
 
@@ -1706,7 +1669,7 @@ export default {
             `;
 
 
-            rightFeatured.innerHTML = `
+            secondaryFeatured.innerHTML = `
 
                 <div class="nfl-featured-message">
 
