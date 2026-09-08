@@ -36,7 +36,6 @@ async function loadSport(
 
     }
 
-
     switch (sport) {
 
         case "mlb": {
@@ -55,7 +54,6 @@ async function loadSport(
 
         }
 
-
         case "nfl": {
 
             const module =
@@ -72,6 +70,21 @@ async function loadSport(
 
         }
 
+        case "soccer": {
+
+            const module =
+                await import(
+                    "./soccer/soccer-standings.js"
+                );
+
+
+            sports[sport] =
+                module.default;
+
+
+            break;
+
+        }
 
         default:
 
@@ -111,8 +124,8 @@ export default {
          * Use the same sport configuration and priority order
          * as the scoreboard.
          *
-         * Only the sport names are passed to the standings
-         * widgets.
+         * Only the active sport's configuration is passed to
+         * the sport-specific standings widget.
          * ====================================================
          */
 
@@ -131,10 +144,6 @@ export default {
                         (
                             b.priority ?? 999
                         )
-                )
-                .map(
-                    sport =>
-                        sport.sport
                 );
 
 
@@ -169,11 +178,14 @@ export default {
         const renderCurrentSport =
             async () => {
 
-                const sport =
+                const sportConfig =
                     configuredSports[
                         currentIndex
                     ];
 
+
+                const sport =
+                    sportConfig.sport;
 
                 /*
                  * Destroy the currently rendered sport.
@@ -221,7 +233,7 @@ export default {
                     container,
                     {
                         ...config,
-                        sport
+                        ...sportConfig
                     }
                 );
 

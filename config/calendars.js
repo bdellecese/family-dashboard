@@ -103,5 +103,11 @@ export const CALENDARS = {
         name: "HYS U10 Travel",
         icon:"fa-fw fas fa-futbol",
         color: "rgb(213, 0, 0)"
+    },
+
+    "91tpif8f6jjk23nph1sm67ta3ib07beh@import.calendar.google.com": {
+        name: "Flag Football",
+        icon: "fa-fw fas fa-football",
+        color: "rgb(124, 179, 66)"
     }
 };

@@ -438,6 +438,8 @@ export const screens = {
 
                             "theodore.dellecese@gmail.com",
 
+                            "91tpif8f6jjk23nph1sm67ta3ib07beh@import.calendar.google.com", /* Flag Football */
+
                             "en.usa#holiday@group.v.calendar.google.com" /* US Holidays */
 
                         ],
@@ -644,7 +646,7 @@ export const screens = {
         duration: {
 
             seconds:
-                60
+                90
 
         },
 
@@ -901,6 +903,8 @@ export const screens = {
                                 "qbmd682o66ou6r7ki53cabl84tkoqtqh@import.calendar.google.com", /* HYS U10 */
 
                                 "theodore.dellecese@gmail.com",
+
+                                "91tpif8f6jjk23nph1sm67ta3ib07beh@import.calendar.google.com", /* Flag Football */
 
                                 "en.usa#holiday@group.v.calendar.google.com" /* US Holidays */
 

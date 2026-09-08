@@ -1,0 +1,858 @@
+/*
+ * ============================================================
+ * SOCCER STANDINGS
+ * ============================================================
+ */
+
+.sports-standings__sport--soccer {
+
+    --soccer-background: transparent;
+    --soccer-panel: rgba(0, 0, 0, 0.18);
+    --soccer-panel-alt: rgba(0, 0, 0, 0.12);
+    --soccer-text: #FFFFFF;
+    --soccer-muted: rgba(255, 255, 255, 0.72);
+    --soccer-line: rgba(255, 255, 255, 0.20);
+    --soccer-accent: #FFFFFF;
+
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+
+    background: var(--soccer-background);
+
+    color: var(--soccer-text);
+
+    font-family: "Oswald", sans-serif;
+
+}
+
+
+/*
+ * ============================================================
+ * ROOT
+ * ============================================================
+ */
+
+.soccer-standings {
+
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    padding: 10px 20px;
+
+    box-sizing: border-box;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * HEADER
+ * ============================================================
+ */
+
+.soccer-standings-header {
+
+    flex:
+        0 0 auto;
+
+    display:
+        flex;
+
+    align-items:
+        baseline;
+
+    justify-content:
+        space-between;
+
+    margin-bottom:
+        7px;
+
+    padding-bottom:
+        5px;
+
+    border-bottom:
+        1px solid
+        var(--soccer-line);
+
+}
+
+
+.soccer-standings-title {
+
+    font-size:
+        clamp(
+            22px,
+            2vw,
+            36px
+        );
+
+    font-weight: 500;
+
+    letter-spacing: 5px;
+
+    line-height: 1;
+
+}
+
+
+.soccer-standings-date {
+
+    font-size:
+        clamp(
+            10px,
+            0.75vw,
+            18px
+        );
+
+    letter-spacing: 3px;
+
+    color: var(--soccer-muted);
+
+}
+
+
+/*
+ * ============================================================
+ * MAIN
+ * ============================================================
+ */
+
+.soccer-standings-main {
+
+    flex: 1 1 auto;
+
+    min-width: 0;
+
+    min-height: 0;
+
+    overflow: hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * COMPETITION GRID
+ *
+ * PREMIER LEAGUE     SERIE A          LA LIGA
+ * LIGUE 1            PRIMEIRA LIGA    MLS
+ *
+ * Six equal cards.
+ * ============================================================
+ */
+
+.soccer-standings-grid {
+
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    grid-template-rows:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    grid-auto-flow: row;
+
+    column-gap: 10px;
+    row-gap: 10px;
+
+    overflow: hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * COMPETITION
+ * ============================================================
+ */
+
+.soccer-standings-competition {
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    box-sizing:
+        border-box;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * SOCCER ACCENT
+ * ============================================================
+ */
+
+.sports-standings__sport--soccer {
+
+    --soccer-accent: #3fae6a;
+
+}
+
+
+/*
+ * ============================================================
+ * COMPETITION TITLE
+ *
+ * Match the soccer scoreboard league-title treatment.
+ * ============================================================
+ */
+
+.soccer-standings-competition-title {
+
+    flex:
+        0 0 auto;
+
+    padding-bottom: 5px;
+
+    color: var(--soccer-accent);
+
+    font-size:
+        clamp(
+            11px,
+            0.8vw,
+            15px
+        );
+
+    font-weight: 400;
+
+    letter-spacing: 2px;
+
+    line-height: 1;
+
+}
+
+
+/*
+ * ============================================================
+ * STANDINGS CARD
+ * ============================================================
+ */
+
+.soccer-standings-card {
+
+    flex:
+        1 1 auto;
+
+    min-width: 0;
+    min-height: 0;
+
+    padding: 8px 10px;
+
+    box-sizing: border-box;
+
+    background: var(--soccer-panel-alt);
+
+    border:
+        1px solid
+        var(--soccer-line);
+
+    border-radius:
+        3px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * STANDINGS CARD
+ * ============================================================
+ */
+
+.soccer-standings-card {
+
+    flex:
+        1 1 auto;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    overflow:
+        hidden;
+
+}
+
+
+/*
+ * ============================================================
+ * SHARED TABLE GRID
+ *
+ * IMPORTANT:
+ *
+ * The header and every team row use the exact same
+ * eight-column definition.
+ *
+ * This keeps the table aligned vertically.
+ *
+ * # | TEAM | P | W-D-L | GF | GA | GD | PTS
+ * ============================================================
+ */
+
+.soccer-standings-columns,
+.soccer-standings-team {
+
+    display: grid;
+
+    grid-template-columns:
+        24px
+        minmax(
+            0,
+            1fr
+        )
+        34px
+        62px
+        34px
+        34px
+        42px
+        44px;
+
+    column-gap:
+        6px;
+
+}
+
+
+/*
+ * ============================================================
+ * COLUMN HEADER
+ * ============================================================
+ */
+
+.soccer-standings-columns {
+
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    flex:
+        0 0 auto;
+
+    align-items:
+        center;
+
+    height:
+        22px;
+
+    color:
+        var(--soccer-muted);
+
+    font-size:
+        clamp(
+            9px,
+            0.62vw,
+            15px
+        );
+
+    font-weight:
+        300;
+
+    letter-spacing:
+        1.5px;
+
+    line-height:
+        1;
+
+}
+
+
+.soccer-standings-columns span:nth-child(1) {
+
+    text-align:
+        center;
+
+}
+
+
+.soccer-standings-columns span:nth-child(2) {
+
+    text-align:
+        left;
+
+}
+
+
+.soccer-standings-columns span:nth-child(n+3) {
+
+    text-align:
+        right;
+
+}
+
+
+/*
+ * ============================================================
+ * TEAM ROW
+ * ============================================================
+ */
+
+.soccer-standings-team {
+
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    align-items:
+        center;
+
+    padding:
+        4px 2px;
+
+    box-sizing:
+        border-box;
+
+    margin-bottom:
+        2px;
+
+    border-bottom:
+        1px solid
+        var(--soccer-line);
+
+    font-size:
+        clamp(
+            15px,
+            1.15vw,
+            28px
+        );
+
+    line-height:
+        1;
+
+}
+
+
+/*
+ * ============================================================
+ * RANK
+ * ============================================================
+ */
+
+.soccer-standings-rank {
+
+    min-width:
+        0;
+
+    text-align:
+        center;
+
+    font-size:
+        0.72em;
+
+    color:
+        var(--soccer-muted);
+
+}
+
+
+/*
+ * ============================================================
+ * TEAM NAME + LOGO
+ * ============================================================
+ */
+
+.soccer-standings-team-name {
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    overflow:
+        hidden;
+
+    white-space:
+        nowrap;
+
+    text-overflow:
+        ellipsis;
+
+}
+
+
+/*
+ * ============================================================
+ * TEAM NAME
+ * ============================================================
+ */
+
+.soccer-standings-team-abbreviation {
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    white-space:
+        nowrap;
+
+    text-overflow:
+        ellipsis;
+
+    font-weight:
+        300;
+
+    letter-spacing:
+        0.5px;
+
+}
+
+
+/*
+ * ============================================================
+ * TEAM LOGO
+ * ============================================================
+ */
+
+.soccer-standings-team-logo {
+
+    flex:
+        0 0 auto;
+
+    width:
+        clamp(
+            25px,
+            1.65vw,
+            36px
+        );
+
+    height:
+        clamp(
+            25px,
+            1.65vw,
+            36px
+        );
+
+    object-fit:
+        contain;
+
+}
+
+
+/*
+ * ============================================================
+ * NUMERIC COLUMNS
+ * ============================================================
+ */
+
+.soccer-standings-games-played,
+.soccer-standings-record,
+.soccer-standings-goals-for,
+.soccer-standings-goals-against,
+.soccer-standings-goal-difference,
+.soccer-standings-points {
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    text-align:
+        right;
+
+    white-space:
+        nowrap;
+
+    font-size:
+        0.88em;
+
+    font-variant-numeric:
+        tabular-nums;
+
+    letter-spacing:
+        0.25px;
+
+}
+
+
+/*
+ * ============================================================
+ * RECORD
+ * ============================================================
+ */
+
+.soccer-standings-record {
+
+    padding-left:
+        0;
+
+}
+
+
+/*
+ * ============================================================
+ * POINTS
+ * ============================================================
+ */
+
+.soccer-standings-points {
+
+    padding-left:
+        0;
+
+    font-weight:
+        300;
+
+}
+
+
+/*
+ * ============================================================
+ * LOADING / ERROR
+ * ============================================================
+ */
+
+.soccer-standings-loading,
+.soccer-standings-message {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    color:
+        var(--soccer-muted);
+
+    font-size:
+        12px;
+
+    letter-spacing:
+        2px;
+
+}
+
+
+/*
+ * ============================================================
+ * SMALLER DASHBOARD HEIGHTS
+ * ============================================================
+ */
+
+@media (
+    max-height: 700px
+) {
+
+    .soccer-standings {
+
+        padding:
+            7px 14px;
+
+    }
+
+
+    .soccer-standings-header {
+
+        margin-bottom:
+            4px;
+
+        padding-bottom:
+            3px;
+
+    }
+
+
+    .soccer-standings-title {
+
+        font-size:
+            clamp(
+                20px,
+                1.8vw,
+                32px
+            );
+
+    }
+
+
+    .soccer-standings-date {
+
+        font-size:
+            clamp(
+                9px,
+                0.65vw,
+                16px
+            );
+
+    }
+
+
+    .soccer-standings-grid {
+
+        column-gap:
+            7px;
+
+        row-gap:
+            7px;
+
+    }
+
+
+    .soccer-standings-competition {
+
+        padding:
+            6px 8px;
+
+    }
+
+
+    .soccer-standings-competition-title {
+
+        margin-bottom:
+            3px;
+
+        padding-bottom:
+            3px;
+
+        font-size:
+            clamp(
+                13px,
+                0.85vw,
+                20px
+            );
+
+    }
+
+
+    .soccer-standings-columns {
+
+        height:
+            18px;
+
+        font-size:
+            clamp(
+                8px,
+                0.58vw,
+                14px
+            );
+
+    }
+
+
+    .soccer-standings-team {
+
+        padding:
+            3px 2px;
+
+        margin-bottom:
+            1px;
+
+        font-size:
+            clamp(
+                14px,
+                1.05vw,
+                26px
+            );
+
+    }
+
+
+    .soccer-standings-team-name {
+
+        gap:
+            6px;
+
+    }
+
+
+    .soccer-standings-team-logo {
+
+        width:
+            clamp(
+                23px,
+                1.45vw,
+                32px
+            );
+
+        height:
+            clamp(
+                23px,
+                1.45vw,
+                32px
+            );
+
+    }
+
+}

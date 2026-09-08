@@ -1,0 +1,991 @@
+/*
+ * ============================================================
+ * SOCCER SCOREBOARD
+ *
+ * European football / matchday broadcast theme.
+ *
+ * Layout:
+ *
+ * LEFT  - Favorite matches
+ * RIGHT - Other matches grouped by league
+ *
+ * ============================================================
+ */
+
+
+/* ============================================================
+ * SOCCER THEME
+ * ============================================================ */
+
+.sports-scoreboard__sport--soccer {
+
+    --soccer-background: #26384A;
+
+    --soccer-panel: rgba(0, 0, 0, 0.18);
+    --soccer-panel-alt: rgba(0, 0, 0, 0.12);
+
+    --soccer-text: #f4f5f2;
+
+    --soccer-muted: rgba(
+        244,
+        245,
+        242,
+        0.62
+    );
+
+    --soccer-line: rgba(
+        244,
+        245,
+        242,
+        0.18
+    );
+
+    --soccer-accent: #3fae6a;
+
+    color:
+        var(--soccer-text);
+
+    background:
+        var(--soccer-background);
+
+    font-family:
+        "Oswald",
+        sans-serif;
+
+}
+
+/* ============================================================
+ * ROOT
+ * ============================================================ */
+
+.soccer-scoreboard {
+
+    width:100%;
+
+    height:100%;
+
+    box-sizing:border-box;
+
+    padding: 18px 24px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.08fr)
+        minmax(0, 0.92fr);
+
+    grid-template-rows:
+        auto
+        minmax(0, 1fr);
+
+    gap: 28px;
+    row-gap: 2px;
+
+    overflow: hidden;
+
+}
+
+
+/* ============================================================
+ * SECTION
+ * ============================================================ */
+
+.soccer-scoreboard__favorites,
+.soccer-scoreboard__other {
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+    grid-row:
+        2;
+
+}
+
+/* ============================================================
+ * HEADER
+ * ============================================================ */
+
+.soccer-scoreboard__header {
+
+    grid-column:
+        1 / -1;
+
+    display:
+        flex;
+
+    align-items:
+        baseline;
+
+    justify-content:
+        space-between;
+
+    margin-bottom:
+        7px;
+
+    padding-bottom:
+        5px;
+
+    border-bottom:
+        1px solid
+        var(--soccer-line);
+
+}
+
+
+.soccer-scoreboard__title {
+
+    color:
+        var(--soccer-text);
+
+    font-size:
+        clamp(
+            22px,
+            2vw,
+            36px
+        );
+
+    font-weight:
+        500;
+
+    letter-spacing:
+        5px;
+
+    line-height:
+        1;
+
+}
+
+
+.soccer-scoreboard__date {
+
+    color:
+        var(--soccer-muted);
+
+    font-size:
+        clamp(
+            10px,
+            0.75vw,
+            18px
+        );
+
+    letter-spacing:
+        3px;
+
+}
+
+
+/* ============================================================
+ * SECTION TITLES
+ * ============================================================ */
+
+.soccer-scoreboard__section-title {
+
+    height:
+        34px;
+
+    box-sizing:
+        border-box;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    border-bottom:
+        1px solid
+        var(--soccer-line);
+
+    color:
+        var(--soccer-text);
+
+    font-size:
+        clamp(
+            16px,
+            1.15vw,
+            24px
+        );
+
+    font-weight:
+        400;
+
+    letter-spacing:
+        4px;
+
+}
+
+
+/* ============================================================
+ * FEATURED GAMES
+ * ============================================================ */
+
+.soccer-scoreboard__featured-games {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        12px;
+
+    padding-top:
+        0px;
+
+    box-sizing:
+        border-box;
+
+    overflow:
+        hidden;
+
+}
+
+
+/* ============================================================
+ * FEATURED GAME CARD
+ * ============================================================ */
+
+.soccer-scoreboard__featured-game {
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    flex:
+        0 0 auto;
+
+    height:
+        auto;
+
+    background:
+        rgba(0, 0, 0, 0.18);
+
+    border-left:
+        3px solid
+        var(--soccer-accent);
+
+    box-sizing:
+        border-box;
+
+    padding:
+        14px 18px;
+
+    overflow:
+        hidden;
+
+}
+
+
+/* ============================================================
+ * FEATURED MATCH
+ * ============================================================ */
+
+.soccer-scoreboard__featured-match {
+
+    width:
+        100%;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        auto
+        minmax(0, 1fr);
+
+    grid-template-rows:
+        auto
+        auto
+        auto;
+
+    align-items:
+        center;
+
+    column-gap:
+        12px;
+
+}
+
+
+/* ============================================================
+ * FEATURED TEAM
+ * ============================================================ */
+
+.soccer-scoreboard__featured-team {
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+}
+
+
+.soccer-scoreboard__featured-team--away {
+
+    justify-content:
+        flex-end;
+
+    grid-column:
+        1;
+
+    grid-row:
+        1;
+
+}
+
+
+.soccer-scoreboard__featured-team--home {
+
+    justify-content:
+        flex-start;
+
+    grid-column:
+        3;
+
+    grid-row:
+        1;
+
+}
+
+
+/* ============================================================
+ * FEATURED LOGO
+ * ============================================================ */
+
+.soccer-scoreboard__featured-logo {
+
+    width:
+        clamp(
+            38px,
+            3vw,
+            52px
+        );
+
+    height:
+        clamp(
+            38px,
+            3vw,
+            52px
+        );
+
+    object-fit:
+        contain;
+
+    display:
+        block;
+
+}
+
+
+.soccer-scoreboard__featured-team-name {
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+    font-size:
+        clamp(
+            17px,
+            1.45vw,
+            26px
+        );
+
+    font-weight:
+        600;
+
+    letter-spacing:
+        0.5px;
+
+}
+
+
+/* ============================================================
+ * FEATURED SCORE
+ * ============================================================ */
+
+.soccer-scoreboard__featured-score {
+
+    grid-column:
+        2;
+
+    grid-row:
+        1;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        10px;
+
+    font-size:
+        clamp(
+            34px,
+            2.8vw,
+            52px
+        );
+
+    font-weight:
+        600;
+
+    line-height:
+        1;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.soccer-scoreboard__featured-dash {
+
+    color:
+        var(--soccer-muted);
+
+    font-weight:
+        300;
+
+}
+
+
+/* ============================================================
+ * FEATURED META
+ * ============================================================ */
+
+.soccer-scoreboard__featured-meta {
+
+    grid-column:
+        1 / -1;
+
+    grid-row:
+        2;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        7px;
+
+    margin-top:
+        7px;
+
+    color:
+        var(--soccer-text);
+
+    font-size:
+        clamp(
+            12px,
+            0.85vw,
+            17px
+        );
+
+    font-weight:
+        300;
+
+    letter-spacing:
+        1.5px;
+
+}
+
+
+.soccer-scoreboard__featured-meta-separator {
+
+    color:
+        var(--soccer-muted);
+
+}
+
+
+/* ============================================================
+ * FEATURED SCORERS
+ * ============================================================ */
+
+.soccer-scoreboard__featured-scorers {
+
+    min-width:
+        0;
+
+    margin-top:
+        10px;
+
+    overflow:
+        hidden;
+
+}
+
+
+.soccer-scoreboard__featured-scorers--away {
+
+    grid-column:
+        1;
+
+    grid-row:
+        3;
+
+    justify-self:
+        start;
+
+    text-align:
+        left;
+
+}
+
+
+.soccer-scoreboard__featured-scorers--home {
+
+    grid-column:
+        3;
+
+    grid-row:
+        3;
+
+    justify-self:
+        end;
+
+    text-align:
+        right;
+
+}
+
+
+.soccer-scoreboard__scorer {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        5px;
+
+    line-height:
+        1.5;
+
+    white-space:
+        nowrap;
+
+    font-size:
+        clamp(
+            11px,
+            0.78vw,
+            16px
+        );
+
+}
+
+
+.soccer-scoreboard__scorer-ball {
+
+    font-size:
+        13px;
+
+}
+
+
+.soccer-scoreboard__scorer-name {
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+}
+
+
+.soccer-scoreboard__scorer-time {
+
+    color:
+        var(--soccer-muted);
+
+}
+
+
+/* ============================================================
+ * OTHER GAMES
+ * ============================================================ */
+
+.soccer-scoreboard__league-groups {
+
+    height:
+        calc(
+            100% - 34px
+        );
+
+    padding-top:
+        12px;
+
+    box-sizing:
+        border-box;
+
+    overflow-y:
+        auto;
+
+    overflow-x:
+        hidden;
+
+}
+
+
+.soccer-scoreboard__league {
+
+    margin-bottom:
+        16px;
+
+}
+
+
+.soccer-scoreboard__league-title {
+
+    padding-bottom:
+        5px;
+
+    border-bottom:
+        1px solid
+        var(--soccer-line);
+
+    color:
+        var(--soccer-accent);
+
+    font-size:
+        clamp(
+            11px,
+            0.8vw,
+            15px
+        );
+
+    font-weight:
+        400;
+
+    letter-spacing:
+        2px;
+
+}
+
+
+.soccer-scoreboard__other-games {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    gap:
+        8px;
+
+    padding-top:
+        7px;
+
+}
+
+
+/* ============================================================
+ * OTHER GAME CARD
+ * ============================================================ */
+
+.soccer-scoreboard__other-game {
+
+    min-width:
+        0;
+
+    background:
+        var(--soccer-panel);
+
+    padding:
+        8px 10px;
+
+    box-sizing:
+        border-box;
+
+}
+
+
+.soccer-scoreboard__other-status {
+
+    margin-bottom:
+        5px;
+
+    color:
+        var(--soccer-muted);
+
+    font-size:
+        10px;
+
+    letter-spacing:
+        1px;
+
+}
+
+
+.soccer-scoreboard__other-team-row {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        8px;
+
+    min-height:
+        21px;
+
+}
+
+
+.soccer-scoreboard__other-team {
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+    font-size:
+        clamp(
+            11px,
+            0.78vw,
+            15px
+        );
+
+}
+
+
+.soccer-scoreboard__other-score {
+
+    flex:
+        0 0 auto;
+
+    min-width:
+        16px;
+
+    text-align:
+        right;
+
+    font-size:
+        clamp(
+            13px,
+            0.9vw,
+            17px
+        );
+
+}
+
+
+/* ============================================================
+ * EMPTY / LOADING
+ * ============================================================ */
+
+.soccer-scoreboard__loading,
+.soccer-scoreboard__empty {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    color:
+        var(--soccer-muted);
+
+    font-size:
+        18px;
+
+    letter-spacing:
+        3px;
+
+}
+
+
+/* ============================================================
+ * SMALL HEIGHT DISPLAY
+ * ============================================================ */
+
+@media (
+    max-height: 700px
+) {
+
+    .soccer-scoreboard {
+
+        padding:
+            12px 18px;
+
+        gap:
+            20px;
+
+    }
+
+
+    .soccer-scoreboard__section-title {
+
+        height:
+            28px;
+
+        font-size:
+            15px;
+
+    }
+
+
+    .soccer-scoreboard__featured-games {
+
+        padding-top:
+            10px;
+
+        gap:
+            10px;
+
+    }
+
+
+    .soccer-scoreboard__featured-game {
+
+        padding:
+            12px 14px;
+
+    }
+
+
+    .soccer-scoreboard__featured-logo {
+
+        width:
+            34px;
+
+        height:
+            34px;
+
+    }
+
+
+    .soccer-scoreboard__featured-team-name {
+
+        font-size:
+            14px;
+
+    }
+
+
+    .soccer-scoreboard__featured-score {
+
+        font-size:
+            28px;
+
+    }
+
+
+    .soccer-scoreboard__featured-meta {
+
+        font-size:
+            10px;
+
+    }
+
+
+    .soccer-scoreboard__scorer {
+
+        font-size:
+            9px;
+
+    }
+
+
+    .soccer-scoreboard__league-groups {
+
+        height:
+            calc(
+                100% - 28px
+            );
+
+        padding-top:
+            8px;
+
+    }
+
+
+    .soccer-scoreboard__league {
+
+        margin-bottom:
+            9px;
+
+    }
+
+
+    .soccer-scoreboard__other-games {
+
+        gap:
+            5px;
+
+        padding-top:
+            4px;
+
+    }
+
+
+    .soccer-scoreboard__other-game {
+
+        padding:
+            5px 8px;
+
+    }
+
+}

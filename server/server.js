@@ -11,6 +11,10 @@ import { fileURLToPath } from "url";
 import { TODOIST } from "../config/todoist.js";
 
 import {
+    sportsPreferences
+} from "../config/sports-preferences.js";
+
+import {
     getGoogleCalendarAuthUrl,
     exchangeGoogleCode,
     getCalendars,
@@ -50,6 +54,18 @@ import {
 import {
     getNFLScoreboard
 } from "../services/sports/nfl-scoreboard-data.js";
+
+import {
+    soccerData
+} from "../services/sports/soccer-data.js";
+
+import {
+    soccerStandingsData
+} from "../services/sports/soccer-standings-data.js";
+
+import {
+    soccerRegistry
+} from "../services/sports/soccer-registry.js";
 
 import {
     getPerformanceEvents,
@@ -1877,6 +1893,552 @@ const server =
 
                     console.error(
                         "MLB postseason error:",
+                        error
+                    );
+
+
+                    return sendJson(
+                        response,
+                        500,
+                        {
+
+                            error:
+                                error.message
+
+                        }
+                    );
+
+                }
+
+            }
+
+            // =================================================
+            // SOCCER SCOREBOARD
+            // =================================================
+            if (
+                requestUrl.pathname ===
+                    "/api/sports/soccer/scoreboard"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+                try {
+
+                    const date =
+                        requestUrl.searchParams.get("date") ||
+                        new Date()
+                            .toISOString()
+                            .slice(0, 10);
+
+                    if (
+                        !/^\d{4}-\d{2}-\d{2}$/.test(
+                            date
+                        )
+                    ) {
+                        return sendJson(
+                            response,
+                            400,
+                            {
+                                error:
+                                    "Invalid date. Expected YYYY-MM-DD."
+                            }
+                        );
+                    }
+
+                    const soccer =
+                        sportsPreferences.sports.find(
+                            sport =>
+                                sport.sport ===
+                                "soccer"
+                        );
+
+                    if (!soccer) {
+                        return sendJson(
+                            response,
+                            404,
+                            {
+                                error:
+                                    "Soccer configuration not found."
+                            }
+                        );
+                    }
+
+                    const favoriteTeams =
+                        Array.isArray(
+                            soccer.favoriteTeams
+                        )
+                            ? soccer.favoriteTeams
+                            : [];
+
+
+                    /*
+                    * ------------------------------------------------
+                    * FAVORITE TEAM GAMES
+                    * ------------------------------------------------
+                    */
+
+                    const favoriteGames = [];
+
+
+                    for (
+                        const teamSlug
+                        of favoriteTeams
+                    ) {
+
+                        const team =
+                            soccerRegistry.teams[
+                                teamSlug
+                            ];
+
+                        if (!team) {
+                            console.warn(
+                                `Soccer team not found: ${teamSlug}`
+                            );
+
+                            continue;
+                        }
+
+                        const teamGames =
+                            await soccerData.getTeamGames(
+                                team.id,
+                                date
+                            );
+
+                        for (
+                            const game
+                            of teamGames
+                        ) {
+
+                            if (
+                                !favoriteGames.some(
+                                    existing =>
+                                        existing.id ===
+                                        game.id
+                                )
+                            ) {
+
+                                let enrichedGame =
+                                    game;
+
+
+                                /*
+                                 * ------------------------------------------------
+                                 * MATCH SCORERS
+                                 * ------------------------------------------------
+                                 */
+
+                                const competitionSlug =
+                                    game?.league?.slug ||
+                                    game?.competitions?.[0]?.league?.slug ||
+                                    game?.competitions?.[0]?.slug ||
+                                    null;
+
+
+                                if (
+                                    competitionSlug &&
+                                    game?.id
+                                ) {
+
+                                    try {
+
+                                        const summary =
+                                            await soccerData.getMatchSummary(
+                                                game.id,
+                                                competitionSlug
+                                            );
+
+
+                                        const scoringEvents =
+                                            summary?.keyEvents ||
+                                            [];
+
+
+                                        const scorers = {
+                                            away: [],
+                                            home: []
+                                        };
+
+
+                                        for (
+                                            const event
+                                            of scoringEvents
+                                        ) {
+
+                                            const eventType =
+                                                event?.type?.text;
+
+                                            if (
+                                                event?.scoringPlay !== true &&
+                                                eventType !== "Own Goal"
+                                            ) {
+
+                                                continue;
+
+                                            }
+
+
+                                            if (
+                                                event?.shootout ===
+                                                true
+                                            ) {
+
+                                                continue;
+
+                                            }
+
+
+                                            const teamId =
+                                                String(
+                                                    event?.team?.id ||
+                                                    ""
+                                                );
+
+
+                                            const participants =
+                                                event?.participants ||
+                                                [];
+
+
+                                            const athlete =
+                                                participants.find(
+                                                    participant =>
+                                                        participant?.athlete
+                                                )?.athlete;
+
+
+                                            if (
+                                                !athlete
+                                            ) {
+
+                                                continue;
+
+                                            }
+
+                                            const scorer = {
+                                                name:
+                                                    athlete.displayName ||
+                                                    athlete.shortName ||
+                                                    "",
+                                                time:
+                                                    event?.clock?.displayValue ||
+                                                    "",
+                                                ownGoal:
+                                                    eventType === "Own Goal"
+                                            };
+
+
+                                            const homeTeamId =
+                                                String(
+                                                    game?.competitions?.[0]
+                                                        ?.competitors
+                                                        ?.find(
+                                                            competitor =>
+                                                                competitor.homeAway ===
+                                                                "home"
+                                                        )
+                                                        ?.team
+                                                        ?.id ||
+                                                    ""
+                                                );
+
+                                            const scorerList =
+                                                teamId === homeTeamId
+                                                    ? scorers.home
+                                                    : scorers.away;
+
+                                            const existingScorer =
+                                                scorerList.find(
+                                                    existing =>
+                                                        existing.name ===
+                                                        scorer.name
+                                                );
+
+                                            if (
+                                                existingScorer
+                                            ) {
+
+                                                existingScorer.times.push(
+                                                    scorer.time
+                                                );
+
+                                            }
+                                            else {
+
+                                                scorerList.push({
+                                                    name:
+                                                        scorer.name,
+                                                    times: [
+                                                        scorer.time
+                                                    ],
+                                                    ownGoal:
+                                                        scorer.ownGoal
+                                                });
+
+                                            }
+
+
+                                        }
+
+
+                                        enrichedGame = {
+                                            ...game,
+                                            scorers
+                                        };
+
+                                    }
+                                    catch (
+                                        error
+                                    ) {
+
+                                        console.warn(
+                                            `Soccer scorer lookup failed for ${game.id}:`,
+                                            error.message
+                                        );
+
+                                    }
+
+                                }
+
+
+                                favoriteGames.push(
+                                    enrichedGame
+                                );
+
+                            }
+                        }
+
+                    }
+
+
+                    /*
+                    * ------------------------------------------------
+                    * FAVORITE LEAGUES
+                    * ------------------------------------------------
+                    *
+                    * Club favorites identify the league schedules
+                    * that should populate the "OTHER GAMES" side.
+                    *
+                    * National-team favorites do not have a league
+                    * association and are therefore skipped here.
+                    * Their own games are still included above.
+                    * ------------------------------------------------
+                    */
+
+                    const favoriteCompetitions =
+                        new Set();
+
+
+                    for (
+                        const teamSlug
+                        of favoriteTeams
+                    ) {
+
+                        const team =
+                            soccerRegistry.teams[
+                                teamSlug
+                            ];
+
+                        if (
+                            team?.competition
+                        ) {
+
+                            favoriteCompetitions.add(
+                                team.competition
+                            );
+
+                        }
+
+                    }
+
+
+                    /*
+                    * ------------------------------------------------
+                    * OTHER GAMES
+                    * ------------------------------------------------
+                    */
+
+                    const competitionGames =
+                        await Promise.all(
+                            [
+                                ...favoriteCompetitions
+                            ].map(
+                                competition => {
+
+                                    const config =
+                                        soccerRegistry.competitions[
+                                            competition
+                                        ];
+
+                                    if (
+                                        !config?.slug
+                                    ) {
+                                        return [];
+                                    }
+
+                                    return soccerData.getCompetitionGames(
+                                        config.slug,
+                                        date
+                                    );
+
+                                }
+                            )
+                        );
+
+
+                    const favoriteGameIds =
+                        new Set(
+                            favoriteGames.map(
+                                game =>
+                                    String(
+                                        game.id
+                                    )
+                            )
+                        );
+
+
+                    const otherGames =
+                        [
+                            ...new Map(
+                                competitionGames
+                                    .flat()
+                                    .filter(
+                                        game =>
+                                            game?.id
+                                    )
+                                    .map(
+                                        game => [
+                                            String(
+                                                game.id
+                                            ),
+                                            game
+                                        ]
+                                    )
+                            ).values()
+                        ].filter(
+                            game =>
+                                !favoriteGameIds.has(
+                                    String(
+                                        game.id
+                                    )
+                                )
+                        );
+
+
+                    return sendJson(
+                        response,
+                        200,
+                        {
+                            date,
+                            favoriteTeams,
+                            favoriteGames,
+                            otherGames
+                        }
+                    );
+
+                }
+                catch (
+                    error
+                ) {
+
+                    console.error(
+                        "Soccer scoreboard error:",
+                        error
+                    );
+
+                    return sendJson(
+                        response,
+                        500,
+                        {
+                            error:
+                                error.message
+                        }
+                    );
+
+                }
+            }
+
+            // ============================================================
+            // SOCCER STANDINGS
+            // ============================================================
+
+            if (
+                requestUrl.pathname ===
+                    "/api/sports/soccer/standings"
+                &&
+                request.method ===
+                    "GET"
+            ) {
+
+                try {
+
+                    const competition =
+                        (
+                            requestUrl.searchParams.get(
+                                "competition"
+                            ) ||
+                            ""
+                        )
+                            .trim();
+
+
+                    if (
+                        !competition
+                    ) {
+
+                        return sendJson(
+                            response,
+                            400,
+                            {
+                                error:
+                                    "Missing competition."
+                            }
+                        );
+
+                    }
+
+
+                    const standings =
+                        await soccerStandingsData.getStandings(
+                            competition
+                        );
+
+
+                    if (
+                        !standings
+                    ) {
+
+                        return sendJson(
+                            response,
+                            404,
+                            {
+                                error:
+                                    "Standings unavailable."
+                            }
+                        );
+
+                    }
+
+
+                    return sendJson(
+                        response,
+                        200,
+                        {
+
+                            competition,
+
+                            standings
+
+                        }
+                    );
+
+                }
+
+                catch (
+                    error
+                ) {
+
+                    console.error(
+                        "Soccer standings error:",
                         error
                     );
 

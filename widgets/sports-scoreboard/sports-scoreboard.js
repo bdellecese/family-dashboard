@@ -15,15 +15,18 @@
  * ============================================================
  */
 
+import {
+    sportsPreferences
+} from "../../config/sports-preferences.js";
+
 import mlbScoreboard
     from "./mlb/mlb-scoreboard.js";
 
 import nflScoreboard
     from "./nfl/nfl-scoreboard.js";
 
-import {
-    sportsPreferences
-} from "../../config/sports-preferences.js";
+import soccerScoreboard
+    from "./soccer/soccer-scoreboard.js";
 
 
 const SPORT_IMPLEMENTATIONS = {
@@ -32,7 +35,10 @@ const SPORT_IMPLEMENTATIONS = {
         mlbScoreboard,
 
     nfl:
-        nflScoreboard
+        nflScoreboard,
+
+    soccer:
+        soccerScoreboard    
 
 };
 
@@ -83,6 +89,51 @@ function getSportPhase(
     sport,
     date
 ) {
+
+    /*
+     * --------------------------------------------------------
+     * SOCCER
+     *
+     * Soccer uses date-driven special events rather than
+     * top-level phases.
+     *
+     * Normal soccer operation is implicit when no special
+     * event is active.
+     * --------------------------------------------------------
+     */
+
+    if (
+        sport.sport ===
+        "soccer"
+    ) {
+
+        const events =
+            sport.modes?.events || [];
+
+
+        const activeEvent =
+            events.find(
+                event =>
+                    date >= event.start &&
+                    date <= event.end
+            );
+
+
+        return (
+            activeEvent?.event ||
+            "normal"
+        );
+
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * ALL OTHER SPORTS
+     *
+     * Continue using the existing phase configuration.
+     * --------------------------------------------------------
+     */
 
     const phases =
         sport.phases || [];
@@ -241,7 +292,8 @@ async function renderSport(
 
     container.classList.remove(
         "sports-scoreboard__sport--mlb",
-        "sports-scoreboard__sport--nfl"
+        "sports-scoreboard__sport--nfl",
+        "sports-scoreboard__sport--soccer"
     );
 
 

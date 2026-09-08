@@ -52,7 +52,6 @@ export const sportsPreferences = {
                 }
             ]
 */
-
         },
 
         {
@@ -82,6 +81,92 @@ export const sportsPreferences = {
                     end: "2027-08-31"
                 }
             ]
+
+        },
+
+        {
+            sport: "soccer",
+
+            priority: 3,
+
+//            testDate: "2026-09-05",
+
+            favoriteTeams: [
+                "inter-milan",
+                "napoli",
+                "manchester-city",
+                "manchester-united",
+                "barcelona",
+                "real-madrid",
+                "inter-miami",
+                "new-england",
+                "usmnt",
+                "italy",
+                "portugal"
+            ],
+
+            standings: {
+
+                topTeams: 7,
+
+                competitions: [
+
+                    {
+                        type: "league",
+                        competition: "premierLeague",
+                        displayName: "English Premier League"
+                    },
+
+                    {
+                        type: "league",
+                        competition: "serieA",
+                        displayName: "Italian Serie A"
+                    },
+
+                    {
+                        type: "league",
+                        competition: "laLiga",
+                        displayName: "Spanish La Liga"
+                    },
+
+                    {
+                        type: "league",
+                        competition: "ligue1",
+                        displayName: "French Ligue 1"
+                    },
+
+                    {
+                        type: "league",
+                        competition: "primeiraLiga",
+                        displayName: "Primeira Liga"
+                    },
+
+                    {
+                        type: "league",
+                        competition: "mls",
+                        displayName: "MLS"
+                    }
+
+                ]
+
+            },
+
+            modes: {
+                events: [
+                    {
+                        event: "euro",
+                        displayName: "EURO",
+                        start: "2028-06-09",
+                        end: "2028-07-09"
+                    },
+                    {
+                        event: "worldCup",
+                        displayName: "WORLD CUP",
+                        start: "2030-06-01",
+                        end: "2030-07-31"
+                    }
+                ]
+            }
 
         }
 
