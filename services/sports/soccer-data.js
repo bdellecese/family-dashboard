@@ -107,7 +107,41 @@ const CACHE_TTL = {
  * ============================================================
  * CACHE
  * ============================================================
+ *
+ * The persistent JSON file is used as a durable cache.
+ *
+ * Once loaded, the cache is kept in memory for the lifetime
+ * of the Node process. This avoids repeatedly reading and
+ * parsing the entire JSON file for every request.
+ *
+ * Cache writes still persist changes to disk.
+ * ============================================================
  */
+
+
+let memoryCache = null;
+
+
+/*
+ * Track requests currently in progress.
+ *
+ * If multiple callers request the same stale/missing entry at
+ * the same time, they share one ESPN request rather than
+ * generating duplicate requests.
+ */
+const inFlightRequests =
+    new Map();
+
+
+/*
+ * How long an unused cache entry may remain on disk.
+ *
+ * All current cache TTLs are 7 days or less, so entries older
+ * than this can no longer be considered useful for normal
+ * stale-cache fallback.
+ */
+const CACHE_CLEANUP_AGE =
+    7 * 24 * 60 * 60 * 1000;
 
 
 function ensureCacheDirectory() {
@@ -126,16 +160,106 @@ function ensureCacheDirectory() {
 }
 
 
+function cleanupCache(
+    cache
+) {
+
+    const cutoff =
+        Date.now() -
+        CACHE_CLEANUP_AGE;
+
+
+    let removed =
+        0;
+
+
+    for (
+        const [
+            key,
+            entry
+        ]
+        of Object.entries(cache)
+    ) {
+
+        if (
+            !entry ||
+            !entry.timestamp
+        ) {
+
+            delete cache[key];
+
+            removed++;
+
+            continue;
+
+        }
+
+
+        if (
+            entry.timestamp <
+            cutoff
+        ) {
+
+            delete cache[key];
+
+            removed++;
+
+        }
+
+    }
+
+
+    if (
+        removed > 0
+    ) {
+
+        console.log(
+            `[soccer] Cache cleanup removed ${removed} old entries.`
+        );
+
+    }
+
+
+    return removed;
+
+}
+
+
 function loadCache() {
 
-    console.count("[soccer] loadCache");
+    /*
+     * --------------------------------------------------------
+     * IN-MEMORY CACHE
+     * --------------------------------------------------------
+     *
+     * Once loaded, return the same object on every call.
+     */
+    if (
+        memoryCache
+    ) {
+
+        return memoryCache;
+
+    }
+
+
+    console.log(
+        "[soccer] Loading persistent cache into memory..."
+    );
+
 
     ensureCacheDirectory();
 
 
-    if (!fs.existsSync(CACHE_FILE)) {
+    if (
+        !fs.existsSync(
+            CACHE_FILE
+        )
+    ) {
 
-        return {};
+        memoryCache = {};
+
+        return memoryCache;
 
     }
 
@@ -149,9 +273,43 @@ function loadCache() {
             );
 
 
-        return JSON.parse(contents);
+        memoryCache =
+            JSON.parse(
+                contents
+            );
 
-    } catch (error) {
+
+        /*
+         * ----------------------------------------------------
+         * CLEANUP
+         * ----------------------------------------------------
+         *
+         * Perform cleanup once when the persistent cache is
+         * loaded rather than during every request.
+         */
+        const removed =
+            cleanupCache(
+                memoryCache
+            );
+
+
+        if (
+            removed > 0
+        ) {
+
+            saveCache(
+                memoryCache
+            );
+
+        }
+
+
+        return memoryCache;
+
+    }
+    catch (
+        error
+    ) {
 
         console.error(
             "[soccer] Unable to read cache:",
@@ -159,14 +317,18 @@ function loadCache() {
         );
 
 
-        return {};
+        memoryCache = {};
+
+        return memoryCache;
 
     }
 
 }
 
 
-function saveCache(cache) {
+function saveCache(
+    cache
+) {
 
     ensureCacheDirectory();
 
@@ -182,7 +344,10 @@ function saveCache(cache) {
             )
         );
 
-    } catch (error) {
+    }
+    catch (
+        error
+    ) {
 
         console.error(
             "[soccer] Unable to write cache:",
@@ -225,7 +390,6 @@ function isCacheFresh(
     ) < ttl;
 
 }
-
 
 /*
  * ============================================================
@@ -301,6 +465,14 @@ async function getCachedData(
     baseUrl = API_BASE_URL
 ) {
 
+    /*
+     * --------------------------------------------------------
+     * LOAD CACHE
+     * --------------------------------------------------------
+     *
+     * This now loads the 11 MB file only once per server
+     * process. Every subsequent lookup uses memory.
+     */
     const cache =
         loadCache();
 
@@ -311,6 +483,12 @@ async function getCachedData(
             key
         );
 
+
+    /*
+     * --------------------------------------------------------
+     * FRESH CACHE
+     * --------------------------------------------------------
+     */
 
     if (
         isCacheFresh(
@@ -324,52 +502,129 @@ async function getCachedData(
     }
 
 
-    try {
+    /*
+     * --------------------------------------------------------
+     * IN-FLIGHT REQUEST DEDUPLICATION
+     * --------------------------------------------------------
+     *
+     * If another caller is already refreshing this exact
+     * cache entry, wait for that request instead of making
+     * another ESPN request.
+     */
+    if (
+        inFlightRequests.has(
+            key
+        )
+    ) {
 
-        const data =
-            await requestApi(
-                baseUrl,
-                endpoint,
-                params
-            );
-
-
-        cache[key] = {
-
-            timestamp:
-                Date.now(),
-
-            data
-
-        };
-
-
-        saveCache(cache);
-
-
-        return data;
-
-    } catch (error) {
-
-        console.error(
-            `[soccer] ESPN request failed for ${key}:`,
-            error.message
+        return await inFlightRequests.get(
+            key
         );
 
-
-        if (cached?.data) {
-
-            console.warn(
-                `[soccer] Using stale cache for ${key}.`
-            );
+    }
 
 
-            return cached.data;
+    /*
+     * --------------------------------------------------------
+     * ESPN REQUEST
+     * --------------------------------------------------------
+     */
 
-        }
+    const request =
+        (async () => {
+
+            try {
+
+                const data =
+                    await requestApi(
+                        baseUrl,
+                        endpoint,
+                        params
+                    );
 
 
-        return null;
+                /*
+                 * Update the in-memory cache.
+                 */
+                cache[key] = {
+
+                    timestamp:
+                        Date.now(),
+
+                    data
+
+                };
+
+
+                /*
+                 * Persist the updated cache.
+                 *
+                 * This is intentionally still synchronous,
+                 * because persistence happens only after a
+                 * successful network refresh, not on every
+                 * cache lookup.
+                 */
+                saveCache(
+                    cache
+                );
+
+
+                return data;
+
+            }
+            catch (
+                error
+            ) {
+
+                console.error(
+                    `[soccer] ESPN request failed for ${key}:`,
+                    error.message
+                );
+
+
+                /*
+                 * ------------------------------------------------
+                 * STALE CACHE FALLBACK
+                 * ------------------------------------------------
+                 */
+
+                if (
+                    cached?.data
+                ) {
+
+                    console.warn(
+                        `[soccer] Using stale cache for ${key}.`
+                    );
+
+
+                    return cached.data;
+
+                }
+
+
+                return null;
+
+            }
+
+        })();
+
+
+    inFlightRequests.set(
+        key,
+        request
+    );
+
+
+    try {
+
+        return await request;
+
+    }
+    finally {
+
+        inFlightRequests.delete(
+            key
+        );
 
     }
 
