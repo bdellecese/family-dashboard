@@ -11,7 +11,7 @@ const CACHE_DIR =
 const CURRENT_SEASON =
     new Date().getFullYear();
 
-const DRY_RUN = true;
+const DRY_RUN = false;
 
 function logAction(
     action,
