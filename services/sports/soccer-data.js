@@ -128,6 +128,8 @@ function ensureCacheDirectory() {
 
 function loadCache() {
 
+    console.count("[soccer] loadCache");
+
     ensureCacheDirectory();
 
 
