@@ -824,19 +824,6 @@ export default {
                     SOCCER STANDINGS
                 </div>
 
-                <div class="soccer-standings-date">
-                    ${new Intl.DateTimeFormat(
-                        "en-US",
-                        {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric"
-                        }
-                    ).format(
-                        new Date()
-                    )}
-                </div>
-
             </header>
 
             <main class="soccer-standings-main">
