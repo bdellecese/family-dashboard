@@ -774,11 +774,9 @@ export const screens = {
 
                         calendars: [
 
-                            "146377806ee0218992f826b434d72b37455f216a16304399637f785714487d17@group.calendar.google.com",
-
                             "9vfeje00p4js7qh3njdlt50hrg0k7udr@import.calendar.google.com", /* 2026 Boston Red Sox */
                             "idig5p3akvreaqp42p8rtvf4bsofas3d@import.calendar.google.com", /* 2026 St. Louis Cardinals */
-                            
+
                             "qiteimfka3k59mi7gnpsu6285i8je6vi@import.calendar.google.com", /* 2026 NE Patriots Schedule */
                             "40idiop4p1qa7t94d1ais3v2dp55g7qq@import.calendar.google.com" /* 2026-2027 Boston Celtics */
 

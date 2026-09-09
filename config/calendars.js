@@ -87,12 +87,6 @@ export const CALENDARS = {
         color: "rgb(167, 155, 142)"
     },
 
-    "146377806ee0218992f826b434d72b37455f216a16304399637f785714487d17@group.calendar.google.com": {
-        name: "Sports",
-        icon: "fa-fw fas fa-trophy",
-        color: "#f5a623"
-    },
-
     "h9b6sa72im49g27qv0hc09ofird2bm27@import.calendar.google.com": {
         name: "Fall ball Softball",
         icon: "fa-fw fas fa-baseball",
