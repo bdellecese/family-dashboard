@@ -18,6 +18,20 @@ import { fileURLToPath } from "url";
  * - Cache freshness / TTL
  * - Stale-cache fallback
  *
+ * Cache structure:
+ *
+ * data/sports/soccer/standings/
+ *     eng.1.json
+ *     ita.1.json
+ *     esp.1.json
+ *     fra.1.json
+ *     por.1.json
+ *     usa.1.json
+ *
+ * Each competition is cached independently so that refreshing
+ * one competition does not require reading or rewriting the
+ * entire standings cache.
+ *
  * This service is intentionally separate from soccer-data.js
  * because standings have different caching and data requirements
  * than the soccer scoreboard.
@@ -36,14 +50,7 @@ const __dirname =
 const CACHE_DIRECTORY =
     path.resolve(
         __dirname,
-        "../../data/sports"
-    );
-
-
-const CACHE_FILE =
-    path.join(
-        CACHE_DIRECTORY,
-        "soccer-standings-cache.json"
+        "../../data/sports/soccer/standings"
     );
 
 
@@ -53,6 +60,10 @@ const API_BASE_URL =
 
 const CACHE_TTL =
     60 * 60 * 1000;
+
+
+const memoryCache =
+    new Map();
 
 
 /*
@@ -78,14 +89,44 @@ function ensureCacheDirectory() {
 }
 
 
-function loadCache() {
+function getCacheFile(
+    competitionSlug
+) {
 
-    ensureCacheDirectory();
+    return path.join(
+        CACHE_DIRECTORY,
+        `${competitionSlug}.json`
+    );
+
+}
 
 
-    if (!fs.existsSync(CACHE_FILE)) {
+function loadCache(
+    competitionSlug
+) {
 
-        return {};
+    if (
+        memoryCache.has(
+            competitionSlug
+        )
+    ) {
+
+        return memoryCache.get(
+            competitionSlug
+        );
+
+    }
+
+
+    const cacheFile =
+        getCacheFile(
+            competitionSlug
+        );
+
+
+    if (!fs.existsSync(cacheFile)) {
+
+        return null;
 
     }
 
@@ -94,14 +135,24 @@ function loadCache() {
 
         const contents =
             fs.readFileSync(
-                CACHE_FILE,
+                cacheFile,
                 "utf8"
             );
 
 
-        return JSON.parse(
-            contents
+        const entry =
+            JSON.parse(
+                contents
+            );
+
+
+        memoryCache.set(
+            competitionSlug,
+            entry
         );
+
+
+        return entry;
 
     }
     catch (
@@ -109,12 +160,12 @@ function loadCache() {
     ) {
 
         console.error(
-            "[soccer-standings] Unable to read cache:",
+            `[soccer-standings] Unable to read cache for ${competitionSlug}:`,
             error.message
         );
 
 
-        return {};
+        return null;
 
     }
 
@@ -122,21 +173,34 @@ function loadCache() {
 
 
 function saveCache(
-    cache
+    competitionSlug,
+    entry
 ) {
 
     ensureCacheDirectory();
 
 
+    const cacheFile =
+        getCacheFile(
+            competitionSlug
+        );
+
+
     try {
 
         fs.writeFileSync(
-            CACHE_FILE,
+            cacheFile,
             JSON.stringify(
-                cache,
+                entry,
                 null,
                 2
             )
+        );
+
+
+        memoryCache.set(
+            competitionSlug,
+            entry
         );
 
     }
@@ -145,7 +209,7 @@ function saveCache(
     ) {
 
         console.error(
-            "[soccer-standings] Unable to write cache:",
+            `[soccer-standings] Unable to write cache for ${competitionSlug}:`,
             error.message
         );
 
@@ -245,16 +309,10 @@ async function getStandings(
     }
 
 
-    const cache =
-        loadCache();
-
-
-    const key =
-        `standings-${competitionSlug}`;
-
-
     const cached =
-        cache[key];
+        loadCache(
+            competitionSlug
+        );
 
 
     if (
@@ -276,7 +334,7 @@ async function getStandings(
             );
 
 
-        cache[key] = {
+        const entry = {
 
             timestamp:
                 Date.now(),
@@ -287,7 +345,8 @@ async function getStandings(
 
 
         saveCache(
-            cache
+            competitionSlug,
+            entry
         );
 
 
@@ -334,8 +393,8 @@ async function getStandings(
 
 export const soccerStandingsData = {
 
-    cacheFile:
-        CACHE_FILE,
+    cacheDirectory:
+        CACHE_DIRECTORY,
 
     cacheTtl:
         CACHE_TTL,
