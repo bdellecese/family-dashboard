@@ -105,7 +105,7 @@ export const CALENDARS = {
         color: "rgb(124, 179, 66)"
     },
 
-    "9vfeje00p4js7qh3njdlt50hrg0k7udr@import.calendar.google.com": {
+    "lkj34jav0ve9nq0klduoqoj718uj7q28@import.calendar.google.com": {
         name: "2026 Boston Red Sox",
         icon: "fa-fw fas fa-baseball",
         color: "#BD3039"
