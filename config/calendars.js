@@ -109,5 +109,29 @@ export const CALENDARS = {
         name: "Flag Football",
         icon: "fa-fw fas fa-football",
         color: "rgb(124, 179, 66)"
+    },
+
+    "9vfeje00p4js7qh3njdlt50hrg0k7udr@import.calendar.google.com": {
+        name: "2026 Boston Red Sox",
+        icon: "fa-fw fas fa-baseball",
+        color: "#BD3039"
+    },
+
+    "idig5p3akvreaqp42p8rtvf4bsofas3d@import.calendar.google.com": {
+        name: "2026 St. Louis Cardinals",
+        icon: "fa-fw fas fa-baseball",
+        color: "#C41E3A"
+    },
+
+    "qiteimfka3k59mi7gnpsu6285i8je6vi@import.calendar.google.com": {
+        name: "2026 New England Patriots",
+        icon: "fa-fw fas fa-football",
+        color: "#B0B7BC"
+    },
+
+    "40idiop4p1qa7t94d1ais3v2dp55g7qq@import.calendar.google.com": {
+        name: "2026-2027 Boston Celtics",
+        icon: "fa-fw fas fa-basketball-ball",
+        color: "#007A33"
     }
 };
