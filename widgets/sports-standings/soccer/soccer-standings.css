@@ -79,10 +79,10 @@
         space-between;
 
     margin-bottom:
-        7px;
+        12px;
 
     padding-bottom:
-        5px;
+        15px;
 
     border-bottom:
         1px solid
@@ -92,6 +92,8 @@
 
 
 .soccer-standings-title {
+
+    color: var(--soccer-text);
 
     font-size:
         clamp(
@@ -105,22 +107,6 @@
     letter-spacing: 5px;
 
     line-height: 1;
-
-}
-
-
-.soccer-standings-date {
-
-    font-size:
-        clamp(
-            10px,
-            0.75vw,
-            18px
-        );
-
-    letter-spacing: 3px;
-
-    color: var(--soccer-muted);
 
 }
 
@@ -254,9 +240,9 @@
 
     font-size:
         clamp(
-            11px,
-            0.8vw,
-            15px
+            12px,
+            1vw,
+            18px
         );
 
     font-weight: 400;

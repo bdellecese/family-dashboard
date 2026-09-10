@@ -134,10 +134,10 @@
         space-between;
 
     margin-bottom:
-        7px;
+        12px;
 
     padding-bottom:
-        5px;
+        15px;
 
     border-bottom:
         1px solid
@@ -169,6 +169,9 @@
 
 .nfl-week {
 
+    margin-top:
+        5px;
+
     font-size:
         clamp(
             10px,
@@ -184,6 +187,9 @@
 
     color:
         var(--nfl-muted);
+
+    text-transform:
+        uppercase;
 
 }
 

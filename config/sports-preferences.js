@@ -89,7 +89,7 @@ export const sportsPreferences = {
 
             priority: 3,
 
-//            testDate: "2026-09-05",
+//          testDate: "2026-09-06",
 
             favoriteTeams: [
                 "inter-milan",
@@ -113,6 +113,12 @@ export const sportsPreferences = {
 
                     {
                         type: "league",
+                        competition: "championsLeague",
+                        displayName: "UEFA Champions League"
+                    },
+
+                    {
+                        type: "league",
                         competition: "premierLeague",
                         displayName: "English Premier League"
                     },
@@ -127,12 +133,6 @@ export const sportsPreferences = {
                         type: "league",
                         competition: "laLiga",
                         displayName: "Spanish La Liga"
-                    },
-
-                    {
-                        type: "league",
-                        competition: "ligue1",
-                        displayName: "French Ligue 1"
                     },
 
                     {

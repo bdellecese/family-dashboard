@@ -37,6 +37,11 @@ export const soccerRegistry = {
             slug: "usa.1"
         },
 
+        championsLeague: {
+            provider: "espn",
+            slug: "uefa.champions"
+        },
+
         fifaMen: {
             provider: "espn",
             slug: "fifa.world"

@@ -99,8 +99,7 @@ function getCompetitionDisplayName(
         );
 
     const competitionKey =
-        registryEntry?.[0] ||
-        "";
+        registryEntry?.[0];
 
     const soccerConfig =
         sportsPreferences
@@ -120,7 +119,7 @@ function getCompetitionDisplayName(
                     competition.competition ===
                     competitionKey
             );
-
+    
     return (
         configuredCompetition?.displayName ||
         getCompetitionName(game)
@@ -128,49 +127,6 @@ function getCompetitionDisplayName(
 
 }
 
-function getLeagueDisplayName(
-    league
-) {
-
-    const soccerConfig =
-        sportsPreferences
-            ?.sports
-            ?.find(
-                sport =>
-                    sport.sport ===
-                    "soccer"
-            );
-
-    const leagueMap = {
-        "English Premier League":
-            "premierLeague",
-        "Serie A":
-            "serieA",
-        "LALIGA":
-            "laLiga",
-        "MLS":
-            "mls"
-    };
-
-    const competitionKey =
-        leagueMap[league];
-
-    const configuredCompetition =
-        soccerConfig
-            ?.standings
-            ?.competitions
-            ?.find(
-                competition =>
-                    competition.competition ===
-                    competitionKey
-            );
-
-    return (
-        configuredCompetition?.displayName ||
-        league
-    );
-
-}
 
 function formatGameDate(
     date
@@ -761,51 +717,22 @@ function renderOtherGame(
 }
 
 
-function groupOtherGamesByLeague(
-    games
-) {
+function groupOtherGamesByLeague(games) {
+    const groups = new Map();
 
-    const groups =
-        new Map();
-
-
-    for (
-        const game
-        of games
-    ) {
-
+    for (const game of games) {
         const league =
-            getCompetitionName(
-                game
-            ) ||
+            getCompetitionDisplayName(game) ||
             "OTHER";
 
-
-        if (
-            !groups.has(
-                league
-            )
-        ) {
-
-            groups.set(
-                league,
-                []
-            );
-
+        if (!groups.has(league)) {
+            groups.set(league, []);
         }
 
-
-        groups
-            .get(league)
-            .push(game);
-
+        groups.get(league).push(game);
     }
 
-
-    return [
-        ...groups.entries()
-    ];
-
+    return [...groups.entries()];
 }
 
 

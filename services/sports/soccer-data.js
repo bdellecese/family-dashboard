@@ -493,18 +493,21 @@ async function getCompetitionGames(
     const key =
         `competition-${competitionSlug}-scoreboard-${date}`;
 
-    return await getCachedData(
-        key,
-        CACHE_TTL.fixturesToday,
-        `/${competitionSlug}/scoreboard`,
-        {
-            dates:
-                date.replace(
-                    /-/g,
-                    ""
-                )
-        }
-    );
+    const data =
+        await getCachedData(
+            key,
+            CACHE_TTL.fixturesToday,
+            `/${competitionSlug}/scoreboard`,
+            {
+                dates:
+                    date.replace(
+                        /-/g,
+                        ""
+                    )
+            }
+        );
+
+    return data?.events || [];
 }
 
 async function getMatchSummary(

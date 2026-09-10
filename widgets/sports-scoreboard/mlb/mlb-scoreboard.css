@@ -91,11 +91,28 @@
 
 .mlb-header {
 
-    text-align:
-        center;
+    flex:
+        0 0 auto;
+
+    display:
+        flex;
+
+    align-items:
+        baseline;
+
+    justify-content:
+        space-between;
 
     margin-bottom:
         12px;
+    
+    padding-bottom:
+        15px;
+
+    border-bottom:
+        1px solid
+        var(--mlb-line);
+
 
 }
 
@@ -104,9 +121,9 @@
 
     font-size:
         clamp(
-            20px,
-            1.8vw,
-            34px
+            22px,
+            2vw,
+            36px
         );
 
     font-weight:
@@ -130,7 +147,7 @@
         clamp(
             10px,
             0.75vw,
-            20px
+            18px
         );
 
     letter-spacing:

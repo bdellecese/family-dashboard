@@ -1778,7 +1778,7 @@ export default {
 
                     <div class="mlb-panel-title">
 
-                        PRIMARY
+                        AMERICAN LEAGUE
 
                     </div>
 
@@ -1820,7 +1820,7 @@ export default {
 
                     <div class="mlb-panel-title">
 
-                        SECONDARY
+                        NATIONAL LEAGUE
 
                     </div>
 

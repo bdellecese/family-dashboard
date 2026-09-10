@@ -27,11 +27,9 @@
 
 .sports-standings__sport--mlb {
 
-    --mlb-green:
-        #123524;
+    --mlb-green: #123524;
 
-    --mlb-green-dark:
-        #0D281B;
+    --mlb-green-dark: #0D281B;
 
     --mlb-green-panel:
         rgba(
@@ -49,11 +47,9 @@
             0.10
         );
 
-    --mlb-cream:
-        #F3EBD3;
+    --mlb-cream: #F3EBD3;
 
-    --mlb-gold:
-        #FFE27A;
+    --mlb-gold: #FFE27A;
 
     --mlb-line:
         rgba(
@@ -71,26 +67,17 @@
             0.68
         );
 
-    width:
-        100%;
+    width: 100%;
+    height: 100%;
 
-    height:
-        100%;
+    min-width: 0;
+    min-height: 0;
 
-    min-width:
-        0;
+    overflow: hidden;
 
-    min-height:
-        0;
+    background: var(--mlb-green);
 
-    overflow:
-        hidden;
-
-    background:
-        var(--mlb-green);
-
-    color:
-        var(--mlb-cream);
+    color: var(--mlb-cream);
 
     font-family:
         "Oswald",
@@ -107,32 +94,22 @@
 
 .mlb-standings {
 
-    width:
-        100%;
+    width: 100%;
+    height: 100%;
 
-    height:
-        100%;
-
-    min-width:
-        0;
-
-    min-height:
-        0;
+    min-width: 0;
+    min-height: 0;
 
     padding:
         10px 20px;
 
-    box-sizing:
-        border-box;
+    box-sizing: border-box;
 
-    display:
-        flex;
+    display: flex;
 
-    flex-direction:
-        column;
+    flex-direction: column;
 
-    overflow:
-        hidden;
+    overflow: hidden;
 
 }
 
@@ -158,10 +135,10 @@
         space-between;
 
     margin-bottom:
-        9px;
+        12px;
 
     padding-bottom:
-        6px;
+        15px;
 
     border-bottom:
         1px solid
@@ -193,10 +170,13 @@
 
 .mlb-standings-date {
 
+    margin-top:
+        5px;
+
     font-size:
         clamp(
-            11px,
-            0.8vw,
+            10px,
+            0.75vw,
             18px
         );
 
