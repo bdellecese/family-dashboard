@@ -2,6 +2,7 @@ export const soccerRegistry = {
 
     competitions: {
 
+
         premierLeague: {
             provider: "espn",
             slug: "eng.1"

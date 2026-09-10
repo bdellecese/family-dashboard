@@ -22,61 +22,26 @@ import {
     sportsPreferences
 } from "../../../config/sports-preferences.js";
 
-const MLB_API =
-    "https://statsapi.mlb.com/api/v1";
-
+const MLB_API = "https://statsapi.mlb.com/api/v1";
 
 const DIVISIONS = {
-
     AL: [
-
-        {
-            id: 201,
-            name: "AL EAST"
-        },
-
-        {
-            id: 202,
-            name: "AL CENTRAL"
-        },
-
-        {
-            id: 200,
-            name: "AL WEST"
-        }
-
+        { id: 201, name: "AL EAST" },
+        { id: 202, name: "AL CENTRAL" },
+        { id: 200, name: "AL WEST" }
     ],
 
     NL: [
-
-        {
-            id: 204,
-            name: "NL EAST"
-        },
-
-        {
-            id: 205,
-            name: "NL CENTRAL"
-        },
-
-        {
-            id: 203,
-            name: "NL WEST"
-        }
-
+        { id: 204, name: "NL EAST" },
+        { id: 205, name: "NL CENTRAL" },
+        { id: 203, name: "NL WEST" }
     ]
-
 };
-
 
 const LEAGUE_IDS = {
-
     AL: 103,
-
     NL: 104
-
 };
-
 
 /*
  * ============================================================
@@ -92,14 +57,15 @@ function getCurrentSeason() {
 
 }
 
+function getMLBConfig() {
+    return sportsPreferences.sports?.find(
+        sport => sport.sport === "mlb"
+    );
+}
+
 function getMLBTestDate() {
 
-    const mlbConfig =
-        sportsPreferences.sports?.find(
-            sport =>
-                sport.sport === "mlb"
-        );
-
+    const mlbConfig = getMLBConfig();
 
     return (
         mlbConfig?.testDate ||
@@ -130,12 +96,7 @@ function getMLBSeason() {
 
 function getMLBPhase() {
 
-    const mlbConfig =
-        sportsPreferences.sports?.find(
-            sport =>
-                sport.sport === "mlb"
-        );
-
+    const mlbConfig = getMLBConfig();
 
     if (
         !mlbConfig
@@ -764,6 +725,70 @@ function sortDivisionRecords(
 
 }
 
+/*
+ * ============================================================
+ * Common rendering for Division and Wild Card Sections 
+ * ============================================================
+ */
+
+function createStandingsSection({
+    title,
+    records,
+    sortRecords,
+    getGamesBack,
+    maxRows = null,
+    getRowClass = null
+}) {
+    const section = createElement(
+        "section",
+        "mlb-standings-section"
+    );
+
+    const sectionTitle = createElement(
+        "div",
+        "mlb-standings-section-title",
+        title
+    );
+
+    section.appendChild(sectionTitle);
+    section.appendChild(createHeader());
+
+    const sorted = sortRecords(records);
+    const leader = sorted[0] || null;
+
+    const visibleRecords = maxRows
+        ? sorted.slice(0, maxRows)
+        : sorted;
+
+    visibleRecords.forEach((record, index) => {
+        const gamesBack = getGamesBack(
+            record,
+            leader
+        );
+
+        const row = createTeamRow(
+            record,
+            index + 1,
+            gamesBack
+        );
+
+        if (getRowClass) {
+            const rowClass = getRowClass(
+                record,
+                index,
+                leader
+            );
+
+            if (rowClass) {
+                row.classList.add(rowClass);
+            }
+        }
+
+        section.appendChild(row);
+    });
+
+    return section;
+}
 
 /*
  * ============================================================
@@ -771,88 +796,58 @@ function sortDivisionRecords(
  * ============================================================
  */
 
-function createDivision(
-    division,
-    records
-) {
+function createDivision(division, records) {
+    return createStandingsSection({
+        title: division.name,
+        records,
+        sortRecords: sortDivisionRecords,
+        getGamesBack: getDivisionGamesBack
+    });
+}
 
-    const section =
-        createElement(
-            "section",
-            "mlb-standings-division"
+/*
+ * ============================================================
+ * Common code to sort Standings by type (regulard season or wild card )
+ * ============================================================
+ */
+
+async function loadStandingsByType(standingsType) {
+    const season = getMLBSeason();
+
+    const url =
+        `${MLB_API}/standings?` +
+        `leagueId=103,104&` +
+        `season=${season}&` +
+        `standingsTypes=${standingsType}&` +
+        `hydrate=team,division,league`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(
+            `MLB ${standingsType} standings request failed: ${response.status}`
         );
+    }
 
+    const data = await response.json();
+    const teamRecords = [];
 
-    const title =
-        createElement(
-            "div",
-            "mlb-standings-division-title",
-            division.name
-        );
-
-
-    section.appendChild(
-        title
-    );
-
-
-    section.appendChild(
-        createHeader()
-    );
-
-
-    const sorted =
-        sortDivisionRecords(
-            records
-        );
-
-
-    const leader =
-        sorted[0] || null;
-
-
-    sorted.forEach(
-        (
-            record,
-            index
-        ) => {
-
-            const gamesBack =
-                getDivisionGamesBack(
-                    record,
-                    leader
-                );
-
-
-            const row =
-                createTeamRow(
-                    record,
-                    index + 1,
-                    gamesBack
-                );
-
-
-            if (
-                index === 0
-            ) {
-
-                row.classList.add(
-                    "mlb-standings-division-leader"
-                );
-
-            }
-
-
-            section.appendChild(
-                row
-            );
-
+    for (const standingsRecord of data.records || []) {
+        for (const teamRecord of standingsRecord.teamRecords || []) {
+            teamRecords.push(teamRecord);
         }
+    }
+
+    const uniqueTeams = Array.from(
+        new Map(
+            teamRecords.map(record => [
+                record.team?.id,
+                record
+            ])
+        ).values()
     );
 
-
-    return section;
-
+    return uniqueTeams;
 }
 
 /*
@@ -862,79 +857,8 @@ function createDivision(
  */
 
 async function loadStandings() {
-
-    const season =
-        getMLBSeason();
-
-
-    const url =
-        `${MLB_API}/standings?` +
-        `leagueId=103,104&` +
-        `season=${season}&` +
-        `standingsTypes=regularSeason&` +
-        `hydrate=team,division,league`;
-
-
-    const response =
-        await fetch(
-            url
-        );
-
-
-    if (
-        !response.ok
-    ) {
-
-        throw new Error(
-            `MLB standings request failed: ${response.status}`
-        );
-
-    }
-
-
-    const data =
-        await response.json();
-
-
-    const teamRecords = [];
-
-
-    for (
-        const standingsRecord
-        of data.records || []
-    ) {
-
-        for (
-            const teamRecord
-            of standingsRecord.teamRecords || []
-        ) {
-
-            teamRecords.push(
-                teamRecord
-            );
-
-        }
-
-    }
-
-
-    const uniqueTeams =
-        Array.from(
-            new Map(
-                teamRecords.map(
-                    record => [
-                        record.team?.id,
-                        record
-                    ]
-                )
-            ).values()
-        );
-
-
-    return uniqueTeams;
-
+    return loadStandingsByType("regularSeason");
 }
-
 
 /*
  * ============================================================
@@ -944,12 +868,7 @@ async function loadStandings() {
 
 async function loadPostseason() {
 
-    const mlbConfig =
-        sportsPreferences.sports?.find(
-            sport =>
-                sport.sport === "mlb"
-        );
-
+    const mlbConfig = getMLBConfig();
 
     const date =
         mlbConfig?.testDate ||
@@ -992,78 +911,8 @@ async function loadPostseason() {
  */
 
 async function loadWildCardStandings() {
-
-    const season =
-        getMLBSeason();
-
-    const url =
-        `${MLB_API}/standings?` +
-        `leagueId=103,104&` +
-        `season=${season}&` +
-        `standingsTypes=wildCard&` +
-        `hydrate=team,division,league`;
-
-
-    const response =
-        await fetch(
-            url
-        );
-
-
-    if (
-        !response.ok
-    ) {
-
-        throw new Error(
-            `MLB Wild Card standings request failed: ${response.status}`
-        );
-
-    }
-
-
-    const data =
-        await response.json();
-
-
-    const teamRecords = [];
-
-
-    for (
-        const standingsRecord
-        of data.records || []
-    ) {
-
-        for (
-            const teamRecord
-            of standingsRecord.teamRecords || []
-        ) {
-
-            teamRecords.push(
-                teamRecord
-            );
-
-        }
-
-    }
-
-
-    const uniqueTeams =
-        Array.from(
-            new Map(
-                teamRecords.map(
-                    record => [
-                        record.team?.id,
-                        record
-                    ]
-                )
-            ).values()
-        );
-
-
-    return uniqueTeams;
-
+    return loadStandingsByType("wildCard");
 }
-
 
 /*
  * ============================================================
@@ -1200,140 +1049,45 @@ function sortWildCardRecords(
  * ============================================================
  */
 
-function createWildCardLeague(
-    leagueName,
-    records
-) {
-
-    const section =
-        createElement(
-            "section",
-            "mlb-standings-wild-card-league"
-        );
-
-
-    const leagueHeader =
-        createElement(
-            "div",
-            "mlb-standings-league-title",
-            `${leagueName} WILD CARD`
-        );
-
-
-    section.appendChild(
-        leagueHeader
+function createWildCardLeague(leagueName, records) {
+    const leagueRecords = getLeagueRecords(
+        records,
+        LEAGUE_IDS[leagueName]
     );
 
-
-    const card =
-        createElement(
-            "div",
-            "mlb-standings-wild-card-card"
-        );
-
-
-    card.appendChild(
-        createHeader()
+    const sortedRecords = sortWildCardRecords(
+        leagueRecords
     );
 
+    const wildCardLeader = sortedRecords.find(
+        record =>
+            Number(record.divisionRank) !== 1
+    ) || null;
 
-    const leagueId =
-        LEAGUE_IDS[
-            leagueName
-        ];
-
-
-    const leagueRecords =
-        records.filter(
-            record =>
-                record.team
-                    ?.league
-                    ?.id === leagueId
-        );
-
-
-    const sorted =
-        sortWildCardRecords(
-            leagueRecords
-        );
-
-
-    const wildCardLeader =
-        sorted.find(
-            record =>
-                Number(
-                    record.divisionRank
-                ) !== 1
-        ) || null;
-
-
-    sorted
-        .slice(
-            0,
-            5
-        )
-        .forEach(
-            (
-                record,
-                index
-            ) => {
-
-                const gamesBack =
-                    getWildCardGamesBack(
-                        record
-                    );
-
-
-                const row =
-                    createTeamRow(
-                        record,
-                        index + 1,
-                        gamesBack
-                    );
-
-
-                if (
-                    Number(
-                        record.divisionRank
-                    ) === 1
-                ) {
-
-                    row.classList.add(
-                        "mlb-standings-division-leader"
-                    );
-
-                }
-
-
-                if (
-                    record.team?.id ===
-                    wildCardLeader?.team?.id
-                ) {
-
-                    row.classList.add(
-                        "mlb-standings-wild-card-leader"
-                    );
-
-                }
-
-
-                card.appendChild(
-                    row
-                );
-
+    return createStandingsSection({
+        title: `${leagueName} WILD CARD`,
+        records: sortedRecords,
+        sortRecords: records => records,
+        getGamesBack: getWildCardGamesBack,
+        maxRows: 5,
+        getRowClass: record => {
+            if (
+                Number(record.divisionRank) === 1
+            ) {
+                return "mlb-standings-wild-card-division-leader";
             }
-        );
 
+            if (
+                record.team?.id ===
+                wildCardLeader?.team?.id
+            ) {
+                return "mlb-standings-wild-card-leader";
+            }
 
-    section.appendChild(
-        card
-    );
-
-
-    return section;
-
+            return null;
+        }
+    });
 }
-
 
 /*
  * ============================================================
@@ -2715,6 +2469,8 @@ export default {
         config = {}
     ) {
 
+        const mlbConfig = getMLBConfig();
+
         container.innerHTML =
             "";
 
@@ -2740,15 +2496,7 @@ export default {
                 </div>
 
                 <div class="mlb-standings-date">
-                    ${sportsPreferences.sports
-                        ?.find(
-                            sport =>
-                                sport.sport === "mlb"
-                        )
-                        ?.testDate
-                            ?.slice(0, 4) ||
-                        getCurrentSeason()
-                    } SEASON
+                    ${mlbConfig?.testDate?.slice(0, 4) || getCurrentSeason()} SEASON
                 </div>
 
             </header>
