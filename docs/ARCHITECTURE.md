@@ -1,1981 +1,313 @@
-# Dashboard Architecture
+# Family Dashboard Architecture
 
-## Overview
+## Purpose
 
-This project is a touchscreen information dashboard designed to run on a Raspberry Pi and display information across multiple screens.
+This document describes the architecture that exists in the repository today. It is a code-verified source of truth for Step 1 of the dashboard work: reconcile documentation with the running code before defining future requirements or evaluating replacement platforms.
 
-Development is performed on a desktop using VS Code. The production environment runs on a Raspberry Pi connected to a dedicated display.
+It deliberately distinguishes between components that exist in the repository, components that are registered/configured, and components that are actually used by the current rotating dashboard.
 
-The dashboard is built using:
+## Technology
 
-- HTML
-- CSS
-- Vanilla JavaScript
-- ES modules
-- Node.js
-- External web APIs
-- RSS feeds
-- Browser-based rendering
+- HTML/CSS
+- Vanilla JavaScript using ES modules
+- Node.js HTTP server
+- Browser APIs
+- External APIs and RSS feeds
+- No frontend build/bundling step
 
-There is no Node.js build process or bundler. Node.js is used as the production application server and for server-side services that require credentials, authentication, or server-side processing that should not be exposed to the browser.
+The repository's runtime application entry point is `app/dashboard.js`. The Node server is `server/server.js`.
 
-The production environment consists of:
+## Runtime Architecture
 
 ```text
-Raspberry Pi
-
-    |
-
-    +-- Node.js application server
-    |       |
-    |       +-- Dashboard static files
-    |       +-- Server-side API services
-    |
-    +-- LabWC desktop session
-    |       |
-    |       +-- Chromium kiosk
-    |
-    +-- Physical display
-```
-
----
-
-# High-Level Architecture
-
-The dashboard is organized around four primary concepts:
-
-1. Dashboard
-2. Screens
-3. Regions
-4. Widgets
-
-The general application flow is:
-
-```text
-Dashboard
-
-    |
-
-    v
-
-Screen Manager
-
-    |
-
-    v
-
-Screen
-
-    |
-
-    v
-
-Region
-
-    |
-
-    v
-
-Widget
-
-    |
-
-    v
-
-Widget-specific Data Service
-
-    |
-
-    +-- Browser-accessible external API
-    |
-    +-- Node.js server API
-    |
-    +-- Shared RSS Data Service
-```
-
-Some services communicate directly with external APIs from the browser.
-Services requiring protected credentials, persistent authentication, or server-side processing communicate through the Node.js application server.
-
-RSS-based widgets use the shared RSS data service rather than implementing RSS retrieval independently.
-
----
-
-# Project Structure
-
-The project currently follows this general structure:
-
-```text
-/
-
-|
-+-- index.html
-|
-+-- server/
-|   |
-|   +-- server.js
-|
-+-- config/
-|   |
-|   +-- config.js
-|   +-- screens.js
-|   +-- google-calendar-token.json
-|   +-- ...
-|
-+-- css/
-|
-+-- js/
-|   |
-|   +-- dashboard.js
-|   +-- screen-manager.js
-|   +-- widget-loader.js
-|   +-- register-widgets.js
-|   +-- ...
-|   |
-|   +-- screens/
-|   |
-|   +-- layouts/
-|
-+-- services/
-|   |
-|   +-- weather/
-|   +-- rss/
-|   |   |
-|   |   +-- rss-data.js
-|   |
-|   +-- google-calendar/
-|   |   |
-|   |   +-- calendar-auth.js
-|   |   +-- calendar-data.js
-|   |   +-- google-calendar-server.js
-|   |
-|   +-- quote-of-day/
-|   |   |
-|   |   +-- quote-of-day-data.js
-|   |
-|   +-- dashboard/
-|   +-- ...
-|
-+-- scripts/
-|   |
-|   +-- display-schedule.sh
-|
-+-- widgets/
-|   |
-|   +-- date-time/
-|   +-- weather/
-|   +-- weather-alerts/
-|   +-- calendar/
-|   +-- calendar-list/
-|   +-- countdown/
-|   +-- news/
-|   +-- quote-of-day/
-|   +-- prayer-list/
-|   +-- family-menu/
-|   +-- wifi/
-|   +-- photo/
-|   +-- ...
-|
-+-- docs/
-|   |
-|   +-- architecture.md
-|   +-- widgets.md
-```
-
-The exact directory contents may evolve as additional screens, widgets, and services are added.
-
----
-
-# Dashboard Entry Point
-
-The dashboard application starts through:
-
-```text
-dashboard.js
-```
-
-The dashboard performs three primary tasks:
-
-1. Initialize dashboard scaling.
-2. Register available widgets.
-3. Start the screen manager.
-
-The current startup flow is:
-
-```text
-dashboard.js
-    |
-    +-- initializeDashboardScaling()
-    |
-    +-- registerWidgets()
-    |
-    +-- startScreenRotation()
-```
-
-The dashboard itself should remain lightweight.
-
-Application behavior belongs in the appropriate manager, widget, or service rather than being implemented directly in `dashboard.js`.
-
----
-
-# Production Server
-
-The Raspberry Pi uses a Node.js application server to serve the dashboard and provide server-side API endpoints.
-
-The primary server is:
-
-```text
-server/server.js
-```
-
-The server listens on:
-
-```text
-http://0.0.0.0:3000
-```
-
-The dashboard is accessed locally by Chromium at:
-
-```text
-http://localhost:3000
-```
-
-The Node server provides two primary functions:
-
-1. Serve the dashboard application.
-2. Provide server-side APIs for services that should not communicate directly with external APIs from the browser.
-
-The Node server is managed by `systemd`.
-
-The production service is:
-
-```text
-family-dashboard.service
-```
-
-The service is enabled at boot and runs as the appropriate Raspberry Pi service.
-
-The expected process is:
-
-```text
-Raspberry Pi boot
-    |
-    v
-systemd
-    |
-    v
-family-dashboard.service
-    |
-    v
-Node.js
-    |
-    v
-server/server.js
-    |
-    v
-localhost:3000
-```
-
-The Node server should automatically restart if it exits unexpectedly, subject to the configuration of the systemd service.
-
----
-
-# Raspberry Pi Deployment
-
-The production environment is:
-
-```text
-Raspberry Pi
-    |
-    +-- Debian Linux
-    |
-    +-- systemd
-    |      |
-    |      +-- family-dashboard.service
-    |
-    +-- LabWC desktop session
-    |
-    +-- Chromium
-           |
-           v
-     http://localhost:3000
-```
-
-The Raspberry Pi is intended to operate as a dedicated appliance rather than as a general-purpose desktop computer.
-
-The dashboard should therefore start automatically after boot without requiring manual intervention.
-
----
-
-# Chromium Kiosk
-
-Chromium is used as the dashboard display application.
-
-The browser is launched in kiosk mode using:
-
-```text
-/usr/bin/chromium
-```
-
-The current production browser configuration includes:
-
-```text
---ozone-platform=wayland
---kiosk
---noerrdialogs
---disable-infobars
---start-maximized
---password-store=basic
-http://localhost:3000
-```
-
-The `--ozone-platform=wayland` option is required for the current Raspberry Pi / LabWC environment.
-
-The `--password-store=basic` option prevents Chromium from attempting to create or unlock a desktop keyring for the dashboard application.
-
-The browser is launched by:
-
-```text
-scripts/display-schedule.sh
-```
-
-rather than relying exclusively on the LabWC autostart command.
-
----
-
-# Display Scheduling
-
-The physical dashboard display is intended to operate only during defined morning and afternoon/evening periods.
-
-Display scheduling is implemented by:
-
-```text
-scripts/display-schedule.sh
-```
-
-The script determines the current day and time and starts or stops Chromium accordingly.
-
-The current schedule is:
-
-## Monday-Friday
-
-### Morning
-
-```text
-06:00 - 09:00
-```
-
-### Afternoon / Evening
-
-```text
-15:00 - 20:00
-```
-
-## Saturday-Sunday
-
-### Morning
-
-```text
-07:00 - 09:00
-```
-
-### Afternoon / Evening
-
-```text
-16:00 - 18:00
-```
-
-The display is considered ON during the defined intervals and OFF outside those intervals.
-
-The schedule is intentionally implemented in the script rather than duplicating scheduling logic across multiple cron entries.
-
----
-
-# Display Schedule Architecture
-
-The display scheduling flow is:
-
-```text
-LabWC session
-    |
-    v
-display-schedule.sh
-    |
-    +-- Determine day
-    |
-    +-- Determine current time
-    |
-    +-- Should display be ON?
-             |
-             +-- YES --> Start Chromium
-             |
-             +-- NO  --> Stop Chromium
-```
-
-The script can be safely run repeatedly because it first determines whether Chromium is already running.
-
-If Chromium is already running during an ON period, it does not launch another instance.
-
-If Chromium is not running during an ON period, it launches Chromium.
-
-If the current time is outside the scheduled period, Chromium is terminated.
-
----
-
-# Display Scheduling and Cron
-
-The display schedule is periodically evaluated by the `pi` user's cron configuration.
-
-The cron job invokes:
-
-```text
-/home/pi/family-dashboard/scripts/display-schedule.sh
-```
-
-Output is redirected to:
-
-```text
-/tmp/family-dashboard-schedule.log
-```
-
-Cron is used to periodically enforce the desired display state rather than creating a separate cron entry for every ON and OFF event.
-
-This makes the scheduling logic centralized in the script.
-
-For example, if the Pi is rebooted during an active display period, the scheduling script can detect that the display should be ON and launch Chromium.
-
-Likewise, if the Pi remains running across a scheduled OFF period, the script will terminate Chromium.
-
----
-
-# LabWC Autostart
-
-The Raspberry Pi uses LabWC as its desktop environment.
-
-The LabWC autostart file is:
-
-```text
-~/.config/labwc/autostart
-```
-
-The current configuration launches:
-
-```text
-/home/pi/family-dashboard/scripts/display-schedule.sh &
-```
-
-This allows the display schedule to be evaluated when the graphical session starts.
-
-The Node.js application server is intentionally not launched from LabWC.
-
-Node.js is a system-level service managed by `systemd`.
-
-This separation is important:
-
-```text
-systemd
-    |
-    +-- Node.js server
-    |
-    v
-localhost:3000
-
-
-LabWC
-    |
-    +-- display-schedule.sh
-            |
-            v
-        Chromium
-            |
-            v
-        localhost:3000
-```
-
----
-
-# Screen Architecture
-
-Screens represent complete dashboard pages.
-
-Examples currently include:
-
-- Information
-- Large Calendar 
-- Chores + Fun
-- Sports
-
-A screen defines:
-
-- Its layout
-- Its theme
-- Its duration
-- Its regions
-- The widgets displayed in those regions
-
-## Screen Configuration
-
-Screens are configuration-driven.
-
-Example:
-
-```text
-information: {
-
-    layout: "information-layout",
-
-    theme: "dark",
-
-    duration: {
-        seconds: 60
-    },
-
-    regions: {
-
-        "left-panel": [
-            {
-                name: "date-time"
-            },
-            {
-                name: "photo"
-            },
-            {
-                name: "weather-alerts"
-            }
-        ]
-
-    }
-
-}
-```
-
-This allows screens to be changed without modifying the underlying widget implementation.
-
----
-
-# Screen Manager
-
-The screen manager is responsible for:
-
-- Determining which screen is currently active
-- Building the screen
-- Loading its regions
-- Loading the widgets within those regions
-- Managing screen duration
-- Advancing between screens
-- Managing touchscreen navigation
-
-The screen manager is the central authority for screen navigation.
-
-## Screen Loading and Transition
-
-Screens are built completely before being displayed.
-
-The screen manager builds the requested screen in a detached DOM structure while the currently active screen remains visible.
-
-The general flow is:
-
-```text
-Request Screen
-      |
-      v
-Create Screen Generation
-      |
-      v
-Build Screen in Detached DOM
-      |
-      +-- Build Regions
-      |      |
-      |      +-- Load Widgets
-      |
-      v
-Verify Screen Load is Still Current
-      |
-      +-- NO --> Destroy Newly Loaded Widgets
-      |          |
-      |          v
-      |        Abort
-      |
-      +-- YES
-           |
-           v
-      Commit New Screen
-           |
-           v
-      Display New Screen
-           |
-           v
-      Destroy Previous Screen
-```
-
-The previous screen is not removed until the new screen has successfully completed loading.
-
-This prevents a slow-loading widget or screen from leaving the dashboard blank during a normal screen transition.
-
-## Screen Load Generations
-
-Each screen load is assigned a generation number.
-
-When a new screen load or navigation action begins, the generation changes.
-
-Asynchronous widget loading checks the generation before and after loading.
-
-If the generation has changed, the screen load is considered stale.
-
-A stale screen:
-
-- Is not committed to the dashboard
-- Has any widgets created during the load destroyed
-- Does not schedule automatic rotation
-
-This prevents an older asynchronous screen load from replacing a newer screen after navigation has already occurred.
-
-# Widget Lifecycle
-
-Widgets may implement:
-
-```text
-    render(container, config)
-
-    destroy()
-```
-
-render() initializes the widget and attaches any required event
-listeners, timers, intervals, subscriptions, or other resources.
-
-destroy() releases resources created by render().
-
-Widgets that create ongoing asynchronous activity should implement
-destroy() so that the screen manager can safely remove the widget
-during screen transitions.
-
-The widget lifecycle is:
-
-```text
-    Load
-      |
-      v
-    render()
-      |
-      v
-    Active
-      |
-      v
-    destroy()
-      |
-      v
-    Removed
-```
-
-## Screen Commit Principle
-
-The screen manager treats screen transitions as an **atomic UI operation** from the viewer's perspective.
-
-The dashboard should transition from:
-
-```text
-Old Screen
-```
-
-directly to:
-
-```text
-New Screen
-```
-
-rather than passing through:
-
-```text
-Old Screen
-    |
-    v
-Empty Dashboard
-    |
-    v
-New Screen
-```
-
-The goal is to ensure that slow or asynchronous widgets do not cause a visible blank screen during normal screen rotation or manual navigation.
-
-# Asynchronous Operations
-
-The dashboard contains asynchronous operations including:
-
-- Screen loading
-- Widget loading
-- API requests
-- RSS retrieval
-- Authentication
-- Image retrieval
-
-Asynchronous work must not assume that the screen or widget that
-started the operation is still active when the operation completes.
-
-Screen generations are used to determine whether asynchronous screen
-loads are still current.
-
-A completed asynchronous operation must therefore be treated as:
-
-```text
-    Current
-        |
-        +-- Commit result
-
-    Stale
-        |
-        +-- Ignore result
-        +-- Destroy resources created during the operation
-```
-
-## Navigation
-
-The screen manager supports:
-
-```text
-Automatic Rotation
-
-      |
-
-      v
-
-Next Screen
-```
-
-and:
-
-```text
-Touchscreen
-
-   +-- Previous
-
-   +-- Next
-
-   +-- Home
-```
-
-Both mechanisms use the same screen navigation functions.
-
-Manual navigation invalidates any screen load currently in progress so that an older asynchronous load cannot later overwrite the newly requested screen.
-
-## Automatic Rotation
-
-After a screen successfully loads, the screen manager schedules the next screen using the duration defined by the screen configuration.
-
-A rotation timer is associated with the current screen load generation.
-
-If a newer navigation action occurs, the previous timer becomes stale and cannot advance the screen.
-
-This prevents overlapping rotation operations and ensures that only the current screen controls the next automatic transition.
-
-# Error Handling
-
-Individual widget or data-service failures should not bring down the
-dashboard application.
-
-Widget failures should be isolated to the affected widget or screen
-load where practical.
-
-A failed widget during screen construction should:
-
-- Report the failure
-- Allow the screen manager to determine whether the screen can still
-  be displayed
-- Clean up resources created during the failed load
-- Avoid leaving the currently displayed screen in a broken state
-
-Server-side service failures should similarly return controlled API
-responses rather than terminating the Node.js application.
-
-The dashboard should favor graceful degradation over application-wide
-failure.
-
-A failure in an individual widget should not unnecessarily prevent the
-remainder of the screen from being displayed. However, failures that
-prevent a screen from being constructed successfully should prevent that
-screen generation from being committed and should leave the currently
-displayed screen intact.
-
----
-
-# Region Architecture
-
-Regions define areas of a screen's layout.
-
-Examples include:
-
-- left-panel
-- right-panel
-- right-top
-- right-bottom
-- weather-column
-- prayer-column
-- menu-column
-
-Regions may contain:
-
-- A single widget
-- Multiple widgets
-- Nested regions
-
-The screen manager is responsible for resolving the region configuration and passing the appropriate container to each widget.
-
----
-
-# Widget Architecture
-
-Widgets are independent UI components.
-
-A widget normally exports a default object containing:
-
-- `name`
-- `render()`
-
-Example:
-
-```text
-const exampleWidget = {
-
-    name: "example",
-
-    async render(
-        container,
-        config = {}
-    ) {
-
-        // Render widget
-
-    }
-
-};
-
-export default exampleWidget;
-```
-
-The widget loader dynamically loads the widget module and calls:
-
-```text
-render(
-    container,
-    config
-)
-```
-
-This creates a consistent contract across widgets.
-
----
-
-# Widget Configuration
-
-Widgets should use configuration supplied by the screen configuration whenever practical.
-
-Example:
-
-```text
-{
-    name: "weather",
-
-    config: {
-
-        location: "Holden, MA"
-
-    }
-}
-```
-
-The widget should not hard-code user-specific configuration if that value can reasonably be supplied through configuration.
-
-## Configuration Principle
-
-Configuration should flow:
-
-```text
-Screen Configuration
+Browser / Chromium
         |
         v
-    Widget Loader
+index.html
         |
         v
-      Widget
+app/dashboard.js
         |
-        v
-    Data Service
-```
+        +--> dashboard scaling
+        +--> widget registration
+        +--> screen manager
+                 |
+                 v
+          config/screens.js
+                 |
+                 v
+          app/screen-manager.js
+                 |
+                 +--> widget-loader
+                 |       |
+                 |       v
+                 |    widgets/*
+                 |
+                 +--> services / browser APIs
 
-This keeps widgets reusable.
-
----
-
-# Data Services
-
-Widgets should not contain large amounts of API-specific logic when that logic can be isolated into a service.
-
-The preferred architecture is:
-
-```text
-Widget
-  |
-  v
-Widget-specific Data Service
-  |
-  +-- Browser-accessible API
-  |
-  +-- Node.js server API
-  |
-  +-- Shared RSS Data Service
-```
-
-For example:
-
-```text
-weather-alerts
-      |
-      v
-weather-alert-data.js
-      |
-      v
-Open-Meteo
-      |
-      v
-National Weather Service
-```
-
-For services requiring protected credentials:
-
-```text
-Widget
-   |
-   v
-Browser Data Service
-   |
-   v
-Node.js API
-   |
-   v
-Server-side Data Service
-   |
-   v
-External API
-```
-
-This separation allows:
-
-- API logic to be tested independently
-- Widgets to focus on presentation
-- Multiple widgets to reuse the same data source
-- API changes to be isolated from UI code
-- Credentials and refresh tokens to remain on the server
-
----
-
-# Data Caching
-
-Data services may use caching to reduce unnecessary requests to external
-services and improve dashboard responsiveness.
-
-Shared caching infrastructure is provided by:
-
-```text
-services/cache/cache.js
-```
-
-The cache provides a simple in-memory key/value mechanism with expiration
-support.
-
-The general pattern is:
-
-```text
-Widget
-|
-v
-Data Service
-|
-v
-Cache
-|
-+-- Cache HIT --> Return cached data
-|
-+-- Cache MISS
-|
-v
-External API
-|
-v
-Cache result
-|
-v
-Return data
-```
-
-Caching is service-specific. Each data service determines whether caching
-is appropriate and controls the appropriate cache lifetime for its data.
-
-For example, the iCloud photo service uses a time-limited cache for its
-photo batch to avoid repeatedly retrieving the same photo metadata and
-asset URLs from iCloud.
-
-Caching is intended to:
-
-- Reduce external API requests
-- Reduce dependency on external service availability
-- Improve dashboard response time
-- Avoid repeatedly retrieving unchanged data
-- Reduce unnecessary authentication or network activity
-
-The cache is currently process-local and in-memory. Cached data is therefore
-lost when the Node.js process restarts.
-
-The cache should not be treated as persistent storage or as the source of
-truth for application data.
-
----
-
-# Shared RSS Data Service
-
-The dashboard uses a shared RSS data service for widgets that consume RSS feeds.
-
-The primary service is:
-
-```text
-services/rss/rss-data.js
-```
-
-The RSS service is responsible for:
-
-- Fetching RSS feeds
-- Parsing RSS responses
-- Normalizing RSS stories
-- Managing RSS caching
-- Providing a consistent data structure to RSS-based widgets
-
-Widgets should not implement their own RSS fetching logic when the shared RSS service can be used.
-
-The architecture is:
-
-```text
-Widget-specific Data Service
+Node.js server: server/server.js
         |
-        v
-rss-data.js
-        |
-        v
-Configured RSS Feed
+        +--> static dashboard files
+        +--> Google Calendar
+        +--> Todoist
+        +--> iCloud Photos
+        +--> Sonos
+        +--> School Lunch
+        +--> MLB / NFL / Soccer
+        +--> RSS
+        +--> Commute
+        +--> Performance API
 ```
 
-This allows multiple widgets to use different RSS feeds while sharing the same retrieval, parsing, normalization, and caching infrastructure.
+The browser and server are therefore separate layers, but they are part of one application. Widgets may obtain data through browser-accessible services, local/configuration data, or `/api/*` endpoints provided by the Node server.
 
-Examples include:
+## Repository Structure
 
-- News
-- Sports News
-- Word of the Day
-- Quote of the Day
-
----
-
-# Current External Data Sources
-
-The dashboard currently uses or is expected to use several external services.
-
-## Weather
-
-Weather data is provided by Open-Meteo.
-
-The weather widget is configurable by location.
-
-Weather data may be retrieved directly from browser-accessible APIs when appropriate.
-
----
-
-# Weather Alerts
-
-Weather alerts use:
-
-1. Open-Meteo geocoding
-2. NWS point lookup
-3. NWS active alerts
-
-The configured location is first converted into latitude/longitude.
-
-That location is then used to determine the appropriate NWS forecast zone.
-
-Active alerts are retrieved for that zone.
-
----
-
-# Google Calendar
-
-Google Calendar is implemented using a server-side authentication architecture.
-
-The browser does not directly manage the long-lived Google OAuth credentials.
-
-The architecture is:
+The current top-level structure is:
 
 ```text
-Calendar Widget
-      |
-      v
-Calendar Data Service
-      |
-      v
-Node.js /api/google-calendar/*
-      |
-      v
-Google Calendar Service
-      |
-      v
-Google Calendar API
+index.html
+app/
+assets/
+config/
+css/
+docs/
+scripts/
+server/
+services/
+tests/
+widgets/
+package.json
+package-lock.json
 ```
 
-The Node.js server manages Google authentication and communicates with Google Calendar.
-
-A persistent Google OAuth refresh token is stored on the Raspberry Pi.
-
-The token is stored in:
-
-```text
-/home/pi/family-dashboard/config/google-calendar-token.json
-```
-
-The token file is protected using restrictive filesystem permissions and should not be committed to Git.
-
-The browser receives calendar data from the local Node.js API rather than requiring the user to repeatedly authenticate through a browser popup.
-
----
-
-# Google Calendar Authentication
-
-The current authentication architecture uses server-side authentication.
-
-The primary components are:
-
-```text
-services/google-calendar/
-    |
-    +-- calendar-auth.js
-    +-- calendar-data.js
-    +-- google-calendar-server.js
-```
-
-The server-side Google Calendar service is responsible for:
-
-- OAuth credentials
-- Refresh token persistence
-- Access token management
-- Communication with the Google Calendar API
-
-The browser-side calendar code should not contain the persistent refresh token.
-
-The intended flow is:
-
-```text
-Browser
-   |
-   | GET calendar data
-   v
-Node.js server
-   |
-   | Authenticate / refresh token
-   v
-Google
-   |
-   | Calendar data
-   v
-Node.js server
-   |
-   | JSON response
-   v
-Browser
-```
-
-This architecture eliminates the need for the dashboard user to repeatedly authenticate with Google during normal operation.
-
----
-
-# Google Calendar OAuth Routes
-
-The production server provides two routes for Google Calendar OAuth:
-
-    GET /api/google-calendar/auth
-    GET /api/google-calendar/callback
-
-The `/api/google-calendar/auth` route starts the Google OAuth authorization flow.
-
-The `/api/google-calendar/callback` route receives the authorization code from Google, exchanges it for Google OAuth credentials, and stores the resulting refresh token for future server-side use.
-
-The dashboard does not need to be restarted after successful reauthorization. The Google Calendar service updates its in-memory authentication state immediately after the OAuth exchange succeeds.
-
-When the stored refresh token becomes invalid, the Google Calendar service detects Google's `invalid_grant` response and enters an authorization-required state.
-
-Once authorization is required:
-
-- Further refresh attempts are suppressed.
-- Calendar API requests return an authorization-required response.
-- Calendar widgets display a recovery message.
-- The user can start the OAuth flow using the Reauthorize Google Calendar action.
-- Successful reauthorization clears the authorization-required state.
-- Calendar access resumes without restarting Node.js.
-
-# Google Calendar Token Security
-
-The Google Calendar refresh token is sensitive information.
-
-The following file must remain local to the Raspberry Pi:
-
-```text
-config/google-calendar-token.json
-```
-
-It should not be committed to the Git repository.
-
-The file should have restrictive permissions, such as:
-
-```text
--rw------- 
-```
-
-The project should also ensure that sensitive credentials and token files are included in `.gitignore`.
-
-The server should be the only component that reads the refresh token.
-
----
-
-# Google Calendar API Endpoints
-
-The Node.js server exposes local API endpoints for the dashboard.
-
-Examples include:
-
-```text
-/api/google-calendar/calendars
-/api/google-calendar/events
-```
-
-These endpoints allow browser widgets to retrieve calendar information without directly handling Google OAuth credentials.
-
-The exact endpoint implementation may evolve as additional calendar functionality is added.
-
----
-
-# News
-
-The News widget consumes RSS feeds through the shared RSS data service.
-
-The feed URL is supplied through widget configuration.
-
-The RSS service handles:
-
-- RSS retrieval
-- RSS parsing
-- RSS caching
-- Normalization of RSS stories
-
-The News widget is responsible for presentation and headline rotation.
-
-The same RSS infrastructure is reused by other RSS-based widgets, including Sports News, Word of the Day, and Quote of the Day.
-
-The architecture is:
-
-News Widget
-    |
-    v
-RSS Data Service
-    |
-    v
-Configured RSS Feed
-
----
-
-# Quote of the Day
-
-The Quote of the Day widget uses the shared RSS data service to retrieve the daily quote from FixQuotes.
-
-The service is:
-
-```text
-services/quote-of-day/quote-of-day-data.js
-```
-
-The FixQuotes RSS feed publishes multiple daily entries, including the current day's quote and future/past entries.
-
-The Quote of the Day data service selects the story whose publication date matches the current dashboard date.
-
-For example, if the dashboard date is:
-
-```text
-2026-08-26
-```
-
-the service selects the RSS story whose publication date is:
-
-```text
-2026-08-26
-```
-
-rather than simply selecting the first RSS story returned by the feed.
-
-This ensures that the displayed quote corresponds to the current dashboard date.
-
-The RSS service is responsible for:
-
-- Fetching the RSS feed
-- Parsing the RSS response
-- Normalizing RSS stories
-- Caching RSS data
-
-The Quote of the Day data service is responsible for:
-
-- Selecting the story for the current dashboard date
-- Extracting the quote
-- Extracting the author
-- Extracting the source
-- Extracting the link
-- Extracting the publication date
-- Extracting the image when available
-
-The architecture is:
-
-```text
-Quote of the Day Widget
-        |
-        v
-quote-of-day-data.js
-        |
-        v
-rss-data.js
-        |
-        v
-FixQuotes RSS
-```
-
----
-
-# Photos
-
-The Photo widget displays rotating photos from an iCloud shared photo
-album.
-
-The browser does not retrieve the iCloud photo stream directly. The
-dashboard uses a Node.js server-side data service to communicate with
-iCloud and provide photo data to the browser.
-
-The architecture is:
-
-Photo Widget
-      |
-      v
-/api/photos
-      |
-      v
-iCloud Photo Data Service
-      |
-      v
-Cache
-      |
-      v
-iCloud Shared Photo Album
-
-The iCloud photo data service is responsible for:
-
-- Communicating with the iCloud shared photo service
-- Filtering the album contents to supported image assets
-- Selecting the photos used by the dashboard
-- Retrieving asset URLs
-- Caching photo data to reduce repeated iCloud requests
-
-The photo service maintains a cached batch of photos so that repeated
-dashboard requests do not require a complete iCloud retrieval.
-
-The photo stream/cache has a defined expiration period, after which the
-service refreshes the cached photo batch from iCloud. Repeated requests
-within the cache lifetime are served from the existing cached data.
-
----
-
-# Styling Architecture
-
-Layout and appearance are primarily controlled through CSS.
-
-Screen-level layout classes define:
-
-- Grid structure
-- Columns
-- Rows
-- Spacing
-- Backgrounds
-- Overflow behavior
-
-Widgets define their own internal presentation where appropriate.
-
-## Layout Principle
-
-Screen layout belongs to the screen/layout CSS.
-
-Widget-specific presentation belongs to the widget CSS.
-
-Avoid putting application-wide layout rules directly inside widget JavaScript.
-
----
-
-# Responsive / Dashboard Scaling
-
-The dashboard includes a scaling service:
-
-```text
-dashboard-scale.js
-```
-
-The purpose is to allow the dashboard UI to adapt to the target display.
-
-The final deployment target is a Raspberry Pi connected to a large display.
-
-The dashboard should therefore avoid assumptions about a desktop browser window size.
-
----
-
-# Development Environment
-
-Development currently uses:
-
-```text
-VS Code
-    |
-    v
-Live Server
-    |
-    v
-http://127.0.0.1:5500
-```
-
-The dashboard uses browser-native ES modules.
-
-There is currently no npm build process or bundler.
-
-The development environment may use Live Server because it provides a convenient browser development workflow.
-
-Production differs from development because the Raspberry Pi uses the Node.js application server.
-
-## Development vs Production
-
-Development:
-
-```text
-VS Code
-   |
-   v
-Live Server
-   |
-   v
-Browser
-```
-
-Production:
-
-```text
-Raspberry Pi
-   |
-   +-- systemd
-   |     |
-   |     v
-   |   Node.js
-   |     |
-   |     v
-   |   localhost:3000
-   |
-   +-- LabWC
-         |
-         v
-      Chromium
-```
-
-Features requiring the Node.js server should be tested against the production-style server when appropriate.
-
----
-
-# Production Startup
-
-The production startup process is divided into two independent responsibilities.
+**Important correction:** application JavaScript is under `app/`, not `js/`. The older documentation's `js/` tree is stale.
 
 ## Application Startup
 
-Managed by systemd:
+`app/dashboard.js` initializes dashboard scaling, registers the widget registry, and starts screen rotation after DOM content is ready.
 
 ```text
-Boot
- |
- v
-systemd
- |
- v
-family-dashboard.service
- |
- v
-Node.js
- |
- v
-server/server.js
- |
- v
-localhost:3000
+index.html
+   |
+   v
+app/dashboard.js
+   |
+   +--> initializeDashboardScaling()
+   +--> registerWidgets()
+   +--> startScreenRotation()
 ```
 
-## Display Startup
+Startup performance timers are also invoked, but browser performance event recording is currently inactive scaffolding; see Performance below.
 
-Managed by the graphical session and schedule:
+## Screens
+
+Screen definitions live in `config/screens.js`.
+
+Current normal rotation order:
+
+1. `information` — 60 seconds
+2. `calendar` — 60 seconds
+3. `chores-fun` — 60 seconds
+4. `sports` — 90 seconds
+
+`distraction-free` is defined but is **not** in `screenOrder`, so it is not part of normal automatic rotation.
+
+Each screen defines its layout, theme, duration, and region/widget configuration.
+
+### Screen loading
+
+`app/screen-manager.js` builds a requested screen in a detached DOM structure and commits it only after the screen generation is still current. Previous widgets are destroyed after the new screen becomes visible.
+
+The generation mechanism protects against stale asynchronous loads replacing a newer screen. This is an important runtime behavior and should be preserved in future architecture work.
+
+### Current screens
+
+**Information** uses date/time, photo, weather alerts, calendar list, calendar, news, countdown, prayer list, Wi-Fi, weather, Sonos status, family menu, and commute.
+
+**Calendar** uses the `large-calendar` widget with the configured family/sports/holiday calendars.
+
+**Chores + Fun** uses the `text`, `kids-chores`, `household-chores`, `school-lunch`, `playing-time`, `on-this-day`, `did-you-know`, `word-of-day`, `quote-of-day`, and `dad-wisdom` widgets.
+
+**Sports** uses MLB/sports scoreboard and standings, a generic `news` widget configured with sports RSS feeds, sports trivia, sports legends, and a sports calendar list.
+
+## Widget Registry
+
+Widgets are registered by `app/register-widgets.js` and loaded dynamically by `app/widget-loader.js`.
+
+There are currently **29 registered widgets**:
 
 ```text
-Boot
- |
- v
-LightDM
- |
- v
-pi user
- |
- v
-LabWC
- |
- v
-display-schedule.sh
- |
- +-- If scheduled ON
- |       |
- |       v
- |    Chromium
- |
- +-- If scheduled OFF
-         |
-         v
-     No Chromium
+date-time
+weather
+weather-alerts
+calendar
+large-calendar
+calendar-list
+commute
+countdown
+news
+prayer-list
+family-menu
+wifi
+photo
+sonos-status
+sports-scoreboard
+sports-standings
+sports-trivia
+sports-legends
+kids-chores
+household-chores
+school-lunch
+playing-time
+on-this-day
+did-you-know
+word-of-day
+quote-of-day
+dad-wisdom
+text
+greeting
 ```
 
-This separation allows the Node server to remain available even when the physical display is intentionally turned off.
+The repository also contains `sports-news` and `on-this-day-sports` directories, but neither is registered. They must not be treated as active dashboard widgets. The current Sports screen uses the generic `news` widget for sports news.
 
----
+## Widget Lifecycle
 
-# Systemd Service
+The widget loader expects a widget to expose a default object with a name and render function. Widgets receive a target container and configuration. Widgets may expose cleanup behavior used during screen transitions.
 
-The production Node.js server is managed by:
+Conceptually:
 
 ```text
-family-dashboard.service
+load widget
+    |
+    v
+render(container, config)
+    |
+    v
+active
+    |
+    v
+destroy()
 ```
 
-The service is enabled at boot.
+Widgets should remain scoped to their supplied container and avoid directly controlling unrelated dashboard regions.
 
-The expected status is:
+## Data and Service Architecture
 
-```text
-Active: active (running)
-```
+The repository contains a substantial `services/` layer. Services are not all equivalent: some are browser-side data modules, some are server-side integrations, and some are local/content providers.
 
-The server process is:
+Active server integrations verified in `server/server.js` include:
 
-```text
-/usr/bin/node /home/pi/family-dashboard/server/server.js
-```
-
-The service should be preferred over launching Node.js from LabWC or cron because systemd provides:
-
-- Boot-time startup
-- Process supervision
-- Automatic restart
-- Centralized logging
-- Dependency management
-
----
-
-# Display Process Management
-
-Chromium is treated as the physical display process.
-
-The scheduling script uses process detection to determine whether Chromium is already running.
-
-The basic logic is:
-
-```text
-Is current time within ON period?
-        |
-        +-- YES
-        |    |
-        |    +-- Chromium running?
-        |           |
-        |           +-- YES --> Do nothing
-        |           |
-        |           +-- NO --> Launch Chromium
-        |
-        +-- NO
-             |
-             +-- Chromium running?
-                    |
-                    +-- YES --> Stop Chromium
-                    |
-                    +-- NO --> Do nothing
-```
-
-This makes the script safe to execute repeatedly.
-
----
-
-# Screen Rotation
-
-Screen rotation is being introduced as a centralized application feature.
-
-Each screen may define a duration.
-
-Example:
-
-```text
-duration: {
-    seconds: 60
-}
-```
-
-The screen manager should use that configuration to determine how long the screen remains active.
-
-Screen rotation should not be implemented independently by individual widgets.
-
----
-
-# Touchscreen Navigation
-
-The dashboard is intended to support touchscreen navigation.
-
-The navigation system allows viewers to:
-
-- Move to the next screen
-- Move to the previous screen
-- Return to a primary/home screen
-
-Touchscreen navigation communicates with the screen manager rather than directly manipulating screen DOM elements.
-
-## Automatic Rotation and Touch Interaction
-
-A future enhancement may temporarily pause automatic rotation when the viewer interacts with the touchscreen.
-
-After a configurable period of inactivity, automatic rotation can resume.
-
-This behavior should be implemented centrally in the screen/navigation system.
-
----
-
-# Architectural Principles
-
-The following principles should guide future development.
-
-## 1. Configuration over hard-coding
-
-User-specific values such as:
-
-- Locations
-- Calendar IDs
-- RSS feeds
-- Screen durations
-- Display schedules
-
-should live in configuration whenever practical.
-
-## 2. Widgets should be independent
-
-A widget should not depend on another widget's DOM structure.
-
-Widgets should communicate through data services or application-level interfaces where necessary.
-
-## 3. Data and presentation should be separated
-
-API access belongs in services.
-
-Rendering belongs in widgets.
-
-Server-side API access belongs in the Node.js server and its associated services.
-
-## 4. Screen navigation belongs to the screen manager
-
-Widgets should never decide which screen is active.
-
-## 5. Avoid unnecessary infrastructure
-
-The Node.js server is now an intentional part of the production architecture because it provides meaningful functionality, including:
-
-- Serving the production dashboard
-- Providing server-side API endpoints
-- Protecting Google Calendar authentication
-- Persisting OAuth refresh tokens
-- Supporting server-side data processing where required
-
-Additional infrastructure should only be introduced when it provides a meaningful benefit.
-
-## 6. Keep credentials server-side
-
-Long-lived credentials, OAuth refresh tokens, API secrets, and similar sensitive information should not be exposed to browser JavaScript.
-
-## 7. Reuse existing services
-
-When building a new widget, first determine whether an existing data service can provide the required information.
-
-Shared services such as `rss-data.js` should be reused rather than duplicating common retrieval and parsing logic.
-
-
-## 8. Test incrementally
-
-Changes should generally be introduced one file at a time and tested in the browser before moving to the next change.
-
-## 9. Keep deployment concerns centralized
-
-Startup, shutdown, process supervision, and display scheduling should be handled by the Raspberry Pi deployment layer rather than individual dashboard widgets.
-
-## 10. Keep shared data logic centralized
-
-When multiple widgets consume the same type of external data, common retrieval, parsing, normalization, and caching logic should be implemented in a shared data service.
-
-Widget-specific services should focus on transforming shared data into the information required by the widget.
-
----
-
-# Current Development Status
-
-The dashboard currently operates as a four-screen rotating information system.
-
-## Operational Screens
-
-The following screens are operational:
-
-- Information screen
-- Large Calendar screen
-- Chores + Fun screen
-- Sports screen
-
-Screen rotation is operational. 
-
-Screen order and duration are controlled by `config/screens.js`.
-
-The configured screen rotation is:
-
-    1. Information — 60 seconds
-    2. Large Calendar — 60 seconds
-    3. Chores + Fun — 60 seconds
-    4. Sports — 60 seconds
-
-## Operational Widgets and Services
-
-The following dashboard functionality is operational:
-
-- Date and time
-- Weather
-- Weather alerts
 - Google Calendar
-- Calendar List
-- News
-- Countdown
-- Prayer
-- Family Menu
-- Commute
-- Wi-Fi
-- Photos
+- Todoist
+- iCloud Photos
+- Sonos
 - School Lunch
-- Household Chores
-- Kids Chores
-- Playing Time
-- On This Day
-- Did You Know
-- Word of the Day
-- Quote of the Day
-- Dad Wisdom
-- Sports Scoreboard
-- Sports Standings
-- Sports News
-- Sports Legends
-- Sports Trivia
-- Sonos status
+- MLB
+- NFL
+- Soccer
+- Performance storage/API
+- RSS
+- Commute
 
-## RSS Infrastructure
+The server imports the corresponding service modules and exposes selected functionality through HTTP APIs.
 
-The shared RSS data service is operational.
+## Server
 
-RSS-based widgets use the shared service where applicable.
+`server/server.js` is a custom Node `http.createServer()` implementation. It listens on `0.0.0.0:3000` and serves both API responses and static dashboard files.
 
-The shared RSS service provides:
+It is not an Express application.
 
-- RSS retrieval
-- RSS parsing
-- Story normalization
-- RSS caching
+The server currently provides these API routes:
 
-Current RSS-based functionality includes:
+| Area | Endpoint | Method |
+|---|---|---|
+| Health | `/api/health` | GET |
+| MLB scoreboard | `/api/sports/mlb/scoreboard` | GET |
+| MLB postseason | `/api/sports/mlb/postseason` | GET |
+| Soccer scoreboard | `/api/sports/soccer/scoreboard` | GET |
+| Soccer standings | `/api/sports/soccer/standings` | GET |
+| NFL scoreboard | `/api/sports/nfl/scoreboard` | GET |
+| NFL standings | `/api/sports/nfl/standings` | GET |
+| School lunch | `/api/school-lunch` | GET |
+| Commute | `/api/commute` | GET |
+| Photos | `/api/photos` | GET |
+| Sonos | `/api/sonos` | GET |
+| Google Calendar auth | `/api/google-calendar/auth` | GET |
+| Google Calendar callback | `/api/google-calendar/callback` | GET |
+| Google Calendar status | `/api/google-calendar/status` | GET |
+| Google calendars | `/api/google-calendar/calendars` | GET |
+| Google events | `/api/google-calendar/events` | GET |
+| Todoist tasks | `/api/todoist/tasks` | GET |
+| Complete Todoist task | `/api/todoist/tasks/:id/complete` | POST |
+| Performance | `/api/performance` | GET/POST/DELETE |
+| RSS | `/api/rss` | GET |
 
-- News
-- Sports News
-- Word of the Day
-- Quote of the Day
+The server's JSON responses currently permit CORS with `*`.
 
-## Quote of the Day
+### Sports API behavior
 
-Quote of the Day is operational.
+The MLB scoreboard has special postseason logic. When postseason games exist for the requested date, the response supplies postseason game data and series status rather than applying the normal favorite-team featured-card model. Regular-season MLB requests support configured primary and secondary teams.
 
-The widget retrieves stories through the shared RSS data service and selects the story whose publication date matches the current dashboard date.
+The soccer scoreboard resolves configured favorite teams and also derives favorite competitions to populate `otherGames`. This is the current implementation behind the Sports screen's soccer data model.
 
-This prevents the widget from displaying a previous day's quote when the RSS feed contains multiple recent entries.
+## External Data Boundaries
 
-## Google Calendar Authorization
+The architecture should preserve the distinction between:
 
-Google Calendar uses server-side OAuth authentication.
+1. **Browser-local data** — browser APIs or configuration.
+2. **Shared services** — reusable data/service modules.
+3. **Server APIs** — integrations that require credentials, authentication, server-side processing, or centralized normalization.
+4. **External providers** — Google Calendar, Todoist, sports providers, RSS feeds, Open-Meteo/NWS, Sonos, iCloud, etc.
 
-The system detects Google's `invalid_grant` response when a refresh token is no longer valid.
+This boundary is more accurate than describing every widget as following a single widget → service → external API path.
 
-After `invalid_grant` is detected:
+## Performance
 
-- Repeated refresh attempts are suppressed.
-- The server enters an authorization-required state.
-- Calendar API requests return an authorization-required response.
-- Calendar widgets display a recovery message.
-- The user can initiate Google Calendar reauthorization from the dashboard.
-- Successful reauthorization clears the authorization-required state.
-- Calendar access resumes without restarting Node.js.
+The application contains performance instrumentation scaffolding in `app/performance.js` and server-side performance endpoints.
 
-## Production Environment
+However, browser-side `recordPerformanceEvent()` is currently a stub that returns without recording an event. Therefore the project should currently be documented as having **performance instrumentation scaffolding, not active performance telemetry/monitoring**.
 
-The following production infrastructure is operational:
+The server-side performance API exists and supports retrieval, recording, and clearing of performance events.
 
-- Node.js production server
-- systemd service
-- Chromium kiosk
-- Wayland / LabWC display environment
-- Display scheduling
-- Weekday display schedule
-- Weekend display schedule
+## Configuration
 
-## Development Status
+Runtime behavior is substantially configuration-driven. Important configuration areas include:
 
-The dashboard is currently in an operational state.
+- screen definitions and order
+- sports preferences/registries
+- Todoist configuration
+- Google Calendar configuration/authentication
+- commute configuration
+- other widget/service-specific configuration
 
-Future development may include:
+Secrets and authorization material should remain outside source-controlled documentation and should not be embedded in architecture examples.
 
-- Additional widgets
-- Additional screens or screen configurations
-- Additional automation and integrations
+## Deployment / Runtime
 
-These items are enhancements rather than requirements for the current production architecture.
+The repository contains scripts and documentation describing Raspberry Pi/LabWC/Chromium kiosk deployment and display scheduling. Those operational details should only be treated as current runtime facts when verified against the actual deployment files; this Step 1 document intentionally does not invent or preserve unverified system-level settings from the older documentation.
 
----
-
-# Current Raspberry Pi Schedule
-
-The production display schedule is currently:
+The code-level application runtime is verified as:
 
 ```text
-Monday-Friday
+Node.js
+  -> server/server.js
+  -> 0.0.0.0:3000
+  -> static dashboard + /api/*
 
-06:00  Display ON
-09:00  Display OFF
-
-15:00  Display ON
-20:00  Display OFF
+Chromium/browser
+  -> index.html
+  -> app/dashboard.js
 ```
 
-```text
-Saturday-Sunday
+## Error and Failure Model
 
-07:00  Display ON
-09:00  Display OFF
+The server generally catches integration errors and returns controlled JSON error responses rather than terminating the process. Screen loading also has generation-based protection and widget cleanup.
 
-16:00  Display ON
-18:00  Display OFF
-```
+Future work should preserve graceful degradation: failure of one integration should not unnecessarily destroy unrelated dashboard functionality.
 
-The Node.js server remains running continuously.
+## Step 1 Boundary
 
-Only the Chromium display process is scheduled on and off.
+This document is intentionally a description of the **current implementation**, not a target architecture.
 
----
-
-# Production Architecture Summary
-
-The current production architecture can be summarized as:
-
-```text
-                         Raspberry Pi
-
-                              |
-
-          +-------------------+-------------------+
-
-          |                                       |
-
-          v                                       v
-
-      systemd                                  LightDM
-
-          |                                       |
-
-          v                                       v
-
-family-dashboard.service                        LabWC
-
-          |                                       |
-
-          v                                       v
-
-       Node.js                            display-schedule.sh
-
-          |                                       |
-
-          v                                       v
-
-   server/server.js                          Chromium
-
-          |                                       |
-
-          |                                       v
-
-          +------------> localhost:3000 <----------+
-
-                              |
-
-                              v
-
-                         Dashboard
-
-                              |
-
-                 +------------+------------+
-
-                 |                         |
-
-                 v                         v
-
-              Widgets                 Data Services
-
-                                           |
-
-                         +-----------------+-----------------+
-
-                         |                 |                 |
-
-                         v                 v                 v
-
-                  Browser APIs       Node.js APIs      RSS Data Service
-
-                                           |                 |
-
-                                           v                 v
-
-                                  Server-side Services   RSS Feeds
-
-                                           |
-
-                                           v
-
-                                     External APIs
-```
-
-The architecture intentionally separates:
-
-- Application logic
-- Screen management
-- Widget rendering
-- Data services
-- Shared RSS infrastructure
-- Server-side authentication
-- Production server startup
-- Display process management
-- Display scheduling
-
-This separation should make the dashboard easier to maintain as additional screens, widgets, and services are added.
+The next phase should define what the dashboard is actually required to do. Only after those requirements are agreed should we evaluate which capabilities should remain custom, which should be delegated to a platform such as Home Assistant, and what the future architecture should look like.
