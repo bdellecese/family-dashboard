@@ -210,7 +210,9 @@ Active server integrations verified in `server/server.js` include:
 - RSS
 - Commute
 
-The server imports the corresponding service modules and exposes selected functionality through HTTP APIs.
+The repository also contains service modules for local/content capabilities such as Dad Wisdom, Did You Know, On This Day, Quote of the Day, Sports Legends, Sports Trivia, Word of Day, and dashboard scaling. A service directory's existence alone does not establish that it is active in the current rotating dashboard.
+
+The `services/on-this-day-sports` module is a concrete example of a repository component that exists but is not currently wired into the registered widget/screen path.
 
 ## Server
 
@@ -270,22 +272,47 @@ However, browser-side `recordPerformanceEvent()` is currently a stub that return
 
 The server-side performance API exists and supports retrieval, recording, and clearing of performance events.
 
-## Configuration
+## Configuration and Secrets
 
 Runtime behavior is substantially configuration-driven. Important configuration areas include:
 
 - screen definitions and order
-- sports preferences/registries
+- sports preferences and registries
+- calendar configuration
+- commute configuration
 - Todoist configuration
 - Google Calendar configuration/authentication
-- commute configuration
 - other widget/service-specific configuration
 
-Secrets and authorization material should remain outside source-controlled documentation and should not be embedded in architecture examples.
+The repository's `.gitignore` explicitly excludes local credentials/configuration and generated data, including `config/todoist.js`, `config/google-calendar.js`, `config/google-calendar-token.json`, `config/google-routes.js`, school-lunch data, sports data, and dashboard performance data. `node_modules/` and macOS `.DS_Store` are also ignored.
+
+`config/config.js` currently contains a Google OAuth client ID and a local-network callback URL. The client ID is not a client secret, but the callback URL makes the repository configuration environment-specific. Authentication tokens and other credential-bearing files are intentionally excluded by `.gitignore`.
+
+## Testing
+
+`package.json` defines a `test` script that is currently only the placeholder `echo "Error: no test specified"` and therefore is **not a real test runner**.
+
+There are nevertheless four standalone test files in `tests/`:
+
+```text
+tests/commute-test.js
+tests/google-routes-test.js
+tests/soccer-data-test.js
+tests/soccer-espn-test.js
+```
+
+These tests are not wired into `npm test`. The existing test suite therefore represents useful standalone verification code, but the repository does not currently provide a single canonical automated test command through `package.json`.
+
+## Scripts
+
+The repository contains:
+
+- `scripts/cleanup-mlb-cache.js` — maintenance for MLB cache data.
+- `scripts/display-schedule.sh` — display scheduling helper.
+
+These scripts indicate operational tooling exists in the repository, but they do not by themselves prove how the production host currently schedules or launches the application.
 
 ## Deployment / Runtime
-
-The repository contains scripts and documentation describing Raspberry Pi/LabWC/Chromium kiosk deployment and display scheduling. Those operational details should only be treated as current runtime facts when verified against the actual deployment files; this Step 1 document intentionally does not invent or preserve unverified system-level settings from the older documentation.
 
 The code-level application runtime is verified as:
 
@@ -299,6 +326,10 @@ Chromium/browser
   -> index.html
   -> app/dashboard.js
 ```
+
+Repository searches did not find Docker, PM2, or systemd deployment artifacts. That means those mechanisms should currently be treated as **not documented/verified in the repository**, not as proof that they are absent from the actual host.
+
+Likewise, the repository contains `display-schedule.sh`, but system-level kiosk, startup, display, and scheduling settings remain outside the verified code-level architecture unless separately inspected on the deployment host.
 
 ## Error and Failure Model
 
