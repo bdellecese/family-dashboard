@@ -2243,66 +2243,25 @@ const server =
                     * ------------------------------------------------
                     */
 
-                    const favoriteCompetitions =
-                        new Set();
+                    const standingsCompetitions =
+                        Array.isArray(soccer?.standings?.competitions)
+                            ? soccer.standings.competitions
+                            : [];
 
+                    const competitionGames = await Promise.all(
+                        standingsCompetitions.map(competitionEntry => {
+                            const competition =
+                                typeof competitionEntry === "string"
+                                    ? competitionEntry
+                                    : competitionEntry?.competition;
 
-                    for (
-                        const teamSlug
-                        of favoriteTeams
-                    ) {
+                            const config = soccerRegistry.competitions[competition];
 
-                        const team =
-                            soccerRegistry.teams[
-                                teamSlug
-                            ];
+                            if (!config?.slug) return [];
 
-                        if (
-                            team?.competition
-                        ) {
-
-                            favoriteCompetitions.add(
-                                team.competition
-                            );
-
-                        }
-
-                    }
-
-
-                    /*
-                    * ------------------------------------------------
-                    * OTHER GAMES
-                    * ------------------------------------------------
-                    */
-
-                    const competitionGames =
-                        await Promise.all(
-                            [
-                                ...favoriteCompetitions
-                            ].map(
-                                competition => {
-
-                                    const config =
-                                        soccerRegistry.competitions[
-                                            competition
-                                        ];
-
-                                    if (
-                                        !config?.slug
-                                    ) {
-                                        return [];
-                                    }
-
-                                    return soccerData.getCompetitionGames(
-                                        config.slug,
-                                        date
-                                    );
-
-                                }
-                            )
-                        );
-
+                            return soccerData.getCompetitionGames(config.slug, date);
+                        })
+                    );
 
                     const favoriteGameIds =
                         new Set(
